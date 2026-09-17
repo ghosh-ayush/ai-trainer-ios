@@ -19,11 +19,13 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import base64, hashlib, html, json, lzma, re, zipfile, docx
+          import base64, hashlib, html, io, json, lzma, re, zipfile, docx
           payload = json.loads(lzma.decompress(base64.b64decode(Path('.document-import/payload.xz.b64').read_text())))
           md = Path('docs/AI_Trainer_01_Athlete_State_and_Training_Brain.md').read_text()
           out = Path('docs/AI_Trainer_01_Athlete_State_and_Training_Brain.docx')
-          base = Path(docx.__file__).parent / 'templates/default.docx'
+          base = io.BytesIO()
+          docx.Document().save(base)
+          base.seek(0)
           with zipfile.ZipFile(base) as b, zipfile.ZipFile(out, 'w') as z:
               for entry in payload['entries']:
                   m = entry['meta']; name = m['filename']; kind = entry['kind']
@@ -38,9 +40,6 @@ jobs:
                   elif kind == 'delta':
                       orig = re.findall(r'<[^>]+>|[^<]+', b.read(name).decode())
                       data = ''.join(''.join(orig[x[0]:x[1]]) if isinstance(x, list) else x for x in entry['ops']).encode()
-                  elif kind == 'bytes_delta':
-                      orig = b.read(name)
-                      data = b''.join(orig[x[0]:x[0]+x[1]] if isinstance(x, list) else x.encode() for x in entry['ops'])
                   elif kind == 'literal':
                       data = entry['text'].encode()
                   else:
