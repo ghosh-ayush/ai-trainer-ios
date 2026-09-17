@@ -1,0 +1,108 @@
+name: Import supplied Word document
+on:
+  push:
+    branches: [master]
+    paths: ['docs/.word-transfer-payload']
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Restore and verify the original document
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          INPUT_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, html, io, json, os, re, urllib.request, urllib.error, zipfile, zlib
+          repo = os.environ['REPO']
+          assert repo == 'ghosh-ayush/ai-trainer-ios'
+          api = 'https://api.github.com/repos/' + repo
+          def request(path, data=None, method=None):
+              body = None if data is None else json.dumps(data).encode()
+              req = urllib.request.Request(api + path, data=body, method=method, headers={
+                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                  'Accept': 'application/vnd.github+json',
+                  'Content-Type': 'application/json',
+                  'X-GitHub-Api-Version': '2022-11-28'
+              })
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  return json.load(response)
+          def read_file(path):
+              obj = request('/contents/' + path + '?ref=' + os.environ['INPUT_SHA'])
+              return base64.b64decode(obj['content'])
+          def check(data, expected):
+              if hashlib.sha256(data).hexdigest() != expected:
+                  raise ValueError('Checksum mismatch; document import stopped')
+          payload = read_file('docs/.word-transfer-payload')
+          check(payload, '99a10978aa0fbfaf4a6305e252bfb0b80846847da2bc96d87e30815561963931')
+          spec = json.loads(zlib.decompress(base64.b64decode(payload)))
+          markdown = read_file('docs/AI_Trainer_01_Athlete_State_and_Training_Brain.md')
+          check(markdown, spec['md_sha256'])
+          template_url = 'https://raw.githubusercontent.com/python-openxml/python-docx/v1.2.0/src/docx/templates/default.docx'
+          with urllib.request.urlopen(template_url, timeout=30) as response:
+              template = response.read()
+          check(template, spec['base_sha256'])
+          md = markdown.decode('utf-8')
+          base = zipfile.ZipFile(io.BytesIO(template))
+          output = io.BytesIO()
+          with zipfile.ZipFile(output, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
+              for entry in spec['entries']:
+                  name = entry['name']
+                  kind = entry['kind']
+                  if kind == 'base':
+                      content = base.read(name)
+                  elif kind == 'template':
+                      def fill(match):
+                          start, length = entry['refs'][int(match.group(1))]
+                          return html.escape(md[start:start+length], quote=False)
+                      content = re.sub(r'@REF(\d+)@', fill, entry['text']).encode('utf-8')
+                  elif kind == 'patch':
+                      source = base.read(name).decode('utf-8')
+                      if entry.get('minify'):
+                          source = re.sub(r'>\s+<', '><', source)
+                      pattern = entry.get('split_pattern')
+                      parts = re.split(pattern, source) if pattern else source.split('><')
+                      updated = []
+                      for operation in entry['ops']:
+                          updated.extend(parts[operation[1]:operation[2]] if operation[0] == 'c' else operation[1])
+                      content = ('' if pattern else '><').join(updated).encode('utf-8')
+                  elif kind == 'literal':
+                      content = base64.b64decode(entry['data'])
+                  else:
+                      raise ValueError('Unknown transfer record')
+                  check(content, entry['sha256'])
+                  info = zipfile.ZipInfo(name, tuple(entry['date_time']))
+                  for field in ('compress_type', 'create_system', 'external_attr', 'internal_attr', 'create_version', 'extract_version', 'flag_bits'):
+                      setattr(info, field, entry[field])
+                  archive.writestr(info, content)
+          document = output.getvalue()
+          check(document, spec['docx_sha256'])
+          target = 'docs/AI_Trainer_01_Athlete_State_and_Training_Brain.docx'
+          expected_blob = 'de0e48207b8a8a370e5e68a2488622b68785edf0'
+          try:
+              existing = request('/contents/' + target + '?ref=master')
+          except urllib.error.HTTPError as error:
+              if error.code != 404:
+                  raise
+          else:
+              if existing['sha'] != expected_blob:
+                  raise ValueError('Target already exists with different contents; refusing to overwrite')
+              print('Original Word document already present and verified')
+              raise SystemExit(0)
+          head = request('/git/ref/heads/master')['object']['sha']
+          parent = request('/git/commits/' + head)
+          blob = request('/git/blobs', {'content': base64.b64encode(document).decode('ascii'), 'encoding': 'base64'})
+          assert blob['sha'] == expected_blob
+          tree = request('/git/trees', {'base_tree': parent['tree']['sha'], 'tree': [
+              {'path': target, 'mode': '100644', 'type': 'blob', 'sha': blob['sha']}
+          ]})
+          commit = request('/git/commits', {'message': 'docs: add verified original Word specification', 'tree': tree['sha'], 'parents': [head]})
+          request('/git/refs/heads/master', {'sha': commit['sha'], 'force': False}, 'PATCH')
+          print('Verified original Word document committed:', commit['sha'])
+          print('Document blob SHA:', blob['sha'])
+          PY
