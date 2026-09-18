@@ -1,5 +1,4 @@
 import AVFoundation
-import Vision
 import SwiftUI
 import AITrainerCore
 
@@ -11,7 +10,7 @@ final class CameraService: NSObject, ObservableObject, AVCaptureVideoDataOutputS
     private let intentLock = NSLock()
     private var wantsRunning = false
     private var shouldRun: Bool { intentLock.lock(); defer { intentLock.unlock() }; return wantsRunning }
-    private var counter = CurlCounter()
+    private let counter = CameraRepTracker()
     private var benchmark = Benchmark()
     private var startedAt = Date()
     @Published private(set) var running = false
@@ -87,33 +86,15 @@ final class CameraService: NSObject, ObservableObject, AVCaptureVideoDataOutputS
         autoreleasepool {
             guard let buffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
             let start = Date(), timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds
-            let request = VNDetectHumanBodyPoseRequest()
-            var result: RepObservation
-            do {
-                try VNImageRequestHandler(cvPixelBuffer: buffer, orientation: .up).perform([request])
-                if let bodies = request.results, bodies.count == 1, let body = bodies.first {
-                    let points = try body.recognizedPoints(.all)
-                    func point(_ key: VNHumanBodyPoseObservation.JointName) -> PosePoint? {
-                        guard let point = points[key] else { return nil }
-                        return PosePoint(x: point.x * Double(CVPixelBufferGetWidth(buffer)),
-                                         y: point.y * Double(CVPixelBufferGetHeight(buffer)), confidence: Double(point.confidence))
-                    }
-                    result = counter.consume(shoulder: point(.rightShoulder), elbow: point(.rightElbow), wrist: point(.rightWrist), timestamp: timestamp)
-                } else {
-                    result = counter.consume(shoulder: nil, elbow: nil, wrist: nil, timestamp: timestamp)
-                    result.status = "Unassessed - need exactly one visible person"
-                }
-            } catch {
-                result = counter.consume(shoulder: nil, elbow: nil, wrist: nil, timestamp: timestamp)
-                result.status = "Vision unavailable; no measurement produced"
-            }
+            let result = counter.process(buffer, timestamp: timestamp)
+            let revision = counter.modelRevision
             benchmark.record(milliseconds: Date().timeIntervalSince(start) * 1000)
             let count = benchmark.processedFrames
             let median = benchmark.percentile(0.5) ?? 0, tail = benchmark.percentile(0.95) ?? 0
             let fps = Double(count) / max(0.001, Date().timeIntervalSince(startedAt))
             DispatchQueue.main.async {
                 self.observation = result; self.p50 = median; self.p95 = tail
-                self.processedFPS = fps; self.frameCount = count; self.modelRevision = request.revision
+                self.processedFPS = fps; self.frameCount = count; self.modelRevision = revision
             }
         }
     }

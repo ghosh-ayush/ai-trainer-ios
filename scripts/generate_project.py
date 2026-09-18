@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the dependency-free, shared Xcode project. Run from any directory."""
+"""Generate the shared Xcode project linking the local AITrainerCore package. Run from any directory."""
 from pathlib import Path
 from hashlib import sha1
 import json

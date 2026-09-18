@@ -13,7 +13,7 @@ Native SwiftUI development build organized around the documented P0-P4 phases. T
 5. Check in, start a workout, log sets, pause/resume, and finish. Review or correct recorded performance in History. Request progression on Today or Coach and explicitly accept the preview.
 6. In Labs, enable experimental tools. Camera and real HealthKit testing require a physical iPhone. In Signing & Capabilities, choose your own team and unique bundle identifier; provisioning must support HealthKit.
 
-No API key, paid AI service, package download, backend, or account is required for P1. Do not add credentials to source control.
+No API key, paid AI service, backend, or account is required for P1. The initial build downloads the pinned MIT-licensed RepCounterSDK Swift package (Swift 6 / Xcode 16+). Runtime catalog browsing and rep counting work offline. Do not add credentials to source control.
 
 ## Troubleshooting: missing AITrainerCore
 
@@ -56,7 +56,7 @@ workspace/cache conflict; project regeneration alone does not close the conflict
 | --- | --- | --- |
 | P0 | Local capture harness; measured frame throughput, latency percentiles, thermal/battery display | Physical-device benchmarks and usability validation |
 | P1 | Onboarding, one sample program, manual/extra/warm-up logs, persistent rest timer, resume, corrections, audit/conflict handling, substitutions, shortening, rescheduling, progression proposals, JSON export/deletion | Reviewed content, broader splits, production SQLite/sync, cloud coach, release approval |
-| P2 | Opt-in Apple Vision 2D right-arm curl counter with confidence/visibility/dropout checks | Validated accuracy, general exercise recognition, form coaching, joint forces, automatic promotion to training evidence |
+| P2 | Opt-in RepCounterSDK + Apple Vision 2D right-arm curl counter with confidence/visibility/dropout checks | Validated accuracy, general exercise recognition, form coaching, joint forces, automatic promotion to training evidence |
 | P3 | Opt-in read-only HealthKit HRV SDNN, resting HR, and individual sleep samples with source/time | Baselines, readiness scores, wearable-driven program adjustments, weather integration |
 | P4 | Manual meal estimates, corrections, reusable portions, portion scaling, local daily totals | Food database, photo identification, calibrated volume, nutrition-driven training |
 | R | Explicitly excluded from the guidance path | Inverse dynamics, lumbar forces, injury-risk claims, food geometry |
@@ -109,3 +109,7 @@ docs/                         Product specification, implementation notes, devic
 - [Download the original Word specification](docs/AI_Trainer_01_Athlete_State_and_Training_Brain.docx)
 
 Detailed rules and numerical fixtures are proposals and test cases, not approved production training prescriptions. The implementation notes explicitly identify narrower coverage and deviations rather than treating the entire roadmap as shipped.
+
+## Open-source integration
+
+See [integration boundaries, licenses, and validation](docs/OPEN_SOURCE_INTEGRATION.md). Settings includes a descriptive exercise catalog and the bundled third-party notices.
