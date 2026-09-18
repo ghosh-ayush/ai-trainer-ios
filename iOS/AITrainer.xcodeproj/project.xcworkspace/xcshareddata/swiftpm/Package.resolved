@@ -1,0 +1,14 @@
+{
+  "originHash" : "25d5e99a2f48847b951776f90997a60f3d146a5926e2c1d09434fdbe0a76efb1",
+  "pins" : [
+    {
+      "identity" : "repcountersdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/NazarKozak/RepCounterSDK.git",
+      "state" : {
+        "revision" : "94aaae70ebf30ad68522e51dd8be24f7cc793ec8"
+      }
+    }
+  ],
+  "version" : 3
+}
