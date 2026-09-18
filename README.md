@@ -6,7 +6,7 @@ Native SwiftUI development build organized around the documented P0-P4 phases. T
 
 ## Run the app
 
-1. Open `iOS/AITrainer.xcodeproj` in Xcode 16 or newer, with an iOS 17+ SDK/runtime.
+1. Open `iOS/AITrainer.xcodeproj` directly in Xcode 16 or newer, with an iOS 17+ SDK/runtime. Keep the complete repository together. Close any other Xcode window that opened the repository folder or `Package.swift`; the app needs to load that local package itself.
 2. Select the **AITrainer** scheme and an iPhone simulator. Run the **Debug** configuration.
 3. Complete onboarding and explicitly accept the sample program. The initial fixture covers 2-4 available days, a repeating full-body session, and at least 41 minutes; use 60 minutes to include an optional slot and test shortening.
 4. On Today, confirm your own load and available equipment values. Unknown values remain blank; the app does not infer starting strength.
@@ -14,6 +14,41 @@ Native SwiftUI development build organized around the documented P0-P4 phases. T
 6. In Labs, enable experimental tools. Camera and real HealthKit testing require a physical iPhone. In Signing & Capabilities, choose your own team and unique bundle identifier; provisioning must support HealthKit.
 
 No API key, paid AI service, package download, backend, or account is required for P1. Do not add credentials to source control.
+
+## Troubleshooting: missing AITrainerCore
+
+If Xcode reports `Missing package product 'AITrainerCore'`, check for an accompanying
+`Couldn't load ai-trainer-ios because it is already opened from another project or workspace` error.
+A separate Xcode folder/package workspace can hold the local package open, even when its window is titled `README.md`.
+
+1. Close other Xcode windows containing this repository folder or `Package.swift`.
+2. Quit Xcode, reopen it, and open only `iOS/AITrainer.xcodeproj`.
+3. Choose **File > Packages > Reset Package Caches**, then **Resolve Package Versions** if needed.
+4. Choose **Product > Clean Build Folder**, then build the **AITrainer** scheme for an iPhone simulator.
+
+The project already links `AITrainerCore` through an `XCLocalSwiftPackageReference`
+with `relativePath = ..`, relative to the `iOS` directory. This correctly points to the
+repository-root `Package.swift`. The manifest exports the `AITrainerCore` library,
+and the app lists it in both package product dependencies and its Frameworks build phase.
+Do not change the reference to `../..` or add a remote package to solve a workspace conflict.
+
+If the next error is `Unable to resolve module dependency: 'AITrainerCore'` on a
+specific simulator, regenerate with the current script. Debug uses
+`ONLY_ACTIVE_ARCH = YES` to match SwiftPM's active-architecture build; Release
+uses `NO`. Without that alignment, an Apple Silicon simulator can build the
+package for arm64 while the app also requests an unavailable x86_64 module.
+Generic simulator builds can miss this mismatch because they build both architectures.
+
+For an incomplete download, restore the full repository, including `Package.swift`
+and `Sources/AITrainerCore/`. If the project file was edited, regenerate it from the repository root:
+
+```sh
+python3 scripts/generate_project.py
+xcodebuild -resolvePackageDependencies -project iOS/AITrainer.xcodeproj -scheme AITrainer
+```
+
+A successful command-line build alongside a failing Xcode window can indicate an IDE
+workspace/cache conflict; project regeneration alone does not close the conflicting window.
 
 ## Phase status
 

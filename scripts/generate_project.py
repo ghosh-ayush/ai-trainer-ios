@@ -34,6 +34,8 @@ frameworkphase = add('frameworkphase', f'isa = PBXFrameworksBuildPhase; buildAct
 project_configs, target_configs = [], []
 for configuration in ['Debug', 'Release']:
     project_settings = '''CLANG_ENABLE_MODULES = YES; SDKROOT = iphoneos; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SWIFT_VERSION = 5.0;'''
+    # Match SwiftPM's Debug architecture selection for a concrete simulator.
+    project_settings += ' ONLY_ACTIVE_ARCH = ' + ('YES' if configuration == 'Debug' else 'NO') + ';'
     settings = '''PRODUCT_BUNDLE_IDENTIFIER = com.ghoshayush.AITrainer; PRODUCT_NAME = AITrainer; INFOPLIST_FILE = AITrainer/Resources/Info.plist; CODE_SIGN_ENTITLEMENTS = AITrainer/Resources/AITrainer.entitlements; CODE_SIGN_STYLE = Automatic; TARGETED_DEVICE_FAMILY = 1; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SWIFT_VERSION = 5.0; SWIFT_STRICT_CONCURRENCY = targeted; GENERATE_INFOPLIST_FILE = NO; CURRENT_PROJECT_VERSION = 1; MARKETING_VERSION = 0.1.0; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks"); SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; ENABLE_USER_SCRIPT_SANDBOXING = YES;'''
     if configuration == 'Debug': settings += ' SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_TESTABILITY = YES;'
     else: settings += ' SWIFT_OPTIMIZATION_LEVEL = "-O"; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";'
