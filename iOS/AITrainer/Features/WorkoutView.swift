@@ -21,9 +21,9 @@ struct WorkoutView: View {
                     Section {
                         PhaseNotice(title: "Accepted plan is pinned", detail: "No automatic mid-set escalation. The fixture does not supply approved technique or warm-up coaching.")
                         Text("Status: \(session.status.rawValue) · \(session.completeWorkingSets) working sets recorded")
-                        if let end = session.restEndsAt {
+                        if let activity = WorkoutActivity(session: session), activity.restEndsAt != nil {
                             TimelineView(.periodic(from: .now, by: 1)) { context in
-                                let remaining = max(0, Int(ceil(end.timeIntervalSince(context.date))))
+                                let remaining = activity.remainingRestSeconds(at: context.date)
                                 Label(remaining == 0 ? "Rest timer complete" : String(format: "Rest %02d:%02d", remaining / 60, remaining % 60), systemImage: "timer")
                                     .font(.title2.monospacedDigit())
                             }

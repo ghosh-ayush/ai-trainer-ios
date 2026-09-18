@@ -40,6 +40,13 @@ struct SettingsView: View {
                     Text("These persist independently of preferences. A reviewed concern-resolution flow is required before production release; this prototype does not provide medical clearance.").font(.footnote)
                 }
             }
+            Section("Reference library") {
+                NavigationLink("Exercise catalog") { ExerciseCatalogView() }
+                NavigationLink("Open-source notices") {
+                    ScrollView { Text((try? ThirdPartyNotices.text()) ?? "Notices unavailable").font(.footnote).padding() }
+                        .navigationTitle("Open-source notices")
+                }
+            }
             Section("Build") {
                 LabeledContent("Version", value: "0.1.0 development")
                 LabeledContent("Local state revision", value: String(store.state.revision))
@@ -60,5 +67,45 @@ struct SettingsView: View {
                 store.experimentalToolsEnabled = false
             }
         }
+    }
+}
+
+
+/// Browsing imported descriptions does not enroll an exercise into guidance.
+private struct ExerciseCatalogView: View {
+    @State private var catalog: ExerciseCatalog?
+    @State private var query = ""
+    @State private var error: String?
+    private var matches: [CatalogExercise] {
+        (catalog?.exercises ?? []).filter { query.isEmpty || $0.name.localizedCaseInsensitiveContains(query) }
+    }
+    var body: some View {
+        List {
+            Section {
+                Text("Reference descriptions only. These exercises and instructions are not reviewed training guidance and do not change your plan.").font(.footnote)
+                if let error { Text(error) }
+            }
+            ForEach(matches) { exercise in
+                NavigationLink(exercise.name) {
+                    List {
+                        Section("Reference details") {
+                            LabeledContent("Equipment", value: exercise.equipment ?? "Not specified")
+                            LabeledContent("Muscles", value: exercise.primaryMuscles.joined(separator: ", "))
+                            LabeledContent("Level", value: exercise.level)
+                        }
+                        Section("Upstream instructions — unreviewed") {
+                            ForEach(Array(exercise.instructions.enumerated()), id: \.offset) { _, instruction in Text(instruction) }
+                        }
+                        Section { Text("Source: free-exercise-db · public domain").font(.caption) }
+                    }.navigationTitle(exercise.name)
+                }
+            }
+        }.navigationTitle("Exercise catalog")
+            .searchable(text: $query)
+            .task {
+                guard catalog == nil else { return }
+                do { catalog = try ExerciseCatalog.bundled() }
+                catch { self.error = error.localizedDescription }
+            }
     }
 }
