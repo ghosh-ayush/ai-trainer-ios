@@ -1,6 +1,8 @@
 # Open-source integration
 
-Based on `feat/native-ios-phases`. The authoritative path remains:
+The initial integration was based on `feat/native-ios-phases`. The subsequent
+[local Python migration](LOCAL_PYTHON_ARCHITECTURE.md) retains both integrations.
+Training/state rules now execute in Python; native perception stays Swift. The authoritative path remains:
 
 `AthleteState -> TrainingBrain -> Recommendation -> TrainerService`
 
@@ -49,9 +51,11 @@ never become confirmed performance or prescriptions automatically.
 
 - `PerformanceHistory` extracts the existing comparable completed-session filter,
   deterministic date/ID ordering, and working-log selection.
-- `ProgressionPolicy` is a proposal-only abstraction. `DoubleProgressionPolicy`
-  preserves the prior fixture logic, decision order, reason strings, load steps,
-  effort requirements, and evidence revisions. No progression rules were copied
+- `DoubleProgressionPolicy` is now a Swift compatibility adapter over the Python
+  implementation. The Python Training Brain owns eligibility gates and progression;
+  Swift policy injection was replaced by the versioned domain service interface.
+  Fixture decision order, reason strings, load steps, effort and evidence revisions
+  remain covered by regression tests. No progression rules were copied
   from another repository.
 - Original `WorkoutActivity` code derives a presentation snapshot from persisted
   sessions and computes rest from a deadline rather than accumulated timer ticks.
@@ -64,7 +68,7 @@ never become confirmed performance or prescriptions automatically.
 ## Licenses
 
 Full upstream license text is included in
-[`ThirdPartyNotices.txt`](../Sources/AITrainerCore/Resources/ThirdPartyNotices.txt),
+[`ThirdPartyNotices.txt`](../apps/ios/Sources/AITrainerCore/Resources/ThirdPartyNotices.txt),
 bundled into the app and readable in Settings:
 
 - RepCounterSDK: MIT, Copyright (c) 2026 Nazar Kozak.
@@ -89,3 +93,18 @@ openGym, wger, Onigiri, or other reference apps.
 - Real camera accuracy, orientation/device performance, and physical-device
   HealthKit/provisioning remain unvalidated; follow `DEVICE_TEST_PLAN.md`.
 - Existing fixture-only training approval restrictions remain in effect.
+
+
+## Embedded Python runtime
+
+The monorepo adds CPython 3.13.11 from Python-Apple-support `3.13-b13`, with a
+checksum-verified development download. The app bundles the PSF license and
+Python-Apple-support MIT notice alongside the existing notices. Only CPython's
+`math` and `_json` binary extensions are packaged; optional third-party
+crypto/compression/FFI/database binaries are excluded. No additional code from
+previously researched fitness repositories is incorporated.
+
+The 876-record exercise JSON and pinned RepCounterSDK revision are unchanged.
+Catalog validation runs in Python, but the descriptive records remain an offline
+native bundle resource. Packaging and actual simulator execution are described in
+[the migration report](PYTHON_MIGRATION.md).

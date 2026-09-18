@@ -1,0 +1,130 @@
+{
+  "PROFILE_REQUIRED": [
+    "needsInput",
+    "Complete a supported profile and accept a plan first."
+  ],
+  "SESSION_ACTIVE": [
+    "withholdGuidance",
+    "The active prescription stays pinned. End the session before changing the next plan."
+  ],
+  "POLICY_NOT_APPROVED": [
+    "withholdGuidance",
+    "Production guidance needs a reviewed policy bundle."
+  ],
+  "SLOT_MISSING": [
+    "needsInput",
+    "Request a new preview."
+  ],
+  "TIME_REQUIRED": [
+    "needsInput",
+    "Enter available minutes."
+  ],
+  "REQUIRED_WORK_DOES_NOT_FIT": [
+    "needsInput",
+    "Required work does not fit this fixture. Reschedule; rest and warm-up are not compressed."
+  ],
+  "ALREADY_FITS": [
+    "keepPlan",
+    "The existing session fits the time budget."
+  ],
+  "OPTIONAL_WORK_REMOVED": [
+    "proposeChange",
+    "Omit optional work for this session only. Rest and warm-up remain unchanged."
+  ],
+  "NO_ELIGIBLE_SUBSTITUTE": [
+    "withholdGuidance",
+    "No enabled directional substitute matches your equipment and exclusions."
+  ],
+  "CURATED_SUBSTITUTION": [
+    "proposeChange",
+    "Use \\(alt.name) for this session only. Confirm its own load and equipment; the original load is not transferred."
+  ],
+  "DATE_IN_PAST": [
+    "needsInput",
+    "Choose a future placement."
+  ],
+  "USER_RESCHEDULE": [
+    "proposeChange",
+    "Move this session without doubling work or changing the sequence."
+  ],
+  "REPORTED_PAIN": [
+    "withholdGuidance",
+    "Guidance for this activity is paused because you reported pain. A different exercise is not assumed safe."
+  ],
+  "EXERCISE_EXCLUDED": [
+    "withholdGuidance",
+    "Your explicit exclusion takes priority over progression or preferences."
+  ],
+  "UNREVIEWED_EXERCISE": [
+    "withholdGuidance",
+    "This exercise has no enabled guidance policy."
+  ],
+  "SESSION_OVERRIDE_ACTIVE": [
+    "keepPlan",
+    "Finish or discard the temporary session change before progression."
+  ],
+  "LOADING_POLICY_UNAVAILABLE": [
+    "unassessed",
+    "Machine settings and assistance need equipment-specific reviewed progression."
+  ],
+  "BASELINE_REQUIRED": [
+    "needsInput",
+    "Confirm a familiar working load. The app does not estimate your strength."
+  ],
+  "NO_COMPARABLE_HISTORY": [
+    "keepPlan",
+    "No comparable confirmed performance yet."
+  ],
+  "HISTORY_STALE": [
+    "needsInput",
+    "Reconfirm your baseline before using older performance."
+  ],
+  "MODIFIED_EXPOSURE": [
+    "keepPlan",
+    "A shortened or substituted session does not qualify as an original exposure."
+  ],
+  "EVIDENCE_CONFLICT": [
+    "needsInput",
+    "Resolve the conflicting set before progression."
+  ],
+  "INCOMPLETE_EXPOSURE": [
+    "keepPlan",
+    "One or more designated working sets are missing; this is not a strength-failure diagnosis."
+  ],
+  "LOAD_CONTEXT_CHANGED": [
+    "needsInput",
+    "The recorded load differs from the planned baseline. Confirm the baseline rather than transferring evidence."
+  ],
+  "EFFORT_UNKNOWN": [
+    "needsInput",
+    "Required effort is unknown. No effort-dependent increase is proposed."
+  ],
+  "TARGET_NOT_QUALIFIED": [
+    "keepPlan",
+    "Repeat or review the plan. The configured rep or effort criterion is not met."
+  ],
+  "REPEAT_TARGET": [
+    "keepPlan",
+    "Keep the current rep targets and load."
+  ],
+  "NEXT_TARGET_REP": [
+    "proposeChange",
+    "Propose one additional total target rep; load and working-set count stay unchanged."
+  ],
+  "MORE_EXPOSURES_REQUIRED": [
+    "keepPlan",
+    "The required consecutive comparable exposures are not complete."
+  ],
+  "EQUIPMENT_STEP_UNKNOWN": [
+    "needsInput",
+    "Confirm the available equipment loads. No increment is invented."
+  ],
+  "INCREMENT_EXCEEDS_BOUND": [
+    "keepPlan",
+    "The next available load exceeds this policy's permitted change. Keep the load."
+  ],
+  "QUALIFYING_EXPOSURES_COMPLETE": [
+    "proposeChange",
+    "Both qualifying exposures met the rep and reported-effort criteria. Review the next available load; sets do not increase."
+  ]
+}
