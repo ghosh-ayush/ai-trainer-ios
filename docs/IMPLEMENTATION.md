@@ -1,3 +1,7 @@
+# Historical native implementation notes
+
+These notes describe the original native implementation. See [the Python migration](PYTHON_MIGRATION.md) and [current architecture](LOCAL_PYTHON_ARCHITECTURE.md) for the monorepo runtime, current tests, paths and ownership.
+
 # Phase-based iOS implementation
 
 Implementation snapshot: September 17, 2026. Basis: the existing **01. Athlete State + Training Brain v0.1** and its P0-P4/R phase boundaries. This is a development build, not release approval.

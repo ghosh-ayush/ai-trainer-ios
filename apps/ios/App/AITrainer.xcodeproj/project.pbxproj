@@ -1,0 +1,302 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+        A1A1A1A1A1A1A1A1A1A1A1A1 /* Bundle Python */ = {
+            isa = PBXShellScriptBuildPhase;
+            alwaysOutOfDate = 1;
+            buildActionMask = 2147483647;
+            files = (); inputPaths = (); outputPaths = ();
+            name = "Bundle local Python";
+            runOnlyForDeploymentPostprocessing = 0;
+            shellPath = /bin/sh;
+            shellScript = "/usr/bin/python3 \"$PROJECT_DIR/../../../scripts/bundle_python.py\"";
+        };
+
+
+/* Begin PBXBuildFile section */
+		03888ACBB57965075CB3B61F /* AITrainerCore in Frameworks */ = {isa = PBXBuildFile; productRef = E55A8CC6397119BC2F346606 /* AITrainerCore */; };
+		070C3435E531C800F6804AD5 /* AITrainer/Services/CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BE22AE1A59F9AEA7618974F /* AITrainer/Services/CameraService.swift */; };
+		07B760A8663938679E1BD8F1 /* AITrainer/Resources/PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 96ED5C5789B174A01557791C /* AITrainer/Resources/PrivacyInfo.xcprivacy */; };
+		128668F1D8D39CA3717E16FA /* AITrainer/Features/WorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54EB8057F012A5E362B41B6D /* AITrainer/Features/WorkoutView.swift */; };
+		4CD2841A4290F8C630FC269D /* AITrainer/App/AITrainerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 361EEC030D527B635646ABBE /* AITrainer/App/AITrainerApp.swift */; };
+		87FE18460D6E5CB373E2EC26 /* AITrainer/Features/TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CC8D684C40EB12AD3B8782F /* AITrainer/Features/TodayView.swift */; };
+		8C2315F898032693F64285BE /* AITrainer/Features/OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371ACC00066075256A618F6D /* AITrainer/Features/OnboardingView.swift */; };
+		A13881E9ADD4192F95BA9010 /* AITrainer/Features/LabsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B1F2DD8B4EE2C18A4CC18F /* AITrainer/Features/LabsView.swift */; };
+		BC29050705311E0D2EE8C4D5 /* AITrainer/Features/CoachView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C201F0EB98448EEEBE4A7BB /* AITrainer/Features/CoachView.swift */; };
+		C3309D4254DA71C5E48DA166 /* AITrainer/Services/HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4344E19B83A4827D66ED9596 /* AITrainer/Services/HealthKitService.swift */; };
+		CD2B9B0AFCF9E15850D71AB9 /* AITrainer/Features/HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37AB04BF5B4EE34C8879749 /* AITrainer/Features/HistoryView.swift */; };
+		CD7FFCAAB6EBAF187C296BDB /* AITrainer/Features/SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4F9C43DC87111C9AC5AF8B2 /* AITrainer/Features/SettingsView.swift */; };
+		F965DD7ABE806D0536AF56EB /* AITrainer/Features/NutritionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A336427BC5265B404F7CAA8B /* AITrainer/Features/NutritionView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		24B1F2DD8B4EE2C18A4CC18F /* AITrainer/Features/LabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITrainer/Features/LabsView.swift; sourceTree = "<group>"; };
+		2C201F0EB98448EEEBE4A7BB /* AITrainer/Features/CoachView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITrainer/Features/CoachView.swift; sourceTree = "<group>"; };
+		361EEC030D527B635646ABBE /* AITrainer/App/AITrainerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITrainer/App/AITrainerApp.swift; sourceTree = "<group>"; };
+		371ACC00066075256A618F6D /* AITrainer/Features/OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITrainer/Features/OnboardingView.swift; sourceTree = "<group>"; };
+		38A007151ABE87CC01A5B6E9 /* AITrainer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = AITrainer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4344E19B83A4827D66ED9596 /* AITrainer/Services/HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITrainer/Services/HealthKitService.swift; sourceTree = "<group>"; };
+		54EB8057F012A5E362B41B6D /* AITrainer/Features/WorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITrainer/Features/WorkoutView.swift; sourceTree = "<group>"; };
+		6BE22AE1A59F9AEA7618974F /* AITrainer/Services/CameraService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITrainer/Services/CameraService.swift; sourceTree = "<group>"; };
+		8CC8D684C40EB12AD3B8782F /* AITrainer/Features/TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITrainer/Features/TodayView.swift; sourceTree = "<group>"; };
+		96ED5C5789B174A01557791C /* AITrainer/Resources/PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = AITrainer/Resources/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A336427BC5265B404F7CAA8B /* AITrainer/Features/NutritionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITrainer/Features/NutritionView.swift; sourceTree = "<group>"; };
+		C4F9C43DC87111C9AC5AF8B2 /* AITrainer/Features/SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITrainer/Features/SettingsView.swift; sourceTree = "<group>"; };
+		D37AB04BF5B4EE34C8879749 /* AITrainer/Features/HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITrainer/Features/HistoryView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BEE832DE65DB5CA7507F7EF9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				03888ACBB57965075CB3B61F /* AITrainerCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B28B7AF69320201D1CF206EB = {
+			isa = PBXGroup;
+			children = (
+				361EEC030D527B635646ABBE /* AITrainer/App/AITrainerApp.swift */,
+				2C201F0EB98448EEEBE4A7BB /* AITrainer/Features/CoachView.swift */,
+				D37AB04BF5B4EE34C8879749 /* AITrainer/Features/HistoryView.swift */,
+				24B1F2DD8B4EE2C18A4CC18F /* AITrainer/Features/LabsView.swift */,
+				A336427BC5265B404F7CAA8B /* AITrainer/Features/NutritionView.swift */,
+				371ACC00066075256A618F6D /* AITrainer/Features/OnboardingView.swift */,
+				C4F9C43DC87111C9AC5AF8B2 /* AITrainer/Features/SettingsView.swift */,
+				8CC8D684C40EB12AD3B8782F /* AITrainer/Features/TodayView.swift */,
+				54EB8057F012A5E362B41B6D /* AITrainer/Features/WorkoutView.swift */,
+				6BE22AE1A59F9AEA7618974F /* AITrainer/Services/CameraService.swift */,
+				4344E19B83A4827D66ED9596 /* AITrainer/Services/HealthKitService.swift */,
+				96ED5C5789B174A01557791C /* AITrainer/Resources/PrivacyInfo.xcprivacy */,
+				FBDC4F23F93125BBEEAE800C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FBDC4F23F93125BBEEAE800C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				38A007151ABE87CC01A5B6E9 /* AITrainer.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0E8A3AD980EC179856012B7E /* AITrainer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DBC1F132A3B6D94B1DF33607 /* Build configuration list for PBXNativeTarget "AITrainer" */;
+			buildPhases = (
+				D3C3E067FC1BBCCEAA4D9313 /* Sources */,
+				BEE832DE65DB5CA7507F7EF9 /* Frameworks */,
+				ECE2D868E17AEF81A05610A3 /* Resources */,
+                A1A1A1A1A1A1A1A1A1A1A1A1 /* Bundle Python */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AITrainer;
+			packageProductDependencies = (
+				E55A8CC6397119BC2F346606 /* AITrainerCore */,
+			);
+			productName = AITrainer;
+			productReference = 38A007151ABE87CC01A5B6E9 /* AITrainer.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		98F54143AB4E86B28C3AFEE0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					0E8A3AD980EC179856012B7E = {
+						CreatedOnToolsVersion = 16.0;
+						SystemCapabilities = {
+							com.apple.HealthKit = {
+								enabled = 1;
+							};
+						};
+					};
+				};
+			};
+			buildConfigurationList = FBD3510CED826C9DAA696E48 /* Build configuration list for PBXProject "AITrainer" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B28B7AF69320201D1CF206EB;
+			packageReferences = (
+				582681C2EAE02B3F3D399C0C /* XCLocalSwiftPackageReference ".." */,
+			);
+			productRefGroup = FBDC4F23F93125BBEEAE800C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0E8A3AD980EC179856012B7E /* AITrainer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		ECE2D868E17AEF81A05610A3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				07B760A8663938679E1BD8F1 /* AITrainer/Resources/PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D3C3E067FC1BBCCEAA4D9313 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4CD2841A4290F8C630FC269D /* AITrainer/App/AITrainerApp.swift in Sources */,
+				BC29050705311E0D2EE8C4D5 /* AITrainer/Features/CoachView.swift in Sources */,
+				CD2B9B0AFCF9E15850D71AB9 /* AITrainer/Features/HistoryView.swift in Sources */,
+				A13881E9ADD4192F95BA9010 /* AITrainer/Features/LabsView.swift in Sources */,
+				F965DD7ABE806D0536AF56EB /* AITrainer/Features/NutritionView.swift in Sources */,
+				8C2315F898032693F64285BE /* AITrainer/Features/OnboardingView.swift in Sources */,
+				CD7FFCAAB6EBAF187C296BDB /* AITrainer/Features/SettingsView.swift in Sources */,
+				87FE18460D6E5CB373E2EC26 /* AITrainer/Features/TodayView.swift in Sources */,
+				128668F1D8D39CA3717E16FA /* AITrainer/Features/WorkoutView.swift in Sources */,
+				070C3435E531C800F6804AD5 /* AITrainer/Services/CameraService.swift in Sources */,
+				C3309D4254DA71C5E48DA166 /* AITrainer/Services/HealthKitService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		639A7CA24D39909E713B47F7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = AITrainer/Resources/AITrainer.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = AITrainer/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ghoshayush.AITrainer;
+				PRODUCT_NAME = AITrainer;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = targeted;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		7082CC0B6FC1282FCEABD07A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = AITrainer/Resources/AITrainer.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = AITrainer/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ghoshayush.AITrainer;
+				PRODUCT_NAME = AITrainer;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = targeted;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		89E1FD6268CC0F221A2BE178 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		E6DE6C99132752C914FEF632 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DBC1F132A3B6D94B1DF33607 /* Build configuration list for PBXNativeTarget "AITrainer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7082CC0B6FC1282FCEABD07A /* Debug */,
+				639A7CA24D39909E713B47F7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FBD3510CED826C9DAA696E48 /* Build configuration list for PBXProject "AITrainer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				89E1FD6268CC0F221A2BE178 /* Debug */,
+				E6DE6C99132752C914FEF632 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		582681C2EAE02B3F3D399C0C /* XCLocalSwiftPackageReference ".." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../..;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E55A8CC6397119BC2F346606 /* AITrainerCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 582681C2EAE02B3F3D399C0C /* XCLocalSwiftPackageReference ".." */;
+			productName = AITrainerCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+}

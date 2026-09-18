@@ -1,0 +1,404 @@
+{
+  "schemaVersion": "1.0",
+  "operation": "decide",
+  "payload": {
+    "state": {
+      "schemaVersion": 1,
+      "athleteID": "00000000-0000-0000-0000-000000000004",
+      "revision": 0,
+      "contextRevision": 0,
+      "profile": {
+        "adultConfirmed": true,
+        "supportedScopeConfirmed": true,
+        "goal": "Hypertrophy",
+        "experience": "Beginner",
+        "daysPerWeek": 3,
+        "minutes": 60,
+        "equipment": [
+          "barbell",
+          "dumbbell",
+          "machine"
+        ],
+        "preferredUnit": "lb",
+        "timeZone": "UTC",
+        "excludedExercises": [],
+        "preferredExercises": []
+      },
+      "program": {
+        "id": "00000000-0000-0000-0000-000000000003",
+        "revision": 1,
+        "templateID": "FULL_BODY_FIXTURE_01",
+        "libraryVersion": "fixture-1",
+        "plans": [
+          {
+            "id": "00000000-0000-0000-0000-000000000002",
+            "revision": 1,
+            "name": "Fixture",
+            "slots": [
+              {
+                "id": "00000000-0000-0000-0000-000000000001",
+                "exerciseID": "bench",
+                "equipment": {
+                  "id": "rack-1",
+                  "name": "Rack 1",
+                  "kind": "barbell",
+                  "unit": "lb",
+                  "basis": "total",
+                  "availableLoads": [
+                    100,
+                    105,
+                    110
+                  ]
+                },
+                "protocolID": "DP_TEST_01",
+                "workingSets": 3,
+                "lowerReps": 8,
+                "upperReps": 10,
+                "targets": [
+                  8,
+                  8,
+                  8
+                ],
+                "load": 100,
+                "restSeconds": 120,
+                "optional": false,
+                "estimatedMinutes": 12
+              }
+            ],
+            "modified": false,
+            "warmUpMinutes": 5
+          }
+        ],
+        "sequenceIndex": 0,
+        "acceptedAt": 811382400
+      },
+      "previousPrograms": [],
+      "sessions": [
+        {
+          "id": "00000000-0000-0000-0000-000000000010",
+          "programID": "00000000-0000-0000-0000-000000000003",
+          "programRevision": 1,
+          "originalPlan": {
+            "id": "00000000-0000-0000-0000-000000000002",
+            "revision": 1,
+            "name": "Fixture",
+            "slots": [
+              {
+                "id": "00000000-0000-0000-0000-000000000001",
+                "exerciseID": "bench",
+                "equipment": {
+                  "id": "rack-1",
+                  "name": "Rack 1",
+                  "kind": "barbell",
+                  "unit": "lb",
+                  "basis": "total",
+                  "availableLoads": [
+                    100,
+                    105,
+                    110
+                  ]
+                },
+                "protocolID": "DP_TEST_01",
+                "workingSets": 3,
+                "lowerReps": 8,
+                "upperReps": 10,
+                "targets": [
+                  8,
+                  8,
+                  8
+                ],
+                "load": 100,
+                "restSeconds": 120,
+                "optional": false,
+                "estimatedMinutes": 12
+              }
+            ],
+            "modified": false,
+            "warmUpMinutes": 5
+          },
+          "plan": {
+            "id": "00000000-0000-0000-0000-000000000002",
+            "revision": 1,
+            "name": "Fixture",
+            "slots": [
+              {
+                "id": "00000000-0000-0000-0000-000000000001",
+                "exerciseID": "bench",
+                "equipment": {
+                  "id": "rack-1",
+                  "name": "Rack 1",
+                  "kind": "barbell",
+                  "unit": "lb",
+                  "basis": "total",
+                  "availableLoads": [
+                    100,
+                    105,
+                    110
+                  ]
+                },
+                "protocolID": "DP_TEST_01",
+                "workingSets": 3,
+                "lowerReps": 8,
+                "upperReps": 10,
+                "targets": [
+                  8,
+                  8,
+                  8
+                ],
+                "load": 100,
+                "restSeconds": 120,
+                "optional": false,
+                "estimatedMinutes": 12
+              }
+            ],
+            "modified": false,
+            "warmUpMinutes": 5
+          },
+          "status": "completed",
+          "startedAt": 810950400,
+          "endedAt": 810952200,
+          "timeZone": "UTC",
+          "checkIn": {
+            "painReported": false,
+            "unavailableEquipment": [],
+            "occurredAt": 810950400
+          },
+          "logs": [
+            {
+              "id": "00000000-0000-0000-0000-000000000011",
+              "operationID": "00000000-0000-0000-0000-000000000110",
+              "revision": 1,
+              "prescriptionID": "00000000-0000-0000-0000-000000000001",
+              "contextKey": "bench|rack-1|lb|total|DP_TEST_01|bilateral-repetition",
+              "index": 0,
+              "kind": "working",
+              "load": 100,
+              "unit": "lb",
+              "basis": "total",
+              "reps": 10,
+              "rir": 2,
+              "occurredAt": 810950400,
+              "conflicted": false
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000012",
+              "operationID": "00000000-0000-0000-0000-000000000111",
+              "revision": 1,
+              "prescriptionID": "00000000-0000-0000-0000-000000000001",
+              "contextKey": "bench|rack-1|lb|total|DP_TEST_01|bilateral-repetition",
+              "index": 1,
+              "kind": "working",
+              "load": 100,
+              "unit": "lb",
+              "basis": "total",
+              "reps": 10,
+              "rir": 2,
+              "occurredAt": 810950400,
+              "conflicted": false
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000013",
+              "operationID": "00000000-0000-0000-0000-000000000112",
+              "revision": 1,
+              "prescriptionID": "00000000-0000-0000-0000-000000000001",
+              "contextKey": "bench|rack-1|lb|total|DP_TEST_01|bilateral-repetition",
+              "index": 2,
+              "kind": "working",
+              "load": 100,
+              "unit": "lb",
+              "basis": "total",
+              "reps": 10,
+              "rir": 2,
+              "occurredAt": 810950400,
+              "conflicted": false
+            }
+          ],
+          "omissions": {}
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000020",
+          "programID": "00000000-0000-0000-0000-000000000003",
+          "programRevision": 1,
+          "originalPlan": {
+            "id": "00000000-0000-0000-0000-000000000002",
+            "revision": 1,
+            "name": "Fixture",
+            "slots": [
+              {
+                "id": "00000000-0000-0000-0000-000000000001",
+                "exerciseID": "bench",
+                "equipment": {
+                  "id": "rack-1",
+                  "name": "Rack 1",
+                  "kind": "barbell",
+                  "unit": "lb",
+                  "basis": "total",
+                  "availableLoads": [
+                    100,
+                    105,
+                    110
+                  ]
+                },
+                "protocolID": "DP_TEST_01",
+                "workingSets": 3,
+                "lowerReps": 8,
+                "upperReps": 10,
+                "targets": [
+                  8,
+                  8,
+                  8
+                ],
+                "load": 100,
+                "restSeconds": 120,
+                "optional": false,
+                "estimatedMinutes": 12
+              }
+            ],
+            "modified": false,
+            "warmUpMinutes": 5
+          },
+          "plan": {
+            "id": "00000000-0000-0000-0000-000000000002",
+            "revision": 1,
+            "name": "Fixture",
+            "slots": [
+              {
+                "id": "00000000-0000-0000-0000-000000000001",
+                "exerciseID": "bench",
+                "equipment": {
+                  "id": "rack-1",
+                  "name": "Rack 1",
+                  "kind": "barbell",
+                  "unit": "lb",
+                  "basis": "total",
+                  "availableLoads": [
+                    100,
+                    105,
+                    110
+                  ]
+                },
+                "protocolID": "DP_TEST_01",
+                "workingSets": 3,
+                "lowerReps": 8,
+                "upperReps": 10,
+                "targets": [
+                  8,
+                  8,
+                  8
+                ],
+                "load": 100,
+                "restSeconds": 120,
+                "optional": false,
+                "estimatedMinutes": 12
+              }
+            ],
+            "modified": false,
+            "warmUpMinutes": 5
+          },
+          "status": "completed",
+          "startedAt": 811209600,
+          "endedAt": 811211400,
+          "timeZone": "UTC",
+          "checkIn": {
+            "painReported": false,
+            "unavailableEquipment": [],
+            "occurredAt": 811209600
+          },
+          "logs": [
+            {
+              "id": "00000000-0000-0000-0000-000000000021",
+              "operationID": "00000000-0000-0000-0000-000000000120",
+              "revision": 1,
+              "prescriptionID": "00000000-0000-0000-0000-000000000001",
+              "contextKey": "bench|rack-1|lb|total|DP_TEST_01|bilateral-repetition",
+              "index": 0,
+              "kind": "working",
+              "load": 100,
+              "unit": "lb",
+              "basis": "total",
+              "reps": 10,
+              "rir": 2,
+              "occurredAt": 811209600,
+              "conflicted": false
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000022",
+              "operationID": "00000000-0000-0000-0000-000000000121",
+              "revision": 1,
+              "prescriptionID": "00000000-0000-0000-0000-000000000001",
+              "contextKey": "bench|rack-1|lb|total|DP_TEST_01|bilateral-repetition",
+              "index": 1,
+              "kind": "working",
+              "load": 100,
+              "unit": "lb",
+              "basis": "total",
+              "reps": 10,
+              "rir": 2,
+              "occurredAt": 811209600,
+              "conflicted": false
+            },
+            {
+              "id": "00000000-0000-0000-0000-000000000023",
+              "operationID": "00000000-0000-0000-0000-000000000122",
+              "revision": 1,
+              "prescriptionID": "00000000-0000-0000-0000-000000000001",
+              "contextKey": "bench|rack-1|lb|total|DP_TEST_01|bilateral-repetition",
+              "index": 2,
+              "kind": "working",
+              "load": 100,
+              "unit": "lb",
+              "basis": "total",
+              "reps": 10,
+              "rir": 2,
+              "occurredAt": 811209600,
+              "conflicted": false
+            }
+          ],
+          "omissions": {}
+        }
+      ],
+      "recommendations": [],
+      "painExclusions": [],
+      "audits": [],
+      "conflicts": [],
+      "operations": [],
+      "events": [],
+      "meals": [],
+      "mealAudits": [],
+      "recipes": []
+    },
+    "request": {
+      "kind": "progression",
+      "slotID": "00000000-0000-0000-0000-000000000001"
+    },
+    "library": {
+      "exercises": [
+        {
+          "id": "bench",
+          "name": "Barbell bench press",
+          "role": "press",
+          "equipmentKind": "barbell",
+          "basis": "total",
+          "alternatives": [
+            "machine_press",
+            "db_floor_press"
+          ],
+          "review": "fixture",
+          "contentVersion": "fixture-1"
+        }
+      ],
+      "policy": {
+        "id": "DP_TEST_01",
+        "version": "fixture-1",
+        "review": "fixture",
+        "requiredExposures": 2,
+        "minimumRIR": 2,
+        "maximumIncreaseFraction": 0.05,
+        "historyDays": 28,
+        "maximumGapDays": 14
+      },
+      "permitsFixtures": true
+    },
+    "now": 811382400
+  }
+}

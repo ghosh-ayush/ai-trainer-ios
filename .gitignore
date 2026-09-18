@@ -9,3 +9,8 @@ xcuserdata/
 .env.*
 *.p12
 *.mobileprovision
+
+apps/ios/Vendor/
+__pycache__/
+*.pyc
+.venv/
