@@ -83,7 +83,8 @@ struct MealEditor: View {
                             }
                         }
                 }
-            }.navigationTitle(existing == nil ? "New meal" : "Correct meal").toolbar { Button("Cancel") { dismiss() } }
+            }.scrollDismissesKeyboard(.interactively)
+                .navigationTitle(existing == nil ? "New meal" : "Correct meal").toolbar { Button("Cancel") { dismiss() } }
                 .onAppear {
                     if let existing {
                         name = existing.name; calories = String(existing.nutrients.calories); protein = String(existing.nutrients.protein)

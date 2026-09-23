@@ -17,44 +17,53 @@ struct WorkoutView: View {
     var body: some View {
         Group {
             if let session = store.state.activeSession {
-                List {
-                    Section {
-                        PhaseNotice(title: "Accepted plan is pinned", detail: "No automatic mid-set escalation. The fixture does not supply approved technique or warm-up coaching.")
-                        Text("Status: \(session.status.rawValue) · \(session.completeWorkingSets) working sets recorded")
-                        if let activity = WorkoutActivity(session: session), activity.restEndsAt != nil {
-                            TimelineView(.periodic(from: .now, by: 1)) { context in
-                                let remaining = activity.remainingRestSeconds(at: context.date)
-                                Label(remaining == 0 ? "Rest timer complete" : String(format: "Rest %02d:%02d", remaining / 60, remaining % 60), systemImage: "timer")
-                                    .font(.title2.monospacedDigit())
-                            }
-                        }
-                    }
-                    ForEach(session.plan.slots) { slot in
-                        Section(store.name(slot.exerciseID)) {
-                            Text("Target: \(slot.load.map(number) ?? "unknown") \(slot.equipment.unit.rawValue) · \(slot.equipment.basis.label)")
-                            ForEach(0..<slot.workingSets, id: \.self) { index in
-                                if let log = session.logs.first(where: { $0.prescriptionID == slot.id && $0.index == index && $0.kind == .working }) {
-                                    Label("Set \(index + 1): \(log.reps) reps at \(log.load.map(number) ?? "unknown") \(log.unit.rawValue)", systemImage: "checkmark.circle.fill")
-                                } else {
-                                    Button("Log set \(index + 1) · target \(slot.targets[index]) reps") {
-                                        entry = SetEntry(sessionID: session.id, prescription: slot, index: index, kind: .working)
-                                    }.disabled(session.status == .paused)
+                ScrollViewReader { proxy in
+                    List {
+                        Section {
+                            PhaseNotice(title: "Accepted plan is pinned", detail: "No automatic mid-set escalation. The fixture does not supply approved technique or warm-up coaching.")
+                            Text("Status: \(session.status.rawValue) · \(session.completeWorkingSets) working sets recorded")
+                            if let activity = WorkoutActivity(session: session), activity.restEndsAt != nil {
+                                TimelineView(.periodic(from: .now, by: 1)) { context in
+                                    let remaining = activity.remainingRestSeconds(at: context.date)
+                                    Label(remaining == 0 ? "Rest timer complete" : String(format: "Rest %02d:%02d", remaining / 60, remaining % 60), systemImage: "timer")
+                                        .font(.title2.monospacedDigit())
                                 }
                             }
-                            Menu("Additional log") {
-                                Button("Warm-up set") { entry = SetEntry(sessionID: session.id, prescription: slot, index: session.logs.count, kind: .warmUp) }
-                                Button("Extra set - not prescribed") { entry = SetEntry(sessionID: session.id, prescription: slot, index: session.logs.count, kind: .extra) }
-                            }.disabled(session.status == .paused)
-                            Button("Report pain and pause guidance", role: .destructive) {
-                                store.perform { try $0.reportPain(exerciseID: slot.exerciseID) }
+                        }
+                        ForEach(session.plan.slots) { slot in
+                            Section(store.name(slot.exerciseID)) {
+                                Text("Target: \(slot.load.map(number) ?? "unknown") \(slot.equipment.unit.rawValue) · \(slot.equipment.basis.label)")
+                                ForEach(0..<slot.workingSets, id: \.self) { index in
+                                    Group {
+                                        if let log = session.logs.first(where: { $0.prescriptionID == slot.id && $0.index == index && $0.kind == .working }) {
+                                            Label("Set \(index + 1): \(log.reps) reps at \(log.load.map(number) ?? "unknown") \(log.unit.rawValue)", systemImage: "checkmark.circle.fill")
+                                        } else {
+                                            Button("Log set \(index + 1) · target \(slot.targets[index]) reps") {
+                                                entry = SetEntry(sessionID: session.id, prescription: slot, index: index, kind: .working)
+                                            }.disabled(session.status == .paused)
+                                        }
+                                    }.id(Self.rowID(slot: slot.id, index: index))
+                                }
+                                Menu("Additional log") {
+                                    Button("Warm-up set") { entry = SetEntry(sessionID: session.id, prescription: slot, index: session.logs.count, kind: .warmUp) }
+                                    Button("Extra set - not prescribed") { entry = SetEntry(sessionID: session.id, prescription: slot, index: session.logs.count, kind: .extra) }
+                                }.disabled(session.status == .paused)
+                                Button("Report pain and pause guidance", role: .destructive) {
+                                    store.perform { try $0.reportPain(exerciseID: slot.exerciseID) }
+                                }
                             }
                         }
-                    }
-                    Section {
-                        Button(session.status == .paused ? "Resume session" : "Pause session") {
-                            store.perform { try $0.setPaused(session.status != .paused) }
+                        Section {
+                            Button(session.status == .paused ? "Resume session" : "Pause session") {
+                                store.perform { try $0.setPaused(session.status != .paused) }
+                            }
+                            Button("Finish / end session") { showFinish = true }
                         }
-                        Button("Finish / end session") { showFinish = true }
+                    }
+                    // After each save, bring the next set still to log into view.
+                    .onChange(of: session.logs.count) {
+                        guard let next = Self.nextUnloggedSet(in: session) else { return }
+                        withAnimation { proxy.scrollTo(next, anchor: .center) }
                     }
                 }
             } else {
@@ -76,6 +85,19 @@ struct WorkoutView: View {
                 }.navigationTitle("End session").toolbar { Button("Cancel") { showFinish = false } }
             }
         }
+    }
+}
+extension WorkoutView {
+    static func rowID(slot: UUID, index: Int) -> String { "\(slot.uuidString)-\(index)" }
+    /// The first planned working set, in plan order, that has no log yet.
+    static func nextUnloggedSet(in session: WorkoutSession) -> String? {
+        for slot in session.plan.slots {
+            for index in 0..<slot.workingSets
+            where !session.logs.contains(where: { $0.prescriptionID == slot.id && $0.index == index && $0.kind == .working }) {
+                return rowID(slot: slot.id, index: index)
+            }
+        }
+        return nil
     }
 }
 struct SetLogView: View {
@@ -111,7 +133,8 @@ struct SetLogView: View {
                                             logID: logID, operationID: operationID)
                     }) { dismiss() }
                 }.buttonStyle(.borderedProminent)
-            }.navigationTitle("Record performance").toolbar { Button("Cancel") { dismiss() } }
+            }.scrollDismissesKeyboard(.interactively)
+                .navigationTitle("Record performance").toolbar { Button("Cancel") { dismiss() } }
                 .onAppear { load = slot.load.map { String($0) } ?? "" }
         }
     }
