@@ -10,51 +10,54 @@ struct TodayView: View {
     @State private var showSchedule = false
     @State private var confirmSkip = false
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text(Date.now.formatted(date: .complete, time: .omitted)).font(.subheadline).foregroundStyle(.secondary)
-                PhaseNotice(title: "P1 - local training", detail: "Sample policies. Recorded performance, proposed changes, and accepted plans remain separate.")
-                if let session = store.state.activeSession {
-                    Panel {
-                        Label(session.status == .paused ? "Workout paused" : "Workout in progress", systemImage: "figure.strengthtraining.traditional").font(.headline)
-                        Text("\(session.completeWorkingSets) working sets recorded locally")
-                        NavigationLink("Open workout") { WorkoutView() }.buttonStyle(.borderedProminent)
-                    }
-                } else if let plan = store.state.nextPlan {
-                    Panel {
-                        Text(plan.name).font(.title2.bold())
-                        Text("\(plan.estimatedMinutes) fixture minutes · \(plan.slots.count) exercises · revision \(plan.revision)").foregroundStyle(.secondary)
-                        if plan.modified { Label("Temporary session adjustment", systemImage: "arrow.triangle.branch").font(.caption) }
-                        if let date = plan.scheduledDate { Text("Scheduled: \(date.formatted(date: .abbreviated, time: .shortened))") }
-                        Button("Check in & start") { showCheckIn = true }.buttonStyle(.borderedProminent)
-                    }
-                    ForEach(plan.slots) { slot in
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text(Date.now.formatted(date: .complete, time: .omitted)).font(.subheadline).foregroundStyle(.secondary)
+                    PhaseNotice(title: "P1 - local training", detail: "Sample policies. Recorded performance, proposed changes, and accepted plans remain separate.")
+                    if let session = store.state.activeSession {
                         Panel {
-                            Text(store.name(slot.exerciseID)).font(.headline)
-                            Text("\(slot.targets.map(String.init).joined(separator: " / ")) reps · \(slot.equipment.basis.label)")
-                            Text(slot.load.map { "\(number($0)) \(slot.equipment.unit.rawValue)" } ?? "Working load not set")
-                                .foregroundStyle(slot.load == nil ? .secondary : .primary)
-                            HStack {
-                                Button("Load & equipment") { selectedLoad = slot }
-                                Spacer()
-                                Menu {
-                                    Button("Review progression") { store.request(.progression(slot.id)) }
-                                    Button("Curated swap") { selectedSwap = slot }
-                                    Button("Report pain / pause guidance", role: .destructive) { store.perform { try $0.reportPain(exerciseID: slot.exerciseID) } }
-                                } label: { Image(systemName: "ellipsis.circle").font(.title2) }.accessibilityLabel("Options for \(store.name(slot.exerciseID))")
+                            Label(session.status == .paused ? "Workout paused" : "Workout in progress", systemImage: "figure.strengthtraining.traditional").font(.headline)
+                            Text("\(session.completeWorkingSets) working sets recorded locally")
+                            NavigationLink("Open workout") { WorkoutView() }.buttonStyle(.borderedProminent)
+                        }
+                    } else if let plan = store.state.nextPlan {
+                        Panel {
+                            Text(plan.name).font(.title2.bold())
+                            Text("\(plan.estimatedMinutes) fixture minutes · \(plan.slots.count) exercises · revision \(plan.revision)").foregroundStyle(.secondary)
+                            if plan.modified { Label("Temporary session adjustment", systemImage: "arrow.triangle.branch").font(.caption) }
+                            if let date = plan.scheduledDate { Text("Scheduled: \(date.formatted(date: .abbreviated, time: .shortened))") }
+                            Button("Check in & start") { showCheckIn = true }.buttonStyle(.borderedProminent)
+                        }
+                        ForEach(plan.slots) { slot in
+                            Panel {
+                                Text(store.name(slot.exerciseID)).font(.headline)
+                                Text("\(slot.targets.map(String.init).joined(separator: " / ")) reps · \(slot.equipment.basis.label)")
+                                Text(slot.load.map { "\(number($0)) \(slot.equipment.unit.rawValue)" } ?? "Working load not set")
+                                    .foregroundStyle(slot.load == nil ? .secondary : .primary)
+                                HStack {
+                                    Button("Load & equipment") { selectedLoad = slot }
+                                    Spacer()
+                                    Menu {
+                                        Button("Review progression") { store.request(.progression(slot.id)) }
+                                        Button("Curated swap") { selectedSwap = slot }
+                                        Button("Report pain / pause guidance", role: .destructive) { store.perform { try $0.reportPain(exerciseID: slot.exerciseID) } }
+                                    } label: { Image(systemName: "ellipsis.circle").font(.title2) }.accessibilityLabel("Options for \(store.name(slot.exerciseID))")
+                                }
                             }
                         }
+                        HStack {
+                            Button("Shorten") { showShorten = true }
+                            Spacer(); Button("Reschedule") { showSchedule = true }
+                            Spacer(); Button("Skip") { confirmSkip = true }
+                        }.buttonStyle(.bordered)
                     }
-                    HStack {
-                        Button("Shorten") { showShorten = true }
-                        Spacer(); Button("Reschedule") { showSchedule = true }
-                        Spacer(); Button("Skip") { confirmSkip = true }
-                    }.buttonStyle(.bordered)
-                }
-                ForEach(store.state.recommendations.filter { $0.status == .proposed }) { recommendation in
-                    RecommendationPanel(recommendation: recommendation)
-                }
-            }.padding()
+                    ForEach(store.state.recommendations.filter { $0.status == .proposed }) { recommendation in
+                        RecommendationPanel(recommendation: recommendation).id(recommendation.id)
+                    }
+                }.padding()
+            }
+            .scrollToNewProposal(store.state.recommendations, proxy: proxy)
         }
         .background(Color(uiColor: .systemGroupedBackground)).navigationTitle("Today")
         .sheet(item: $selectedLoad) { LoadSetupView(slot: $0) }
@@ -64,6 +67,15 @@ struct TodayView: View {
         .sheet(isPresented: $showSchedule) { ScheduleView() }
         .confirmationDialog("Skip this session? Work will not be added to the next session.", isPresented: $confirmSkip, titleVisibility: .visible) {
             Button("Skip session", role: .destructive) { store.perform { try $0.skip() } }
+        }
+    }
+}
+extension View {
+    /// Scrolls to a proposal as soon as it appears, so it is not hidden below the fold.
+    func scrollToNewProposal(_ recommendations: [Recommendation], proxy: ScrollViewProxy) -> some View {
+        onChange(of: recommendations.last { $0.status == .proposed }?.id) { _, id in
+            guard let id else { return }
+            withAnimation { proxy.scrollTo(id, anchor: .top) }
         }
     }
 }
@@ -118,7 +130,8 @@ struct LoadSetupView: View {
                         try service.configureLoad(slotID: slot.id, load: value, options: choices)
                     }) { dismiss() }
                 }
-            }.navigationTitle("Load setup").toolbar { Button("Cancel") { dismiss() } }
+            }.scrollDismissesKeyboard(.interactively)
+                .navigationTitle("Load setup").toolbar { Button("Cancel") { dismiss() } }
                 .onAppear { load = slot.load.map { String($0) } ?? ""; options = slot.equipment.availableLoads.map { String($0) }.joined(separator: ", ") }
         }
     }

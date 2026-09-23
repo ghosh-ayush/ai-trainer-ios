@@ -38,8 +38,7 @@ implemented features.
 ## Interop
 
 Use CPython's official C API, an iOS XCFramework and PEP 730 extension packaging.
-The Swift `TrainerDomainService` protocol and `TrainerCoreTransport` JSON seam are
-explicit substitution points. There is no HTTP dependency or required connection.
+The Swift `TrainerCoreTransport` JSON seam is the explicit substitution point. There is no HTTP dependency or required connection.
 The small bridge owns GIL/refcount/string lifetime and propagates errors. Python
 modules and versioned schemas are bundled in the signed app; they are not downloaded
 or changed at runtime. `ml/` is intentionally only an integration guide until there

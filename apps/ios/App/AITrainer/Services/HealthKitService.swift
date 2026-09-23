@@ -19,7 +19,7 @@ final class HealthKitService: ObservableObject {
     private var generation = 0
     /// Reads samples and asks the domain core to classify them. The core always answers
     /// `unassessed` today (no reviewed readiness policy); anything else is treated as an error.
-    func requestAndRead(using core: any TrainerDomainService) async {
+    func requestAndRead(using core: LocalPythonTrainerService) async {
         guard !loading else { return }
         guard HKHealthStore.isHealthDataAvailable() else { message = "HealthKit is not available on this device."; return }
         guard let hrv = HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN),

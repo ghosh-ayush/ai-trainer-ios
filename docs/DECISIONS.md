@@ -78,3 +78,19 @@ and `apps/ios/Tests` need no project edit. The generator and its CI step are del
 app target grows past a handful of files, switch it to an Xcode folder-synchronised group so new
 files stop requiring a `pbxproj` change at all.
 Status: accepted.
+
+## ADR-012 · 2026-09-23 · Content, set records and state migration move into Python; one command path
+Why: owner request to make the codebase as Python as possible and remove clutter. Swift still held
+fixture exercises and policy values, built set records (including the comparison key), sent the
+whole content library on every call, and kept a second dispatch path for recommendations plus a
+Swift-enum-shaped stored request that Python had to translate.
+Consequences: training content (exercises, policy and the program template's sets/reps/rest/minutes)
+ships as `ai_trainer/fixture_content.json`; the host sends only `permitsFixtures`. `saveSet` takes
+what the athlete entered and Python builds the record. Recommendations are ordinary state commands
+(`requestChange`, `acceptRecommendation`, `rejectRecommendation`). Stored requests use the explicit
+`{kind, …}` shape; state schema version 2, with `migrateState` upgrading v1 files in Python before
+Swift decodes them. Unused operations (`progression`, `performance`, `workingLogs`, `validateSet`,
+`catalog`, `recommendation`), the `ai_trainer.service` alias, the `TrainerDomainService` protocol and
+the duplicate `shared/schemas` copy are gone. Rule tests live in Python; Swift tests cover transport,
+persistence, migration wiring, perception and one end-to-end flow. Contract version stays 1.0.
+Status: accepted.

@@ -49,9 +49,9 @@ final class AppStore: ObservableObject {
         let includeInBackup = defaults.object(forKey: Self.includeInDeviceBackupKey) as? Bool ?? true
         includeInDeviceBackup = includeInBackup
         let core = LocalPythonTrainerService(transport: EmbeddedPythonTransport())
-        do {
-            _ = try core.call("nutrients", RuntimeProbeNutrients(), as: Nutrients.self)
-        } catch {
+        // Loading the bundled content doubles as the probe that the embedded core runs at all.
+        let library: ContentLibrary
+        do { library = try core.library(permitsFixtures: Self.isDevelopment) } catch {
             service = nil; persistence = nil; startupFailure = .runtime(error.localizedDescription)
             return
         }
@@ -59,8 +59,8 @@ final class AppStore: ObservableObject {
             let root = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             let filePersistence = try FilePersistence(url: root.appendingPathComponent("AITrainer/state.json"),
                                                       excludedFromBackup: !includeInBackup)
-            let repository = try StateRepository(persistence: filePersistence)
-            service = TrainerService(repository: repository, library: ContentLibrary(permitsFixtures: Self.isDevelopment), core: core)
+            let repository = try StateRepository(persistence: filePersistence, core: core)
+            service = TrainerService(repository: repository, library: library, core: core)
             persistence = filePersistence
             startupFailure = nil
             state = repository.snapshot
@@ -73,7 +73,7 @@ final class AppStore: ObservableObject {
         do { try action(service); state = service.repository.snapshot; return true }
         catch { errorMessage = error.localizedDescription; state = service.repository.snapshot; return false }
     }
-    func request(_ request: Request) {
+    func request(_ request: TrainingRequest) {
         perform { service in
             let result = try service.request(request)
             if result.outcome != .proposeChange { errorMessage = result.explanation }
@@ -146,9 +146,6 @@ func parseOptionalNumber(_ text: String) throws -> Double? {
     return value
 }
 
-private struct RuntimeProbeNutrients: Encodable {
-    let nutrients = Nutrients(); let servings = 1.0
-}
 #if DEBUG
 /// Simulator/device diagnostic uses memory only, never the user's saved athlete state.
 private enum CoreSmokeTest {
@@ -156,8 +153,8 @@ private enum CoreSmokeTest {
         var result: [String: Any] = [:]
         do {
             let core = LocalPythonTrainerService(transport: EmbeddedPythonTransport())
-            let repository = try StateRepository(persistence: MemoryPersistence())
-            let service = TrainerService(repository: repository, library: ContentLibrary(permitsFixtures: true), core: core)
+            let repository = try StateRepository(persistence: MemoryPersistence(), core: core)
+            let service = TrainerService(repository: repository, library: try core.library(permitsFixtures: true), core: core)
             var profile = Profile(); profile.adultConfirmed = true; profile.supportedScopeConfirmed = true
             profile.equipment = ["barbell", "dumbbell", "machine"]; profile.preferredExercises = ["bench"]
             let now = Date(timeIntervalSince1970: 1_789_689_600)
@@ -167,10 +164,9 @@ private enum CoreSmokeTest {
             for days in [5.0, 2.0] {
                 let date = now.addingTimeInterval(-days * 86400)
                 try service.start(now: date)
-                guard let session = repository.snapshot.activeSession,
-                      let prescription = session.plan.slots.first else { throw TrainerError.notFound }
+                guard let session = repository.snapshot.activeSession else { throw TrainerError.notFound }
                 for index in 0..<3 {
-                    try service.saveSet(SetLog(prescription: prescription, index: index, load: 100, reps: 10, rir: 2, occurredAt: date), sessionID: session.id)
+                    try service.saveSet(sessionID: session.id, slotID: slot.id, index: index, load: 100, reps: 10, rir: 2, now: date)
                 }
                 try service.finish(now: date.addingTimeInterval(1800))
             }
@@ -180,7 +176,7 @@ private enum CoreSmokeTest {
             try service.acceptRecommendation(id: rec.id, now: now)
             guard repository.snapshot.nextPlan?.slots.first?.load == 105 else { throw TrainerError.invalid("Acceptance smoke failed") }
             let nutrients = try service.scaleNutrients(Nutrients(calories: 200, protein: 10), servings: 2)
-            let catalog = try ExerciseCatalog.bundled(core: core)
+            let catalog = try ExerciseCatalog.bundled()
             guard nutrients.calories == 400, catalog.exercises.count == 876 else { throw TrainerError.invalid("Content smoke failed") }
             result = ["passed": true, "runtime": "embedded CPython", "catalogCount": catalog.exercises.count,
                       "decision": decision.reason, "appliedLoad": 105, "networkRequired": false]

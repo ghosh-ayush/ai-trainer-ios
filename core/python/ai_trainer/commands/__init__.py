@@ -1,17 +1,18 @@
 """State commands: every mutation of AthleteState, as a pure reducer.
 
-The host sends ``{command, arguments, state, library, now, ids}``. The reducer
-deep-copies ``state``, applies exactly one command, and returns the candidate
-state (plus an optional boolean ``value``). The host saves the candidate
-atomically and only then publishes it; the state ``revision`` is incremented by
-the host on durable commit, never here.
+The host sends ``{command, arguments, state, permitsFixtures, now, ids}``. The
+reducer deep-copies ``state``, applies exactly one command, and returns the
+candidate state (plus an optional boolean ``value`` or ``decision``). The host
+saves the candidate atomically and only then publishes it; the state
+``revision`` is incremented by the host on durable commit, never here.
 
 Command handlers are grouped by concern:
 
-- ``plan``     — acceptInitialPlan, configureLoad
-- ``workout``  — start, skip, setPaused, saveSet, finish, reportPain, exclude
-- ``records``  — correctSet, resolveConflict, deleteSession
-- ``meals``    — saveMeal, deleteMeal
+- ``plan``      — acceptInitialPlan, configureLoad
+- ``workout``   — start, skip, setPaused, saveSet, finish, reportPain, exclude
+- ``records``   — correctSet, resolveConflict, deleteSession
+- ``meals``     — saveMeal, deleteMeal
+- ``proposals`` — requestChange, acceptRecommendation, rejectRecommendation
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ from copy import deepcopy
 from typing import Any
 
 from ..errors import DomainError
-from . import meals, plan, records, workout
+from . import meals, plan, proposals, records, workout
 from .context import CommandContext
 
 JSON = dict[str, Any]
@@ -42,18 +43,21 @@ HANDLERS: dict[str, Handler] = {
     "deleteSession": records.delete_session,
     "deleteMeal": meals.delete_meal,
     "saveMeal": meals.save_meal,
+    "requestChange": proposals.request_change,
+    "acceptRecommendation": proposals.accept,
+    "rejectRecommendation": proposals.reject,
 }
 
 
-def reduce_state(payload: JSON) -> JSON:
-    """Apply one command to a copy of the payload's state and return ``{state, value?}``."""
+def reduce_state(payload: JSON, library: JSON) -> JSON:
+    """Apply one command to a copy of the payload's state and return ``{state, value?, decision?}``."""
     handler = HANDLERS.get(payload["command"])
     if handler is None:
         raise DomainError("unsupported")
     context = CommandContext(
         state=deepcopy(payload["state"]),
         arguments=deepcopy(payload.get("arguments", {})),
-        library=payload["library"],
+        library=library,
         now=payload["now"],
         ids=iter(payload["ids"]),
     )
@@ -61,6 +65,8 @@ def reduce_state(payload: JSON) -> JSON:
     result: JSON = {"state": context.state}
     if value is not None:
         result["value"] = value
+    if context.decision is not None:
+        result["decision"] = context.decision
     return result
 
 

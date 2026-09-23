@@ -99,10 +99,10 @@ for name in list(sys.modules):
 sys.meta_path.insert(0, BlockStrippedExtensions())
 
 sys.path.insert(0, sys.argv[2])
-import ai_trainer.service as service  # the bridge's entry module
+import ai_trainer.api as api  # the bridge's entry module
 
 request = open(sys.argv[3]).read()
-response = service.dispatch_json(request)
+response = api.dispatch_json(request)
 assert '"result"' in response, response
 print("OK")
 """

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the v1 JSON contracts from ``ai_trainer.contract_spec`` and copy them into the package.
+"""Generate the v1 JSON contracts from ``ai_trainer.contract_spec`` into the Python package.
 
 Run from any directory after changing the spec. CI fails if the committed files drift.
 """
@@ -74,14 +74,6 @@ def build_definitions() -> dict[str, Schema]:
                     for kind, fields in spec.REQUEST_KINDS.items()
                 ]
             }
-            definitions["StoredRequest"] = {
-                "oneOf": [
-                    object_of(
-                        {kind: object_of({f"_{index}": ref(kind_type) for index, (_, kind_type) in enumerate(fields)})}
-                    )
-                    for kind, fields in spec.REQUEST_KINDS.items()
-                ]
-            }
         definitions[model.name] = model_schema(model)
 
     for model_name, field_name, minimum, maximum in spec.INTEGER_BOUNDS:
@@ -99,10 +91,6 @@ def build_request(definitions: dict[str, Schema]) -> Schema:
     for name, fields in spec.OPERATIONS:
         definitions[name + "Payload"] = model_schema(spec._model(name + "Payload", fields))
         operations[name] = ref(name + "Payload")
-    definitions[spec.RECOVERY_OBSERVATION.name] = model_schema(spec.RECOVERY_OBSERVATION)
-    recovery_name, recovery_fields = spec.RECOVERY_OPERATION
-    definitions[recovery_name + "Payload"] = model_schema(spec._model(recovery_name + "Payload", recovery_fields))
-    operations[recovery_name] = ref(recovery_name + "Payload")
 
     command_variants: list[Schema] = []
     for name, fields in spec.COMMANDS.items():
@@ -113,7 +101,7 @@ def build_request(definitions: dict[str, Schema]) -> Schema:
                     "command": {"const": name},
                     "arguments": ref(name + "Arguments"),
                     "state": ref("State"),
-                    "library": ref("Library"),
+                    "permitsFixtures": ref("Bool"),
                     "now": ref("Date"),
                     "ids": array_of(ref("UUID")),
                 }
@@ -123,7 +111,6 @@ def build_request(definitions: dict[str, Schema]) -> Schema:
     operations["stateCommand"] = ref("stateCommandPayload")
 
     definitions["initialProgramPayload"]["properties"]["ids"]["minItems"] = spec.MIN_IDS["initialProgram"]
-    definitions["recommendationPayload"]["properties"]["ids"]["minItems"] = spec.MIN_IDS["recommendation"]
     for variant in command_variants:
         variant["properties"]["ids"]["minItems"] = spec.MIN_IDS["stateCommand"]
 
@@ -173,7 +160,6 @@ def main() -> None:
     response = build_response(definitions, request)  # shares ``definitions`` by reference, as before
     for name, value in (("request", request), ("response", response)):
         text = json.dumps(value, indent=2) + "\n"
-        (ROOT / "shared/schemas/v1" / f"{name}.schema.json").write_text(text)
         (ROOT / "core/python/ai_trainer" / f"{name}.schema.json").write_text(text)
 
 

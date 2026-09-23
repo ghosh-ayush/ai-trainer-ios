@@ -91,6 +91,8 @@ def render() -> str:
         sections.append(render_enum(name, cases))
     sections.append("// MARK: - Records\n")
     for model in spec.MODELS:
+        if model.name == "Recommendation":
+            sections.append(render_struct(spec.request_model(), spec.SWIFT_MODELS["Request"]))
         swift = spec.SWIFT_MODELS.get(model.name)
         if swift is not None:
             sections.append(render_struct(model, swift))

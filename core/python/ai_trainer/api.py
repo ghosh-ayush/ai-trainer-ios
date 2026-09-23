@@ -1,9 +1,11 @@
 """Contract v1.0 entry point. JSON in, JSON out, no side effects.
 
-``dispatch_json`` is what the Swift host calls through the C bridge
-(``ai_trainer.service.dispatch_json`` remains as an alias for compatibility).
-Every request is validated against the bundled schema before any rule runs;
-failures come back as ``{"schemaVersion": "1.0", "error": {"code", "message"}}``.
+``dispatch_json`` is what the Swift host calls through the C bridge. Every
+request is validated against the bundled schema before any rule runs; failures
+come back as ``{"schemaVersion": "1.0", "error": {"code", "message"}}``.
+
+The host never sends training content. Operations that need it pass
+``permitsFixtures`` and the core loads its own bundled library.
 """
 
 from __future__ import annotations
@@ -14,19 +16,16 @@ from typing import Any
 
 from . import contracts
 from .commands import reduce_state
-from .commands.workout import validate_set
+from .content import load_library, public_library
 from .errors import DomainError
+from .migrations import migrate_state
 from .nutrition import scale_nutrients
-from .queries import comparable_sessions, working_logs
-from .recommendations import handle_recommendation
 from .rules.eligibility import decide
 from .rules.program import initial_program
-from .rules.progression import propose_progression
 
 JSON = dict[str, Any]
 
 VERSION = "1.0"
-SUPPORTED_STATE_SCHEMA_VERSION = 1
 
 
 def dispatch_json(raw: str) -> str:
@@ -50,43 +49,23 @@ def dispatch(envelope: JSON) -> Any:
     contracts.validate(envelope, contracts.REQUEST)
     payload, operation = envelope["payload"], envelope["operation"]
     _reject_non_finite_numbers(payload)
-    if "state" in payload and payload["state"]["schemaVersion"] != SUPPORTED_STATE_SCHEMA_VERSION:
-        raise DomainError("unsupported", "Unsupported state version.")
 
     if operation == "stateCommand":
-        return reduce_state(payload)
-    if operation == "validateSet":
-        validate_set(payload["log"])
-        return True
+        return reduce_state(payload, load_library(payload["permitsFixtures"]))
     if operation == "decide":
-        return decide(payload["state"], payload["request"], payload["library"], payload["now"])
-    if operation == "progression":
-        return propose_progression(
-            payload["state"], payload["plan"], payload["slot"], payload["policy"], payload["now"]
-        )
+        return decide(payload["state"], payload["request"], load_library(payload["permitsFixtures"]), payload["now"])
     if operation == "initialProgram":
-        return initial_program(payload["profile"], payload["library"], payload["now"], payload["ids"])
-    if operation == "recommendation":
-        return handle_recommendation(payload)
+        library = load_library(payload["permitsFixtures"])
+        return initial_program(payload["profile"], library, payload["now"], payload["ids"])
+    if operation == "library":
+        return public_library(load_library(payload["permitsFixtures"]))
+    if operation == "migrateState":
+        return migrate_state(payload["state"])
     if operation == "nutrients":
         return scale_nutrients(payload["nutrients"], payload.get("servings", 1))
-    if operation == "performance":
-        return comparable_sessions(payload["state"], payload["slot"], payload["now"])
-    if operation == "workingLogs":
-        return working_logs(payload["session"], payload["slot"])
-    if operation == "catalog":
-        return _validate_catalog(payload["exercises"])
     if operation == "recovery":
         return _assess_recovery(payload["observations"])
     raise DomainError("unsupported", "Unknown operation.")
-
-
-def _validate_catalog(records: list[JSON]) -> list[JSON]:
-    """Descriptive catalog records pass through unchanged; duplicate ids fail closed."""
-    ids = [record["id"] for record in records]
-    if len(ids) != len(set(ids)):
-        raise DomainError("invalid", "Duplicate exercise catalog identifiers.")
-    return records
 
 
 def _assess_recovery(observations: list[JSON]) -> JSON:

@@ -14,6 +14,9 @@
     "Bool": {
       "type": "boolean"
     },
+    "Object": {
+      "type": "object"
+    },
     "UUID": {
       "type": "string",
       "pattern": "^[0-9A-Fa-f]{8}(-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}$"
@@ -785,98 +788,6 @@
         }
       ]
     },
-    "StoredRequest": {
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "progression": {
-              "type": "object",
-              "properties": {
-                "_0": {
-                  "$ref": "#/$defs/UUID"
-                }
-              },
-              "required": [
-                "_0"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "required": [
-            "progression"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "shorten": {
-              "type": "object",
-              "properties": {
-                "_0": {
-                  "$ref": "#/$defs/Int"
-                }
-              },
-              "required": [
-                "_0"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "required": [
-            "shorten"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "substitute": {
-              "type": "object",
-              "properties": {
-                "_0": {
-                  "$ref": "#/$defs/UUID"
-                },
-                "_1": {
-                  "$ref": "#/$defs/String"
-                }
-              },
-              "required": [
-                "_0",
-                "_1"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "required": [
-            "substitute"
-          ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "properties": {
-            "reschedule": {
-              "type": "object",
-              "properties": {
-                "_0": {
-                  "$ref": "#/$defs/Date"
-                }
-              },
-              "required": [
-                "_0"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "required": [
-            "reschedule"
-          ],
-          "additionalProperties": false
-        }
-      ]
-    },
     "Recommendation": {
       "type": "object",
       "properties": {
@@ -896,7 +807,7 @@
           "$ref": "#/$defs/Int"
         },
         "request": {
-          "$ref": "#/$defs/StoredRequest"
+          "$ref": "#/$defs/Request"
         },
         "decision": {
           "$ref": "#/$defs/Decision"
@@ -1121,7 +1032,7 @@
       "type": "object",
       "properties": {
         "schemaVersion": {
-          "const": 1
+          "const": 2
         },
         "athleteID": {
           "$ref": "#/$defs/UUID"
@@ -1330,227 +1241,6 @@
       ],
       "additionalProperties": false
     },
-    "decidePayload": {
-      "type": "object",
-      "properties": {
-        "state": {
-          "$ref": "#/$defs/State"
-        },
-        "request": {
-          "$ref": "#/$defs/Request"
-        },
-        "library": {
-          "$ref": "#/$defs/Library"
-        },
-        "now": {
-          "$ref": "#/$defs/Date"
-        }
-      },
-      "required": [
-        "state",
-        "request",
-        "library",
-        "now"
-      ],
-      "additionalProperties": false
-    },
-    "progressionPayload": {
-      "type": "object",
-      "properties": {
-        "state": {
-          "$ref": "#/$defs/State"
-        },
-        "plan": {
-          "$ref": "#/$defs/Plan"
-        },
-        "slot": {
-          "$ref": "#/$defs/Slot"
-        },
-        "policy": {
-          "$ref": "#/$defs/Policy"
-        },
-        "now": {
-          "$ref": "#/$defs/Date"
-        }
-      },
-      "required": [
-        "state",
-        "plan",
-        "slot",
-        "policy",
-        "now"
-      ],
-      "additionalProperties": false
-    },
-    "initialProgramPayload": {
-      "type": "object",
-      "properties": {
-        "profile": {
-          "$ref": "#/$defs/Profile"
-        },
-        "library": {
-          "$ref": "#/$defs/Library"
-        },
-        "now": {
-          "$ref": "#/$defs/Date"
-        },
-        "ids": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/UUID"
-          },
-          "minItems": 6
-        }
-      },
-      "required": [
-        "profile",
-        "library",
-        "now",
-        "ids"
-      ],
-      "additionalProperties": false
-    },
-    "recommendationPayload": {
-      "type": "object",
-      "properties": {
-        "operation": {
-          "$ref": "#/$defs/String"
-        },
-        "state": {
-          "$ref": "#/$defs/State"
-        },
-        "request": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Request"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "id": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/UUID"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "reason": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/String"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "library": {
-          "$ref": "#/$defs/Library"
-        },
-        "now": {
-          "$ref": "#/$defs/Date"
-        },
-        "ids": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/UUID"
-          },
-          "minItems": 2
-        }
-      },
-      "required": [
-        "operation",
-        "state",
-        "library",
-        "now",
-        "ids"
-      ],
-      "additionalProperties": false
-    },
-    "nutrientsPayload": {
-      "type": "object",
-      "properties": {
-        "nutrients": {
-          "$ref": "#/$defs/Nutrients"
-        },
-        "servings": {
-          "$ref": "#/$defs/Number"
-        }
-      },
-      "required": [
-        "nutrients",
-        "servings"
-      ],
-      "additionalProperties": false
-    },
-    "performancePayload": {
-      "type": "object",
-      "properties": {
-        "state": {
-          "$ref": "#/$defs/State"
-        },
-        "slot": {
-          "$ref": "#/$defs/Slot"
-        },
-        "now": {
-          "$ref": "#/$defs/Date"
-        }
-      },
-      "required": [
-        "state",
-        "slot",
-        "now"
-      ],
-      "additionalProperties": false
-    },
-    "workingLogsPayload": {
-      "type": "object",
-      "properties": {
-        "session": {
-          "$ref": "#/$defs/Session"
-        },
-        "slot": {
-          "$ref": "#/$defs/Slot"
-        }
-      },
-      "required": [
-        "session",
-        "slot"
-      ],
-      "additionalProperties": false
-    },
-    "validateSetPayload": {
-      "type": "object",
-      "properties": {
-        "log": {
-          "$ref": "#/$defs/SetLog"
-        }
-      },
-      "required": [
-        "log"
-      ],
-      "additionalProperties": false
-    },
-    "catalogPayload": {
-      "type": "object",
-      "properties": {
-        "exercises": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/CatalogExercise"
-          }
-        }
-      },
-      "required": [
-        "exercises"
-      ],
-      "additionalProperties": false
-    },
     "RecoveryObservation": {
       "type": "object",
       "properties": {
@@ -1576,6 +1266,98 @@
         "value",
         "date",
         "source"
+      ],
+      "additionalProperties": false
+    },
+    "decidePayload": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "request": {
+          "$ref": "#/$defs/Request"
+        },
+        "permitsFixtures": {
+          "$ref": "#/$defs/Bool"
+        },
+        "now": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "required": [
+        "state",
+        "request",
+        "permitsFixtures",
+        "now"
+      ],
+      "additionalProperties": false
+    },
+    "initialProgramPayload": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/$defs/Profile"
+        },
+        "permitsFixtures": {
+          "$ref": "#/$defs/Bool"
+        },
+        "now": {
+          "$ref": "#/$defs/Date"
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UUID"
+          },
+          "minItems": 6
+        }
+      },
+      "required": [
+        "profile",
+        "permitsFixtures",
+        "now",
+        "ids"
+      ],
+      "additionalProperties": false
+    },
+    "libraryPayload": {
+      "type": "object",
+      "properties": {
+        "permitsFixtures": {
+          "$ref": "#/$defs/Bool"
+        }
+      },
+      "required": [
+        "permitsFixtures"
+      ],
+      "additionalProperties": false
+    },
+    "migrateStatePayload": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/Object"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "additionalProperties": false
+    },
+    "nutrientsPayload": {
+      "type": "object",
+      "properties": {
+        "nutrients": {
+          "$ref": "#/$defs/Nutrients"
+        },
+        "servings": {
+          "$ref": "#/$defs/Number"
+        }
+      },
+      "required": [
+        "nutrients",
+        "servings"
       ],
       "additionalProperties": false
     },
@@ -1674,16 +1456,56 @@
     "saveSetArguments": {
       "type": "object",
       "properties": {
-        "log": {
-          "$ref": "#/$defs/SetLog"
-        },
         "sessionID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "slotID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "index": {
+          "$ref": "#/$defs/Int"
+        },
+        "kind": {
+          "$ref": "#/$defs/SetKind"
+        },
+        "load": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reps": {
+          "$ref": "#/$defs/Int"
+        },
+        "rir": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "logID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "operationID": {
           "$ref": "#/$defs/UUID"
         }
       },
       "required": [
-        "log",
-        "sessionID"
+        "sessionID",
+        "slotID",
+        "index",
+        "kind",
+        "reps",
+        "logID",
+        "operationID"
       ],
       "additionalProperties": false
     },
@@ -1827,6 +1649,52 @@
       ],
       "additionalProperties": false
     },
+    "requestChangeArguments": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "#/$defs/Request"
+        }
+      },
+      "required": [
+        "request"
+      ],
+      "additionalProperties": false
+    },
+    "acceptRecommendationArguments": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "rejectRecommendationArguments": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
     "stateCommandPayload": {
       "oneOf": [
         {
@@ -1841,8 +1709,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -1859,7 +1727,7 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -1877,8 +1745,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -1895,7 +1763,7 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -1913,8 +1781,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -1931,7 +1799,7 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -1949,8 +1817,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -1967,7 +1835,7 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -1985,8 +1853,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -2003,7 +1871,7 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -2021,8 +1889,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -2039,7 +1907,7 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -2057,8 +1925,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -2075,7 +1943,7 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -2093,8 +1961,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -2111,7 +1979,7 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -2129,8 +1997,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -2147,7 +2015,7 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -2165,8 +2033,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -2183,7 +2051,7 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -2201,8 +2069,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -2219,7 +2087,7 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -2237,8 +2105,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -2255,7 +2123,7 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -2273,8 +2141,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -2291,7 +2159,7 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -2309,8 +2177,8 @@
             "state": {
               "$ref": "#/$defs/State"
             },
-            "library": {
-              "$ref": "#/$defs/Library"
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
             },
             "now": {
               "$ref": "#/$defs/Date"
@@ -2327,7 +2195,115 @@
             "command",
             "arguments",
             "state",
-            "library",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "requestChange"
+            },
+            "arguments": {
+              "$ref": "#/$defs/requestChangeArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "acceptRecommendation"
+            },
+            "arguments": {
+              "$ref": "#/$defs/acceptRecommendationArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "rejectRecommendation"
+            },
+            "arguments": {
+              "$ref": "#/$defs/rejectRecommendationArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
             "now",
             "ids"
           ],
@@ -2350,18 +2326,6 @@
               "type": "null"
             }
           ]
-        }
-      },
-      "required": [
-        "state"
-      ],
-      "additionalProperties": false
-    },
-    "RecommendationResult": {
-      "type": "object",
-      "properties": {
-        "state": {
-          "$ref": "#/$defs/State"
         },
         "decision": {
           "anyOf": [
@@ -2432,40 +2396,19 @@
               "$ref": "#/$defs/Decision"
             },
             {
-              "$ref": "#/$defs/Decision"
-            },
-            {
               "$ref": "#/$defs/Program"
             },
             {
-              "$ref": "#/$defs/StateResult"
+              "$ref": "#/$defs/Library"
             },
             {
-              "$ref": "#/$defs/RecommendationResult"
+              "$ref": "#/$defs/State"
             },
             {
               "$ref": "#/$defs/Nutrients"
             },
             {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/Session"
-              }
-            },
-            {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/SetLog"
-              }
-            },
-            {
-              "$ref": "#/$defs/Bool"
-            },
-            {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/CatalogExercise"
-              }
+              "$ref": "#/$defs/StateResult"
             },
             {
               "$ref": "#/$defs/RecoveryResult"

@@ -1,9 +1,7 @@
 import Foundation
 
-// Hand-written behaviour on top of the generated records in Models.swift.
-// Keep this file free of stored properties: the JSON shape is owned by the contract spec.
-
-// MARK: - Errors and app-only enums
+// Read-only presentation helpers on top of the generated records in Models.swift.
+// No rules live here: every decision, validation and mutation runs in `core/python`.
 
 public enum TrainerError: Error, LocalizedError, Equatable {
     case invalid(String), notFound, conflict, staleProposal, unsupported, corruptStore
@@ -19,28 +17,21 @@ public enum TrainerError: Error, LocalizedError, Equatable {
     }
 }
 
-public enum Phase: String, Codable, CaseIterable, Identifiable {
-    case p0 = "P0", p1 = "P1", p2 = "P2", p3 = "P3", p4 = "P4"
-    public var id: String { rawValue }
+extension TrainingRequest {
+    public static func progression(_ slotID: UUID) -> TrainingRequest { .init(kind: "progression", slotID: slotID) }
+    public static func shorten(_ minutes: Int) -> TrainingRequest { .init(kind: "shorten", minutes: minutes) }
+    public static func substitute(_ slotID: UUID, _ alternativeID: String) -> TrainingRequest {
+        .init(kind: "substitute", slotID: slotID, alternativeID: alternativeID)
+    }
+    public static func reschedule(_ date: Date) -> TrainingRequest { .init(kind: "reschedule", date: date) }
 }
 
-/// The persisted shape of a training request inside a Recommendation
-/// (Swift's synthesized enum encoding: `{"progression": {"_0": "<uuid>"}}`).
-public enum Request: Codable, Equatable {
-    case progression(UUID)
-    case shorten(Int)
-    case substitute(UUID, String)
-    case reschedule(Date)
+extension ContentLibrary {
+    public func exercise(_ id: String) -> Exercise? { exercises.first { $0.id == id } }
 }
-
-// MARK: - Enum presentation helpers
 
 extension MassUnit: Identifiable {
     public var id: String { rawValue }
-    public func convert(_ value: Double, to other: MassUnit) -> Double {
-        if self == other { return value }
-        return self == .lb ? value * 0.45359237 : value / 0.45359237
-    }
 }
 
 extension LoadBasis {
@@ -55,97 +46,34 @@ extension LoadBasis {
     }
 }
 
-// MARK: - Prescriptions and plans
-
-extension Prescription {
-    /// Identity used to compare performance across sessions. Must match `athlete_state.comparison_key` in Python.
-    public var comparisonKey: String {
-        [exerciseID, equipment.id, equipment.unit.rawValue, equipment.basis.rawValue, protocolID, "bilateral-repetition"]
-            .joined(separator: "|")
-    }
-
-    /// The DP_TEST_01 development fixture (3 x 8-10, 120 s rest). Test data only — never a production default.
-    public static func developmentFixture(
-        id: UUID = UUID(), exerciseID: String, equipment: EquipmentContext, load: Double? = nil, optional: Bool = false
-    ) -> Prescription {
-        Prescription(
-            id: id, exerciseID: exerciseID, equipment: equipment, protocolID: "DP_TEST_01",
-            workingSets: 3, lowerReps: 8, upperReps: 10, targets: [8, 8, 8], load: load,
-            restSeconds: 120, optional: optional, estimatedMinutes: 12
-        )
-    }
-}
-
 extension SessionPlan {
     public var estimatedMinutes: Int { warmUpMinutes + slots.reduce(0) { $0 + $1.estimatedMinutes } }
 }
 
-extension Program {
-    public var nextPlan: SessionPlan? { plans.indices.contains(sequenceIndex) ? plans[sequenceIndex] : nil }
-}
-
-extension TrainingPolicy {
-    /// The DP_TEST_01 development fixture policy. Test data only — never a production default.
-    public static let developmentFixture = TrainingPolicy(
-        id: "DP_TEST_01", version: "fixture-1", review: .fixture, requiredExposures: 2, minimumRIR: 2,
-        maximumIncreaseFraction: 0.05, historyDays: 28, maximumGapDays: 14
-    )
-}
-
-// MARK: - Sessions and set logs
-
-extension SetLog {
-    /// A set recorded against a prescription; context, unit and basis are copied from the slot.
-    public init(
-        id: UUID = UUID(), operationID: UUID = UUID(), prescription: Prescription, index: Int, kind: SetKind = .working,
-        load: Double?, reps: Int, rir: Int?, occurredAt: Date = Date()
-    ) {
-        self.init(
-            id: id, operationID: operationID, revision: 1, prescriptionID: prescription.id,
-            contextKey: prescription.comparisonKey, index: index, kind: kind, load: load,
-            unit: prescription.equipment.unit, basis: prescription.equipment.basis, reps: reps, rir: rir,
-            occurredAt: occurredAt, conflicted: false
-        )
-    }
-    // Validity (rep/RIR ranges, finite nonnegative load) is enforced by `validate_set` in Python
-    // when a set is saved or corrected; Swift does not duplicate those rules.
-}
-
 extension WorkoutSession {
-    public init(program: Program, plan: SessionPlan, checkIn: CheckIn, now: Date, timeZone: String) {
-        self.init(
-            programID: program.id, programRevision: program.revision, originalPlan: plan, plan: plan,
-            startedAt: now, timeZone: timeZone, checkIn: checkIn
-        )
-    }
     public var active: Bool { status == .inProgress || status == .paused }
     public var completeWorkingSets: Int { logs.filter { $0.kind == .working }.count }
-    public func hasWorkingSet(slot: UUID, index: Int) -> Bool {
-        logs.contains { $0.prescriptionID == slot && $0.index == index && $0.kind == .working }
-    }
 }
-
-// MARK: - Decisions
-
-extension Decision {
-    public init(_ outcome: DecisionOutcome, _ reason: String, _ explanation: String, after: SessionPlan? = nil, evidence: [Evidence] = []) {
-        self.init(outcome: outcome, reason: reason, explanation: explanation, after: after, evidence: evidence)
-    }
-}
-
-// MARK: - Athlete state
 
 extension AthleteState {
     public var activeSession: WorkoutSession? { sessions.last(where: \.active) }
-    public var nextPlan: SessionPlan? { nextPlanOverride ?? program?.nextPlan }
-
-    public mutating func expireProposals() {
-        for index in recommendations.indices where recommendations[index].status == .proposed {
-            recommendations[index].status = .expired
-        }
+    /// A temporary override wins over the program's sequenced plan (as in `athlete_state.next_plan`).
+    public var nextPlan: SessionPlan? {
+        if let nextPlanOverride { return nextPlanOverride }
+        guard let program, program.plans.indices.contains(program.sequenceIndex) else { return nil }
+        return program.plans[program.sequenceIndex]
     }
+}
 
-    public mutating func record(_ name: String, now: Date, reason: String? = nil) {
-        events.append(AnalyticsEvent(name: name, occurredAt: now, stateRevision: revision + 1, reason: reason))
+extension Nutrients {
+    public static func + (a: Nutrients, b: Nutrients) -> Nutrients {
+        Nutrients(calories: a.calories + b.calories, protein: a.protein + b.protein, carbs: a.carbs + b.carbs, fat: a.fat + b.fat)
+    }
+}
+
+extension Meal {
+    /// Sum of confirmed estimates eaten on `date` in the device calendar.
+    public static func total(_ meals: [Meal], on date: Date, calendar: Calendar = .current) -> Nutrients {
+        meals.filter { calendar.isDate($0.occurredAt, inSameDayAs: date) }.reduce(Nutrients()) { $0 + $1.nutrients }
     }
 }

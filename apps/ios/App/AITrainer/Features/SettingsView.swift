@@ -54,7 +54,7 @@ struct SettingsView: View {
             Section("Build") {
                 LabeledContent("Version", value: "0.1.0 development")
                 LabeledContent("Local state revision", value: String(store.state.revision))
-                LabeledContent("Policy", value: "fixture-1")
+                LabeledContent("Policy", value: store.service?.library.policy.version ?? "unavailable")
                 LabeledContent("Local events", value: String(store.state.events.count))
                 Text("P2-P4 are opt-in experiments. Production training content is not approved.")
             }
@@ -108,8 +108,8 @@ private struct ExerciseCatalogView: View {
         }.navigationTitle("Exercise catalog")
             .searchable(text: $query)
             .task {
-                guard catalog == nil, let core = store.service?.core else { return }
-                do { catalog = try ExerciseCatalog.bundled(core: core) }
+                guard catalog == nil else { return }
+                do { catalog = try ExerciseCatalog.bundled() }
                 catch { self.error = error.localizedDescription }
             }
     }

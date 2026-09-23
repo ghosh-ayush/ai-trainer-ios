@@ -18,9 +18,8 @@ apps/ios/Sources/AITrainerCore/   Swift DTOs, local storage, service facade, per
 apps/ios/PythonBridge/           CPython C API bridge (GIL and memory ownership)
 apps/ios/Tests/                  Swift regression and real embedded-runtime tests
 apps/ios/Vendor/                 Ignored, checksum-pinned CPython build artifact
-core/python/ai_trainer/          Training Brain, progression, state reducers, nutrition
+core/python/ai_trainer/          Training Brain, state commands, content bundle, contract schemas
 core/python/tests/               Python unit and contract tests
-shared/schemas/v1/               Explicit versioned request/response JSON schemas
 shared/fixtures/v1/              Cross-language golden contract fixtures
 ml/                             Future offline model training/export workspace
 docs/                           Architecture, migration, specifications, device testing

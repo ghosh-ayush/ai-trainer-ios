@@ -91,7 +91,8 @@ struct CorrectionView: View {
                         if !applied { store.errorMessage = "Another edit exists. Review both versions in the session details." }
                     }) { dismiss() }
                 }
-            }.navigationTitle("Correct a set").toolbar { Button("Cancel") { dismiss() } }
+            }.scrollDismissesKeyboard(.interactively)
+                .navigationTitle("Correct a set").toolbar { Button("Cancel") { dismiss() } }
                 .onAppear { reps = String(original.reps); load = original.load.map { String($0) } ?? ""; rir = original.rir.map(String.init) ?? "" }
         }
     }

@@ -44,7 +44,7 @@ char *trainer_python_call(const char *request, char **error) {
     *error = NULL;
     if (!Py_IsInitialized()) { *error = strdup("Python is not initialized."); return NULL; }
     PyGILState_STATE gil = PyGILState_Ensure();
-    PyObject *module = PyImport_ImportModule("ai_trainer.service");
+    PyObject *module = PyImport_ImportModule("ai_trainer.api");
     PyObject *function = module ? PyObject_GetAttrString(module, "dispatch_json") : NULL;
     PyObject *arg = function ? PyUnicode_FromString(request) : NULL;
     PyObject *result = arg ? PyObject_CallFunctionObjArgs(function, arg, NULL) : NULL;

@@ -2,10 +2,10 @@
 
 Two generators consume this module:
 
-- ``scripts/generate_schemas.py``      → ``shared/schemas/v1/{request,response}.schema.json``
+- ``scripts/generate_schemas.py``      → ``core/python/ai_trainer/{request,response}.schema.json``
 - ``scripts/generate_swift_models.py`` → ``apps/ios/Sources/AITrainerCore/Models.swift``
 
-Change a record here, run both generators, commit all three outputs. CI diffs them.
+Change a record here, run both generators, commit the outputs. CI diffs them.
 
 Field spec mini-language (one string per model, space-separated ``name:Type`` entries):
 
@@ -26,7 +26,14 @@ from __future__ import annotations
 # Primitives and enums
 # --------------------------------------------------------------------------- #
 
-PRIMITIVES: dict[str, str] = {"String": "string", "Number": "number", "Int": "integer", "Bool": "boolean"}
+# ``Object`` is an unchecked JSON object: only ``migrateState`` takes one, and validates it after upgrading.
+PRIMITIVES: dict[str, str] = {
+    "String": "string",
+    "Number": "number",
+    "Int": "integer",
+    "Bool": "boolean",
+    "Object": "object",
+}
 
 UUID_PATTERN = "^[0-9A-Fa-f]{8}(-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}$"
 DATE_DESCRIPTION = (
@@ -96,8 +103,8 @@ def _model(name: str, specification: str, doc: str = "") -> ModelSpec:
     return ModelSpec(name, _parse_fields(specification), doc)
 
 
-# Domain records, in ``$defs`` order. ``Omissions``, ``Request`` and ``StoredRequest``
-# are structural definitions inserted by the schema generator at the marked positions.
+# Domain records, in ``$defs`` order. ``Omissions`` and ``Request`` are structural
+# definitions inserted by the schema generator at the marked positions.
 MODELS: list[ModelSpec] = [
     _model(
         "Profile",
@@ -123,7 +130,11 @@ MODELS: list[ModelSpec] = [
         "maximumIncreaseFraction:Number historyDays:Int maximumGapDays:Int",
         "Progression policy parameters. Values are supplied by the content bundle, never assumed.",
     ),
-    _model("Library", "exercises:[Exercise] policy:Policy permitsFixtures:Bool"),
+    _model(
+        "Library",
+        "exercises:[Exercise] policy:Policy permitsFixtures:Bool",
+        "The bundled content the core runs against, as the host displays it.",
+    ),
     _model(
         "Slot",
         "id:UUID exerciseID:String equipment:Equipment protocolID:String workingSets:Int lowerReps:Int "
@@ -165,11 +176,11 @@ MODELS: list[ModelSpec] = [
         "outcome:Outcome reason:String explanation:String after?:Plan evidence:[Evidence]",
         "The Training Brain's answer. ``after`` is the proposed plan for ``proposeChange`` outcomes.",
     ),
-    # -> Request and StoredRequest (tagged unions) are inserted here by the schema generator.
+    # -> Request (a tagged union over REQUEST_KINDS) is inserted here by the schema generator.
     _model(
         "Recommendation",
         "id:UUID stateRevision:Int contextRevision:Int targetPlanID:UUID targetPlanRevision:Int "
-        "request:StoredRequest decision:Decision policyVersion:String createdAt:Date status:RecommendationStatus "
+        "request:Request decision:Decision policyVersion:String createdAt:Date status:RecommendationStatus "
         "rejectionReason?:String",
         "A proposal pinned to the context it was computed against. Inert until accepted.",
     ),
@@ -202,6 +213,11 @@ MODELS: list[ModelSpec] = [
         "primaryMuscles:[String] secondaryMuscles:[String] instructions:[String] category:String images:[String]",
         "Descriptive record from free-exercise-db. Never a governed Exercise.",
     ),
+    _model(
+        "RecoveryObservation",
+        "id:UUID title:String value:String date:Date source:String",
+        "A read-only HealthKit sample with provenance. Never a readiness score.",
+    ),
 ]
 
 # Constraints the schema generator applies after building the models above.
@@ -209,7 +225,7 @@ INTEGER_BOUNDS: list[tuple[str, str, int, int]] = [
     ("Slot", "workingSets", 1, 1000),
     ("Policy", "requiredExposures", 1, 1000),
 ]
-STATE_SCHEMA_VERSION = 1
+STATE_SCHEMA_VERSION = 2  # migrations.py upgrades older saved files
 
 # Training request variants: kind -> ordered (field, type) pairs.
 REQUEST_KINDS: dict[str, list[tuple[str, str]]] = {
@@ -219,30 +235,29 @@ REQUEST_KINDS: dict[str, list[tuple[str, str]]] = {
     "reschedule": [("date", "Date")],
 }
 
+
+def request_model() -> ModelSpec:
+    """``Request`` as one flat record (for Swift): ``kind`` plus every variant's fields, optional."""
+    fields = [FieldSpec("kind", "String")]
+    for variant_fields in REQUEST_KINDS.values():
+        for name, type_name in variant_fields:
+            if all(existing.name != name for existing in fields):
+                fields.append(FieldSpec(name, type_name, optional=True))
+    return ModelSpec("Request", tuple(fields), "One training request. Which fields are set depends on ``kind``.")
+
+
 # --------------------------------------------------------------------------- #
 # Operations (request payloads) and results
 # --------------------------------------------------------------------------- #
 
 OPERATIONS: list[tuple[str, str]] = [
-    ("decide", "state:State request:Request library:Library now:Date"),
-    ("progression", "state:State plan:Plan slot:Slot policy:Policy now:Date"),
-    ("initialProgram", "profile:Profile library:Library now:Date ids:[UUID]"),
-    (
-        "recommendation",
-        "operation:String state:State request?:Request id?:UUID reason?:String library:Library now:Date ids:[UUID]",
-    ),
+    ("decide", "state:State request:Request permitsFixtures:Bool now:Date"),
+    ("initialProgram", "profile:Profile permitsFixtures:Bool now:Date ids:[UUID]"),
+    ("library", "permitsFixtures:Bool"),
+    ("migrateState", "state:Object"),
     ("nutrients", "nutrients:Nutrients servings:Number"),
-    ("performance", "state:State slot:Slot now:Date"),
-    ("workingLogs", "session:Session slot:Slot"),
-    ("validateSet", "log:SetLog"),
-    ("catalog", "exercises:[CatalogExercise]"),
+    ("recovery", "observations:[RecoveryObservation]"),
 ]
-RECOVERY_OBSERVATION = _model(
-    "RecoveryObservation",
-    "id:UUID title:String value:String date:Date source:String",
-    "A read-only HealthKit sample with provenance. Never a readiness score.",
-)
-RECOVERY_OPERATION: tuple[str, str] = ("recovery", "observations:[RecoveryObservation]")
 
 # State commands: name -> arguments spec. Order matters for the generated union.
 COMMANDS: dict[str, str] = {
@@ -251,7 +266,9 @@ COMMANDS: dict[str, str] = {
     "start": "checkIn:CheckIn",
     "skip": "checkIn:CheckIn",
     "setPaused": "paused:Bool",
-    "saveSet": "log:SetLog sessionID:UUID",
+    "saveSet": (
+        "sessionID:UUID slotID:UUID index:Int kind:SetKind load?:Number reps:Int rir?:Int logID:UUID operationID:UUID"
+    ),
     "finish": "reason:Omission",
     "reportPain": "exerciseID:String",
     "exclude": "exerciseID:String excluded:Bool",
@@ -260,26 +277,24 @@ COMMANDS: dict[str, str] = {
     "deleteSession": "id:UUID",
     "deleteMeal": "id:UUID",
     "saveMeal": "meal:Meal asRecipe:Bool",
+    "requestChange": "request:Request",
+    "acceptRecommendation": "id:UUID",
+    "rejectRecommendation": "id:UUID reason?:String",
 }
-MIN_IDS = {"initialProgram": 6, "recommendation": 2, "stateCommand": 10}
+MIN_IDS = {"initialProgram": 6, "stateCommand": 10}
 
 RESULT_MODELS: list[ModelSpec] = [
-    _model("StateResult", "state:State value?:Bool"),
-    _model("RecommendationResult", "state:State decision?:Decision"),
+    _model("StateResult", "state:State value?:Bool decision?:Decision"),
     _model("RecoveryResult", "status:String reason:String observations:[RecoveryObservation]"),
     _model("Error", "code:String message:String"),
 ]
 RESULT_TYPES: dict[str, str] = {
     "decide": "Decision",
-    "progression": "Decision",
     "initialProgram": "Program",
-    "stateCommand": "StateResult",
-    "recommendation": "RecommendationResult",
+    "library": "Library",
+    "migrateState": "State",
     "nutrients": "Nutrients",
-    "performance": "[Session]",
-    "workingLogs": "[SetLog]",
-    "validateSet": "Bool",
-    "catalog": "[CatalogExercise]",
+    "stateCommand": "StateResult",
     "recovery": "RecoveryResult",
 }
 
@@ -324,7 +339,6 @@ SWIFT_TYPE_NAMES: dict[str, str] = {
     "Bool": "Bool",
     "UUID": "UUID",
     "Date": "Date",
-    "StoredRequest": "Request",  # hand-written Codable enum in Models+Helpers.swift
     "Omissions": "[String: OmissionReason]",
 }
 
@@ -351,6 +365,10 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
         "Exercise", defaults={"review": ".fixture", "contentVersion": '"fixture-1"'}, identifiable=True
     ),
     "Policy": SwiftModel("TrainingPolicy"),
+    "Library": SwiftModel("ContentLibrary"),
+    "Request": SwiftModel(
+        "TrainingRequest", defaults={"slotID": "nil", "minutes": "nil", "alternativeID": "nil", "date": "nil"}
+    ),
     "Slot": SwiftModel("Prescription", defaults={"id": "UUID()", "load": "nil"}, identifiable=True),
     "Plan": SwiftModel(
         "SessionPlan",
@@ -421,7 +439,7 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "State": SwiftModel(
         "AthleteState",
         defaults={
-            "schemaVersion": "1",
+            "schemaVersion": "2",
             "athleteID": "UUID()",
             "revision": "0",
             "contextRevision": "0",

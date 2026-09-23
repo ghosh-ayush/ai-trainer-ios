@@ -52,7 +52,7 @@ jobs:
         run: |
           python scripts/generate_schemas.py
           python scripts/generate_swift_models.py
-          git diff --exit-code -- shared/schemas core/python/ai_trainer apps/ios/Sources/AITrainerCore/Models.swift
+          git diff --exit-code -- core/python/ai_trainer apps/ios/Sources/AITrainerCore/Models.swift
   swift-tests:
     # Desktop `swift test` linked against the same CPython version the app embeds.
     needs: changes
