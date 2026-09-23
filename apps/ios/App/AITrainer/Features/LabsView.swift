@@ -91,13 +91,17 @@ struct CameraLabView: View {
     }
 }
 struct RecoveryView: View {
+    @EnvironmentObject private var store: AppStore
     @StateObject private var health = HealthKitService()
     var body: some View {
         List {
             Section {
                 Text("P3 read-only integration").font(.headline)
                 Text("Read HRV (SDNN), resting heart rate, and sleep samples from Apple Health. This screen does not diagnose fatigue, combine duplicate sleep sources, calculate readiness, or modify training.")
-                Button(health.loading ? "Reading..." : "Request access & read samples") { Task { await health.requestAndRead() } }.disabled(health.loading)
+                Button(health.loading ? "Reading..." : "Request access & read samples") {
+                    guard let core = store.service?.core else { return }
+                    Task { await health.requestAndRead(using: core) }
+                }.disabled(health.loading || store.service == nil)
                 Text(health.message).font(.footnote)
             }
             ForEach(health.readings) { reading in

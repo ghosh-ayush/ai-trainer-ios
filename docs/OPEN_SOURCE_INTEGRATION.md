@@ -4,13 +4,13 @@ The initial integration was based on `feat/native-ios-phases`. The subsequent
 [local Python migration](LOCAL_PYTHON_ARCHITECTURE.md) retains both integrations.
 Training/state rules now execute in Python; native perception stays Swift. The authoritative path remains:
 
-`AthleteState -> TrainingBrain -> Recommendation -> TrainerService`
+`AthleteState -> rules.eligibility.decide (Python) -> Recommendation -> TrainerService`
 
-`TrainingBrain` checks profile, active session, policy approval, exercise review,
-exclusions, and pain before invoking the progression policy. `TrainerService`
-continues to create and apply recommendations through its existing acceptance,
-evidence revision, and persistence checks. Camera observations and catalog records
-never become confirmed performance or prescriptions automatically.
+The Python eligibility gate checks profile, active session, policy approval, exercise
+review, exclusions, and pain before invoking the progression rule. `TrainerService`
+creates and applies recommendations through its acceptance, evidence-revision, and
+persistence checks. Camera observations and catalog records never become confirmed
+performance or prescriptions automatically.
 
 ## Exercise descriptions
 
@@ -49,14 +49,13 @@ never become confirmed performance or prescriptions automatically.
 
 ## Progression and rest/activity infrastructure
 
-- `PerformanceHistory` extracts the existing comparable completed-session filter,
-  deterministic date/ID ordering, and working-log selection.
-- `DoubleProgressionPolicy` is now a Swift compatibility adapter over the Python
-  implementation. The Python Training Brain owns eligibility gates and progression;
-  Swift policy injection was replaced by the versioned domain service interface.
-  Fixture decision order, reason strings, load steps, effort and evidence revisions
-  remain covered by regression tests. No progression rules were copied
-  from another repository.
+- Comparable completed-session filtering, deterministic date/ID ordering, and
+  working-log selection live in `queries.py` (`comparable_sessions`, `working_logs`).
+- Eligibility gates and double progression live in `rules/`; the former Swift adapters
+  (`PerformanceHistory`, `DoubleProgressionPolicy`, `TrainingBrain`) were removed once
+  the Python implementation was the only one. Fixture decision order, reason strings,
+  load steps, effort and evidence revisions remain covered by regression tests in both
+  languages. No progression rules were copied from another repository.
 - Original `WorkoutActivity` code derives a presentation snapshot from persisted
   sessions and computes rest from a deadline rather than accumulated timer ticks.
   WorkoutView uses it; rest continues while paused, matching existing behavior.

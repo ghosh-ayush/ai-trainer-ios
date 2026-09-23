@@ -15,13 +15,28 @@ struct AITrainerApp: App {
     }
 }
 
+/// Why the app could not reach a usable `TrainerService` at launch. The two cases need different
+/// advice: a runtime failure is a broken build, a saved-data failure is the user's file.
+enum StartupFailure {
+    /// The embedded Python core did not answer a trivial request. Nothing was read or written.
+    case runtime(String)
+    /// The core works but the saved state file could not be read. The file was not touched.
+    case savedData(String)
+}
+
+/// The app's composition root: builds the one domain core, the one repository and the one
+/// `TrainerService`, then publishes state snapshots to the views.
 @MainActor
 final class AppStore: ObservableObject {
     @Published private(set) var state = AthleteState()
     @Published var errorMessage: String?
     @Published var experimentalToolsEnabled = false
+    /// Whether the state file participates in iCloud/computer backups of this device (B.1).
+    @Published private(set) var includeInDeviceBackup: Bool
     let service: TrainerService?
-    let startupError: String?
+    let startupFailure: StartupFailure?
+    private let persistence: FilePersistence?
+    private static let includeInDeviceBackupKey = "includeInDeviceBackup"
     static var isDevelopment: Bool {
         #if DEBUG
         return true
@@ -30,14 +45,28 @@ final class AppStore: ObservableObject {
         #endif
     }
     init() {
+        let defaults = UserDefaults.standard
+        let includeInBackup = defaults.object(forKey: Self.includeInDeviceBackupKey) as? Bool ?? true
+        includeInDeviceBackup = includeInBackup
+        let core = LocalPythonTrainerService(transport: EmbeddedPythonTransport())
         do {
-            _ = try LocalPythonTrainerService.shared.call("nutrients", RuntimeProbeNutrients(), as: Nutrients.self)
+            _ = try core.call("nutrients", RuntimeProbeNutrients(), as: Nutrients.self)
+        } catch {
+            service = nil; persistence = nil; startupFailure = .runtime(error.localizedDescription)
+            return
+        }
+        do {
             let root = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-            let persistence = try FilePersistence(url: root.appendingPathComponent("AITrainer/state.json"))
-            let repository = try StateRepository(persistence: persistence)
-            service = TrainerService(repository: repository, library: ContentLibrary(permitsFixtures: Self.isDevelopment))
-            state = repository.snapshot; startupError = nil
-        } catch { service = nil; startupError = error.localizedDescription }
+            let filePersistence = try FilePersistence(url: root.appendingPathComponent("AITrainer/state.json"),
+                                                      excludedFromBackup: !includeInBackup)
+            let repository = try StateRepository(persistence: filePersistence)
+            service = TrainerService(repository: repository, library: ContentLibrary(permitsFixtures: Self.isDevelopment), core: core)
+            persistence = filePersistence
+            startupFailure = nil
+            state = repository.snapshot
+        } catch {
+            service = nil; persistence = nil; startupFailure = .savedData(error.localizedDescription)
+        }
     }
     @discardableResult func perform(_ action: (TrainerService) throws -> Void) -> Bool {
         guard let service else { return false }
@@ -50,15 +79,27 @@ final class AppStore: ObservableObject {
             if result.outcome != .proposeChange { errorMessage = result.explanation }
         }
     }
-    func name(_ id: String) -> String { service?.brain.library.exercise(id)?.name ?? id }
+    func name(_ id: String) -> String { service?.library.exercise(id)?.name ?? id }
+    /// Flips the backup attribute on the state directory first; the preference is only recorded
+    /// once the file system accepted the change, so the toggle never lies about what is backed up.
+    func setIncludeInDeviceBackup(_ include: Bool) {
+        do { try persistence?.setExcludedFromBackup(!include) }
+        catch { errorMessage = error.localizedDescription; return }
+        includeInDeviceBackup = include
+        UserDefaults.standard.set(include, forKey: Self.includeInDeviceBackupKey)
+    }
 }
 
 struct RootView: View {
     @EnvironmentObject private var store: AppStore
     var body: some View {
         Group {
-            if let error = store.startupError {
-                ContentUnavailableView("Saved data needs attention", systemImage: "externaldrive.badge.exclamationmark", description: Text(error + " Your file was not reset. Unlock the device and reopen the app; preserve its container before recovery."))
+            if case .runtime(let error) = store.startupFailure {
+                ContentUnavailableView("Training engine did not start", systemImage: "cpu",
+                    description: Text(error + " This build's bundled training rules could not run, so the app read nothing and changed nothing. Your saved data is untouched. Update the app, or report this build."))
+            } else if case .savedData(let error) = store.startupFailure {
+                ContentUnavailableView("Saved data needs attention", systemImage: "externaldrive.badge.exclamationmark",
+                    description: Text(error + " Your file was not reset. Unlock the device and reopen the app; preserve its container before recovery."))
             } else if store.state.profile == nil {
                 OnboardingView()
             } else {
@@ -114,8 +155,9 @@ private enum CoreSmokeTest {
     static func run() {
         var result: [String: Any] = [:]
         do {
+            let core = LocalPythonTrainerService(transport: EmbeddedPythonTransport())
             let repository = try StateRepository(persistence: MemoryPersistence())
-            let service = TrainerService(repository: repository, library: ContentLibrary(permitsFixtures: true))
+            let service = TrainerService(repository: repository, library: ContentLibrary(permitsFixtures: true), core: core)
             var profile = Profile(); profile.adultConfirmed = true; profile.supportedScopeConfirmed = true
             profile.equipment = ["barbell", "dumbbell", "machine"]; profile.preferredExercises = ["bench"]
             let now = Date(timeIntervalSince1970: 1_789_689_600)
@@ -137,8 +179,8 @@ private enum CoreSmokeTest {
                   let rec = repository.snapshot.recommendations.last else { throw TrainerError.invalid("Progression smoke failed: " + decision.reason) }
             try service.acceptRecommendation(id: rec.id, now: now)
             guard repository.snapshot.nextPlan?.slots.first?.load == 105 else { throw TrainerError.invalid("Acceptance smoke failed") }
-            let nutrients = try Nutrients(calories: 200, protein: 10).scaled(by: 2)
-            let catalog = try ExerciseCatalog.bundled()
+            let nutrients = try service.scaleNutrients(Nutrients(calories: 200, protein: 10), servings: 2)
+            let catalog = try ExerciseCatalog.bundled(core: core)
             guard nutrients.calories == 400, catalog.exercises.count == 876 else { throw TrainerError.invalid("Content smoke failed") }
             result = ["passed": true, "runtime": "embedded CPython", "catalogCount": catalog.exercises.count,
                       "decision": decision.reason, "appliedLoad": 105, "networkRequired": false]

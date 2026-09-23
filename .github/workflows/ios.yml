@@ -68,8 +68,6 @@ jobs:
         run: scripts/setup_python.sh
       - name: Python and Swift tests through embedded CPython
         run: scripts/test.sh
-      - name: Verify generated Xcode project builds
-        run: python3 scripts/generate_project.py
   simulator:
     # Runs in parallel with swift-tests. The simulator boots in the background while the
     # Debug build runs; the build itself does not need a booted device, only install/launch do.

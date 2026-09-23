@@ -68,8 +68,11 @@ public protocol TrainerDomainService {
 }
 
 /// In-process JSON calls; no sockets, subprocesses, downloads or remote fallback.
+///
+/// The app composes exactly one instance at startup (`AppStore`) and hands it to everything that
+/// needs the domain core. There is deliberately no shared singleton: every caller receives its
+/// core explicitly, so tests can substitute a failing or recording transport.
 public final class LocalPythonTrainerService: TrainerDomainService {
-    public static let shared = LocalPythonTrainerService(transport: EmbeddedPythonTransport())
     private let transport: any TrainerCoreTransport
     public init(transport: any TrainerCoreTransport) { self.transport = transport }
     public func call<P: Encodable, R: Decodable>(_ operation: String, _ payload: P, as: R.Type = R.self) throws -> R {

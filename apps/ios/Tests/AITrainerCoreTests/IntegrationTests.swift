@@ -2,10 +2,11 @@ import XCTest
 @testable import AITrainerCore
 
 final class IntegrationTests: XCTestCase {
+    let core = LocalPythonTrainerService(transport: EmbeddedPythonTransport())
     func testCatalogIsDescriptiveAndDoesNotChangeGovernedContent() throws {
         let library = ContentLibrary(permitsFixtures: true)
         let before = library.exercises
-        let catalog = try ExerciseCatalog.bundled()
+        let catalog = try ExerciseCatalog.bundled(core: core)
         XCTAssertEqual(catalog.exercises.count, 876)
         XCTAssertEqual(Set(catalog.exercises.map(\.id)).count, catalog.exercises.count)
         for (governed, upstream) in ExerciseCatalog.governedLinks {
@@ -21,32 +22,18 @@ final class IntegrationTests: XCTestCase {
     func testCatalogRejectsDuplicateIDs() throws {
         let record = #"{"id":"duplicate","name":"Example","level":"beginner","primaryMuscles":[],"secondaryMuscles":[],"instructions":[],"category":"strength","images":[]}"#
         let data = "[\(record),\(record)]".data(using: .utf8)!
-        XCTAssertThrowsError(try ExerciseCatalog(data: data))
+        XCTAssertThrowsError(try ExerciseCatalog(data: data, core: core))
     }
 
-    func testPerformanceHistoryFiltersAndOrdersComparableSessions() {
-        let fixtures = TrainerTests()
-        var state = fixtures.fixture()
-        let older = fixtures.exposure(state, daysAgo: 5)
-        let newer = fixtures.exposure(state, daysAgo: 1)
-        var skipped = fixtures.exposure(state, daysAgo: 0); skipped.status = .skipped
-        var active = fixtures.exposure(state, daysAgo: 0); active.status = .paused
-        var different = fixtures.exposure(state, daysAgo: 0); different.plan.slots[0].equipment.id = "different-rack"
-        let future = fixtures.exposure(state, daysAgo: -1)
-        state.sessions = [older, future, skipped, active, different, newer]
-        let history = PerformanceHistory(state: state, slot: state.nextPlan!.slots[0], now: fixtures.now)
-        XCTAssertEqual(history.sessions.map(\.id), [newer.id, older.id])
-        XCTAssertEqual(history.workingLogs(in: newer).map(\.index), [0, 1, 2])
-    }
+    // Comparable-history ordering is covered by `test_comparable_sessions_filter_and_order`
+    // in core/python/tests/test_domain.py; Swift no longer has a history view of its own.
 
-    func testPythonPolicyCannotBypassBrainPainGate() {
+    func testPainGateBeatsQualifyingHistoryThroughTheCore() {
         let fixtures = TrainerTests()
         var state = fixtures.qualified()
-        let brain = TrainingBrain(library: fixtures.library)
-        let request = Request.progression(state.nextPlan!.slots[0].id)
-        XCTAssertEqual(brain.decide(state: state, request: request, now: fixtures.now).reason, "QUALIFYING_EXPOSURES_COMPLETE")
+        XCTAssertEqual(fixtures.decision(state).reason, "QUALIFYING_EXPOSURES_COMPLETE")
         state.painExclusions.insert("bench")
-        XCTAssertEqual(brain.decide(state: state, request: request, now: fixtures.now).reason, "REPORTED_PAIN")
+        XCTAssertEqual(fixtures.decision(state).reason, "REPORTED_PAIN")
     }
 
     func testRestSnapshotSurvivesPersistenceAndExpiresWithoutTicks() throws {
