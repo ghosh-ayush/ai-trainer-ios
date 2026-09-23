@@ -60,7 +60,7 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
 
 ## Workflow
 - Branch per task: `claude/<topic>`, `codex/<topic>`, `feat/<topic>`. Never commit to `master`.
-- One PR per change; CI (`python` + `ios` jobs) must be green; squash-merge.
+- One PR per change; CI (`python`, `swift-tests` and `simulator` jobs) must be green; squash-merge.
 - Definition of done: tests added/updated · schemas regenerated if contracts changed · project
   regenerated if Swift files changed · docs touched if behaviour changed · ADR in
   `docs/DECISIONS.md` if an architectural or product-policy decision was made · notices updated
