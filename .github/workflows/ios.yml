@@ -1,4 +1,4 @@
-name: iOS and domain checks
+name: Local Python and iOS checks
 on:
   push:
     branches: [master, 'feat/**']
@@ -9,31 +9,44 @@ concurrency:
   group: ios-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  build:
-    runs-on: macos-15
-    timeout-minutes: 20
+  python:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Toolchain
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: PYTHONPATH=core/python python -m unittest discover -s core/python/tests -v
+      - name: Versioned schemas remain reproducible
         run: |
-          swift --version
-          xcodebuild -version
-      - name: Domain behavior tests
-        run: swift test
-      - name: Reproducible project generation
-        run: |
-          python3 scripts/generate_project.py
-          git diff --exit-code -- iOS/AITrainer.xcodeproj
-      - name: Build iOS Simulator Debug on a concrete device
+          python scripts/generate_schemas.py
+          git diff --exit-code -- shared/schemas core/python/ai_trainer
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Fetch checksum-pinned development runtime
+        run: scripts/setup_python.sh
+      - name: Python and Swift tests through embedded CPython
+        run: scripts/test.sh
+      - name: Verify generated Xcode project builds
+        run: python3 scripts/generate_project.py
+      - name: Build and exercise simulator runtime
         run: |
           set -o pipefail
-          # A generic destination builds every architecture and can hide app/package mismatches.
           simulator_id=$(xcrun simctl list devices available --json | python3 -c 'import json, sys; print(next(d["udid"] for devices in json.load(sys.stdin)["devices"].values() for d in devices if d["name"].startswith("iPhone")))')
-          xcodebuild -project iOS/AITrainer.xcodeproj -scheme AITrainer -configuration Debug -sdk iphonesimulator -destination "platform=iOS Simulator,id=$simulator_id" CODE_SIGNING_ALLOWED=NO build | tee ios-debug.log
-      - name: Build iOS Simulator Release
+          xcrun simctl boot "$simulator_id"
+          xcrun simctl bootstatus "$simulator_id" -b
+          xcodebuild -project apps/ios/App/AITrainer.xcodeproj -scheme AITrainer -configuration Debug -sdk iphonesimulator -destination "platform=iOS Simulator,id=$simulator_id" -derivedDataPath DerivedData CODE_SIGNING_ALLOWED=NO build | tee ios-debug.log
+          scripts/smoke_ios.sh "$simulator_id"
+      - name: Build Release simulator
         run: |
           set -o pipefail
-          xcodebuild -project iOS/AITrainer.xcodeproj -scheme AITrainer -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build | tee ios-release.log
+          xcodebuild -project apps/ios/App/AITrainer.xcodeproj -scheme AITrainer -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData CODE_SIGNING_ALLOWED=NO build | tee ios-release.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

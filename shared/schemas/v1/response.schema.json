@@ -1,0 +1,2499 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ai-trainer:core:1.0:response",
+  "$defs": {
+    "String": {
+      "type": "string"
+    },
+    "Number": {
+      "type": "number"
+    },
+    "Int": {
+      "type": "integer"
+    },
+    "Bool": {
+      "type": "boolean"
+    },
+    "UUID": {
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{8}(-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}$"
+    },
+    "Date": {
+      "type": "number",
+      "description": "Exact binary64 seconds since 2001-01-01T00:00:00Z (Foundation reference epoch). No Unix-epoch conversion; preserves existing audit timestamps."
+    },
+    "Review": {
+      "type": "string",
+      "enum": [
+        "fixture",
+        "approved",
+        "disabled"
+      ]
+    },
+    "Unit": {
+      "type": "string",
+      "enum": [
+        "lb",
+        "kg"
+      ]
+    },
+    "Basis": {
+      "type": "string",
+      "enum": [
+        "total",
+        "perHand",
+        "machineSetting",
+        "assistance",
+        "externalBodyweight"
+      ]
+    },
+    "SessionStatus": {
+      "type": "string",
+      "enum": [
+        "inProgress",
+        "paused",
+        "completed",
+        "endedEarly",
+        "skipped"
+      ]
+    },
+    "SetKind": {
+      "type": "string",
+      "enum": [
+        "working",
+        "warmUp",
+        "extra"
+      ]
+    },
+    "Outcome": {
+      "type": "string",
+      "enum": [
+        "keepPlan",
+        "proposeChange",
+        "needsInput",
+        "unassessed",
+        "withholdGuidance"
+      ]
+    },
+    "RecommendationStatus": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "applied",
+        "rejected",
+        "expired"
+      ]
+    },
+    "Omission": {
+      "type": "string",
+      "enum": [
+        "time",
+        "equipment",
+        "userChoice",
+        "pain",
+        "interruption",
+        "unspecified"
+      ]
+    },
+    "Profile": {
+      "type": "object",
+      "properties": {
+        "adultConfirmed": {
+          "$ref": "#/$defs/Bool"
+        },
+        "supportedScopeConfirmed": {
+          "$ref": "#/$defs/Bool"
+        },
+        "goal": {
+          "$ref": "#/$defs/String"
+        },
+        "experience": {
+          "$ref": "#/$defs/String"
+        },
+        "daysPerWeek": {
+          "$ref": "#/$defs/Int"
+        },
+        "minutes": {
+          "$ref": "#/$defs/Int"
+        },
+        "equipment": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "preferredUnit": {
+          "$ref": "#/$defs/Unit"
+        },
+        "timeZone": {
+          "$ref": "#/$defs/String"
+        },
+        "excludedExercises": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "preferredExercises": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        }
+      },
+      "required": [
+        "adultConfirmed",
+        "supportedScopeConfirmed",
+        "goal",
+        "experience",
+        "daysPerWeek",
+        "minutes",
+        "equipment",
+        "preferredUnit",
+        "timeZone",
+        "excludedExercises",
+        "preferredExercises"
+      ],
+      "additionalProperties": false
+    },
+    "Equipment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/String"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "kind": {
+          "$ref": "#/$defs/String"
+        },
+        "unit": {
+          "$ref": "#/$defs/Unit"
+        },
+        "basis": {
+          "$ref": "#/$defs/Basis"
+        },
+        "availableLoads": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Number"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "unit",
+        "basis",
+        "availableLoads"
+      ],
+      "additionalProperties": false
+    },
+    "Exercise": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/String"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "role": {
+          "$ref": "#/$defs/String"
+        },
+        "equipmentKind": {
+          "$ref": "#/$defs/String"
+        },
+        "basis": {
+          "$ref": "#/$defs/Basis"
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "review": {
+          "$ref": "#/$defs/Review"
+        },
+        "contentVersion": {
+          "$ref": "#/$defs/String"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "role",
+        "equipmentKind",
+        "basis",
+        "alternatives",
+        "review",
+        "contentVersion"
+      ],
+      "additionalProperties": false
+    },
+    "Policy": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/String"
+        },
+        "version": {
+          "$ref": "#/$defs/String"
+        },
+        "review": {
+          "$ref": "#/$defs/Review"
+        },
+        "requiredExposures": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "minimumRIR": {
+          "$ref": "#/$defs/Int"
+        },
+        "maximumIncreaseFraction": {
+          "$ref": "#/$defs/Number"
+        },
+        "historyDays": {
+          "$ref": "#/$defs/Int"
+        },
+        "maximumGapDays": {
+          "$ref": "#/$defs/Int"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "review",
+        "requiredExposures",
+        "minimumRIR",
+        "maximumIncreaseFraction",
+        "historyDays",
+        "maximumGapDays"
+      ],
+      "additionalProperties": false
+    },
+    "Library": {
+      "type": "object",
+      "properties": {
+        "exercises": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Exercise"
+          }
+        },
+        "policy": {
+          "$ref": "#/$defs/Policy"
+        },
+        "permitsFixtures": {
+          "$ref": "#/$defs/Bool"
+        }
+      },
+      "required": [
+        "exercises",
+        "policy",
+        "permitsFixtures"
+      ],
+      "additionalProperties": false
+    },
+    "Slot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "exerciseID": {
+          "$ref": "#/$defs/String"
+        },
+        "equipment": {
+          "$ref": "#/$defs/Equipment"
+        },
+        "protocolID": {
+          "$ref": "#/$defs/String"
+        },
+        "workingSets": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "lowerReps": {
+          "$ref": "#/$defs/Int"
+        },
+        "upperReps": {
+          "$ref": "#/$defs/Int"
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Int"
+          }
+        },
+        "load": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "restSeconds": {
+          "$ref": "#/$defs/Int"
+        },
+        "optional": {
+          "$ref": "#/$defs/Bool"
+        },
+        "estimatedMinutes": {
+          "$ref": "#/$defs/Int"
+        }
+      },
+      "required": [
+        "id",
+        "exerciseID",
+        "equipment",
+        "protocolID",
+        "workingSets",
+        "lowerReps",
+        "upperReps",
+        "targets",
+        "restSeconds",
+        "optional",
+        "estimatedMinutes"
+      ],
+      "additionalProperties": false
+    },
+    "Plan": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "revision": {
+          "$ref": "#/$defs/Int"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Slot"
+          }
+        },
+        "modified": {
+          "$ref": "#/$defs/Bool"
+        },
+        "scheduledDate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "warmUpMinutes": {
+          "$ref": "#/$defs/Int"
+        }
+      },
+      "required": [
+        "id",
+        "revision",
+        "name",
+        "slots",
+        "modified",
+        "warmUpMinutes"
+      ],
+      "additionalProperties": false
+    },
+    "Program": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "revision": {
+          "$ref": "#/$defs/Int"
+        },
+        "templateID": {
+          "$ref": "#/$defs/String"
+        },
+        "libraryVersion": {
+          "$ref": "#/$defs/String"
+        },
+        "plans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Plan"
+          }
+        },
+        "sequenceIndex": {
+          "$ref": "#/$defs/Int"
+        },
+        "acceptedAt": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "required": [
+        "id",
+        "revision",
+        "templateID",
+        "libraryVersion",
+        "plans",
+        "sequenceIndex",
+        "acceptedAt"
+      ],
+      "additionalProperties": false
+    },
+    "CheckIn": {
+      "type": "object",
+      "properties": {
+        "energy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "soreness": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "painReported": {
+          "$ref": "#/$defs/Bool"
+        },
+        "minutes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unavailableEquipment": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "required": [
+        "painReported",
+        "unavailableEquipment",
+        "occurredAt"
+      ],
+      "additionalProperties": false
+    },
+    "SetLog": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "operationID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "revision": {
+          "$ref": "#/$defs/Int"
+        },
+        "prescriptionID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "contextKey": {
+          "$ref": "#/$defs/String"
+        },
+        "index": {
+          "$ref": "#/$defs/Int"
+        },
+        "kind": {
+          "$ref": "#/$defs/SetKind"
+        },
+        "load": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "$ref": "#/$defs/Unit"
+        },
+        "basis": {
+          "$ref": "#/$defs/Basis"
+        },
+        "reps": {
+          "$ref": "#/$defs/Int"
+        },
+        "rir": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/Date"
+        },
+        "conflicted": {
+          "$ref": "#/$defs/Bool"
+        }
+      },
+      "required": [
+        "id",
+        "operationID",
+        "revision",
+        "prescriptionID",
+        "contextKey",
+        "index",
+        "kind",
+        "unit",
+        "basis",
+        "reps",
+        "occurredAt",
+        "conflicted"
+      ],
+      "additionalProperties": false
+    },
+    "Omissions": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/Omission"
+      }
+    },
+    "Session": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "programID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "programRevision": {
+          "$ref": "#/$defs/Int"
+        },
+        "originalPlan": {
+          "$ref": "#/$defs/Plan"
+        },
+        "plan": {
+          "$ref": "#/$defs/Plan"
+        },
+        "status": {
+          "$ref": "#/$defs/SessionStatus"
+        },
+        "startedAt": {
+          "$ref": "#/$defs/Date"
+        },
+        "endedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timeZone": {
+          "$ref": "#/$defs/String"
+        },
+        "checkIn": {
+          "$ref": "#/$defs/CheckIn"
+        },
+        "logs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SetLog"
+          }
+        },
+        "omissions": {
+          "$ref": "#/$defs/Omissions"
+        },
+        "restEndsAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "programID",
+        "programRevision",
+        "originalPlan",
+        "plan",
+        "status",
+        "startedAt",
+        "timeZone",
+        "checkIn",
+        "logs",
+        "omissions"
+      ],
+      "additionalProperties": false
+    },
+    "Evidence": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "revision": {
+          "$ref": "#/$defs/Int"
+        }
+      },
+      "required": [
+        "id",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "Decision": {
+      "type": "object",
+      "properties": {
+        "outcome": {
+          "$ref": "#/$defs/Outcome"
+        },
+        "reason": {
+          "$ref": "#/$defs/String"
+        },
+        "explanation": {
+          "$ref": "#/$defs/String"
+        },
+        "after": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Plan"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        }
+      },
+      "required": [
+        "outcome",
+        "reason",
+        "explanation",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "Request": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "progression"
+            },
+            "slotID": {
+              "$ref": "#/$defs/UUID"
+            }
+          },
+          "required": [
+            "kind",
+            "slotID"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "shorten"
+            },
+            "minutes": {
+              "$ref": "#/$defs/Int"
+            }
+          },
+          "required": [
+            "kind",
+            "minutes"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "substitute"
+            },
+            "slotID": {
+              "$ref": "#/$defs/UUID"
+            },
+            "alternativeID": {
+              "$ref": "#/$defs/String"
+            }
+          },
+          "required": [
+            "kind",
+            "slotID",
+            "alternativeID"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "reschedule"
+            },
+            "date": {
+              "$ref": "#/$defs/Date"
+            }
+          },
+          "required": [
+            "kind",
+            "date"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "StoredRequest": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "progression": {
+              "type": "object",
+              "properties": {
+                "_0": {
+                  "$ref": "#/$defs/UUID"
+                }
+              },
+              "required": [
+                "_0"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "progression"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "shorten": {
+              "type": "object",
+              "properties": {
+                "_0": {
+                  "$ref": "#/$defs/Int"
+                }
+              },
+              "required": [
+                "_0"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "shorten"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "substitute": {
+              "type": "object",
+              "properties": {
+                "_0": {
+                  "$ref": "#/$defs/UUID"
+                },
+                "_1": {
+                  "$ref": "#/$defs/String"
+                }
+              },
+              "required": [
+                "_0",
+                "_1"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "substitute"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "reschedule": {
+              "type": "object",
+              "properties": {
+                "_0": {
+                  "$ref": "#/$defs/Date"
+                }
+              },
+              "required": [
+                "_0"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "reschedule"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Recommendation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "stateRevision": {
+          "$ref": "#/$defs/Int"
+        },
+        "contextRevision": {
+          "$ref": "#/$defs/Int"
+        },
+        "targetPlanID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "targetPlanRevision": {
+          "$ref": "#/$defs/Int"
+        },
+        "request": {
+          "$ref": "#/$defs/StoredRequest"
+        },
+        "decision": {
+          "$ref": "#/$defs/Decision"
+        },
+        "policyVersion": {
+          "$ref": "#/$defs/String"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Date"
+        },
+        "status": {
+          "$ref": "#/$defs/RecommendationStatus"
+        },
+        "rejectionReason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "stateRevision",
+        "contextRevision",
+        "targetPlanID",
+        "targetPlanRevision",
+        "request",
+        "decision",
+        "policyVersion",
+        "createdAt",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "Audit": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "previous": {
+          "$ref": "#/$defs/SetLog"
+        },
+        "correctedAt": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "required": [
+        "id",
+        "previous",
+        "correctedAt"
+      ],
+      "additionalProperties": false
+    },
+    "Conflict": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "sessionID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "current": {
+          "$ref": "#/$defs/SetLog"
+        },
+        "incoming": {
+          "$ref": "#/$defs/SetLog"
+        }
+      },
+      "required": [
+        "id",
+        "sessionID",
+        "current",
+        "incoming"
+      ],
+      "additionalProperties": false
+    },
+    "Event": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/Date"
+        },
+        "stateRevision": {
+          "$ref": "#/$defs/Int"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "occurredAt",
+        "stateRevision"
+      ],
+      "additionalProperties": false
+    },
+    "Nutrients": {
+      "type": "object",
+      "properties": {
+        "calories": {
+          "$ref": "#/$defs/Number"
+        },
+        "protein": {
+          "$ref": "#/$defs/Number"
+        },
+        "carbs": {
+          "$ref": "#/$defs/Number"
+        },
+        "fat": {
+          "$ref": "#/$defs/Number"
+        }
+      },
+      "required": [
+        "calories",
+        "protein",
+        "carbs",
+        "fat"
+      ],
+      "additionalProperties": false
+    },
+    "Meal": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "revision": {
+          "$ref": "#/$defs/Int"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "nutrients": {
+          "$ref": "#/$defs/Nutrients"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/Date"
+        },
+        "source": {
+          "$ref": "#/$defs/String"
+        },
+        "timeZone": {
+          "$ref": "#/$defs/String"
+        }
+      },
+      "required": [
+        "id",
+        "revision",
+        "name",
+        "nutrients",
+        "occurredAt",
+        "source",
+        "timeZone"
+      ],
+      "additionalProperties": false
+    },
+    "MealAudit": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "previous": {
+          "$ref": "#/$defs/Meal"
+        },
+        "correctedAt": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "required": [
+        "id",
+        "previous",
+        "correctedAt"
+      ],
+      "additionalProperties": false
+    },
+    "Recipe": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "perServing": {
+          "$ref": "#/$defs/Nutrients"
+        },
+        "source": {
+          "$ref": "#/$defs/String"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "perServing",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    "State": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "athleteID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "revision": {
+          "$ref": "#/$defs/Int"
+        },
+        "contextRevision": {
+          "$ref": "#/$defs/Int"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Profile"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "program": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Program"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nextPlanOverride": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Plan"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "previousPrograms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Program"
+          }
+        },
+        "sessions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Session"
+          }
+        },
+        "recommendations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Recommendation"
+          }
+        },
+        "painExclusions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "audits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Audit"
+          }
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Conflict"
+          }
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UUID"
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Event"
+          }
+        },
+        "meals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Meal"
+          }
+        },
+        "mealAudits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MealAudit"
+          }
+        },
+        "recipes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Recipe"
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "athleteID",
+        "revision",
+        "contextRevision",
+        "previousPrograms",
+        "sessions",
+        "recommendations",
+        "painExclusions",
+        "audits",
+        "conflicts",
+        "operations",
+        "events",
+        "meals",
+        "mealAudits",
+        "recipes"
+      ],
+      "additionalProperties": false
+    },
+    "CatalogExercise": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/String"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "force": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "level": {
+          "$ref": "#/$defs/String"
+        },
+        "mechanic": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "equipment": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "primaryMuscles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "secondaryMuscles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "instructions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "category": {
+          "$ref": "#/$defs/String"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "level",
+        "primaryMuscles",
+        "secondaryMuscles",
+        "instructions",
+        "category",
+        "images"
+      ],
+      "additionalProperties": false
+    },
+    "decidePayload": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "request": {
+          "$ref": "#/$defs/Request"
+        },
+        "library": {
+          "$ref": "#/$defs/Library"
+        },
+        "now": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "required": [
+        "state",
+        "request",
+        "library",
+        "now"
+      ],
+      "additionalProperties": false
+    },
+    "progressionPayload": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "plan": {
+          "$ref": "#/$defs/Plan"
+        },
+        "slot": {
+          "$ref": "#/$defs/Slot"
+        },
+        "policy": {
+          "$ref": "#/$defs/Policy"
+        },
+        "now": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "required": [
+        "state",
+        "plan",
+        "slot",
+        "policy",
+        "now"
+      ],
+      "additionalProperties": false
+    },
+    "initialProgramPayload": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/$defs/Profile"
+        },
+        "library": {
+          "$ref": "#/$defs/Library"
+        },
+        "now": {
+          "$ref": "#/$defs/Date"
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UUID"
+          },
+          "minItems": 6
+        }
+      },
+      "required": [
+        "profile",
+        "library",
+        "now",
+        "ids"
+      ],
+      "additionalProperties": false
+    },
+    "recommendationPayload": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "$ref": "#/$defs/String"
+        },
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "request": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Request"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "library": {
+          "$ref": "#/$defs/Library"
+        },
+        "now": {
+          "$ref": "#/$defs/Date"
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UUID"
+          },
+          "minItems": 2
+        }
+      },
+      "required": [
+        "operation",
+        "state",
+        "library",
+        "now",
+        "ids"
+      ],
+      "additionalProperties": false
+    },
+    "nutrientsPayload": {
+      "type": "object",
+      "properties": {
+        "nutrients": {
+          "$ref": "#/$defs/Nutrients"
+        },
+        "servings": {
+          "$ref": "#/$defs/Number"
+        }
+      },
+      "required": [
+        "nutrients",
+        "servings"
+      ],
+      "additionalProperties": false
+    },
+    "performancePayload": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "slot": {
+          "$ref": "#/$defs/Slot"
+        },
+        "now": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "required": [
+        "state",
+        "slot",
+        "now"
+      ],
+      "additionalProperties": false
+    },
+    "workingLogsPayload": {
+      "type": "object",
+      "properties": {
+        "session": {
+          "$ref": "#/$defs/Session"
+        },
+        "slot": {
+          "$ref": "#/$defs/Slot"
+        }
+      },
+      "required": [
+        "session",
+        "slot"
+      ],
+      "additionalProperties": false
+    },
+    "validateSetPayload": {
+      "type": "object",
+      "properties": {
+        "log": {
+          "$ref": "#/$defs/SetLog"
+        }
+      },
+      "required": [
+        "log"
+      ],
+      "additionalProperties": false
+    },
+    "catalogPayload": {
+      "type": "object",
+      "properties": {
+        "exercises": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CatalogExercise"
+          }
+        }
+      },
+      "required": [
+        "exercises"
+      ],
+      "additionalProperties": false
+    },
+    "RecoveryObservation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "title": {
+          "$ref": "#/$defs/String"
+        },
+        "value": {
+          "$ref": "#/$defs/String"
+        },
+        "date": {
+          "$ref": "#/$defs/Date"
+        },
+        "source": {
+          "$ref": "#/$defs/String"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "value",
+        "date",
+        "source"
+      ],
+      "additionalProperties": false
+    },
+    "recoveryPayload": {
+      "type": "object",
+      "properties": {
+        "observations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RecoveryObservation"
+          }
+        }
+      },
+      "required": [
+        "observations"
+      ],
+      "additionalProperties": false
+    },
+    "acceptInitialPlanArguments": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/$defs/Profile"
+        }
+      },
+      "required": [
+        "profile"
+      ],
+      "additionalProperties": false
+    },
+    "configureLoadArguments": {
+      "type": "object",
+      "properties": {
+        "slotID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "load": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Number"
+          }
+        }
+      },
+      "required": [
+        "slotID",
+        "options"
+      ],
+      "additionalProperties": false
+    },
+    "startArguments": {
+      "type": "object",
+      "properties": {
+        "checkIn": {
+          "$ref": "#/$defs/CheckIn"
+        }
+      },
+      "required": [
+        "checkIn"
+      ],
+      "additionalProperties": false
+    },
+    "skipArguments": {
+      "type": "object",
+      "properties": {
+        "checkIn": {
+          "$ref": "#/$defs/CheckIn"
+        }
+      },
+      "required": [
+        "checkIn"
+      ],
+      "additionalProperties": false
+    },
+    "setPausedArguments": {
+      "type": "object",
+      "properties": {
+        "paused": {
+          "$ref": "#/$defs/Bool"
+        }
+      },
+      "required": [
+        "paused"
+      ],
+      "additionalProperties": false
+    },
+    "saveSetArguments": {
+      "type": "object",
+      "properties": {
+        "log": {
+          "$ref": "#/$defs/SetLog"
+        },
+        "sessionID": {
+          "$ref": "#/$defs/UUID"
+        }
+      },
+      "required": [
+        "log",
+        "sessionID"
+      ],
+      "additionalProperties": false
+    },
+    "finishArguments": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "$ref": "#/$defs/Omission"
+        }
+      },
+      "required": [
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "reportPainArguments": {
+      "type": "object",
+      "properties": {
+        "exerciseID": {
+          "$ref": "#/$defs/String"
+        }
+      },
+      "required": [
+        "exerciseID"
+      ],
+      "additionalProperties": false
+    },
+    "excludeArguments": {
+      "type": "object",
+      "properties": {
+        "exerciseID": {
+          "$ref": "#/$defs/String"
+        },
+        "excluded": {
+          "$ref": "#/$defs/Bool"
+        }
+      },
+      "required": [
+        "exerciseID",
+        "excluded"
+      ],
+      "additionalProperties": false
+    },
+    "correctSetArguments": {
+      "type": "object",
+      "properties": {
+        "sessionID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "logID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "expectedRevision": {
+          "$ref": "#/$defs/Int"
+        },
+        "load": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reps": {
+          "$ref": "#/$defs/Int"
+        },
+        "rir": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "sessionID",
+        "logID",
+        "expectedRevision",
+        "reps"
+      ],
+      "additionalProperties": false
+    },
+    "resolveConflictArguments": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "useIncoming": {
+          "$ref": "#/$defs/Bool"
+        }
+      },
+      "required": [
+        "id",
+        "useIncoming"
+      ],
+      "additionalProperties": false
+    },
+    "deleteSessionArguments": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "deleteMealArguments": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "saveMealArguments": {
+      "type": "object",
+      "properties": {
+        "meal": {
+          "$ref": "#/$defs/Meal"
+        },
+        "asRecipe": {
+          "$ref": "#/$defs/Bool"
+        }
+      },
+      "required": [
+        "meal",
+        "asRecipe"
+      ],
+      "additionalProperties": false
+    },
+    "stateCommandPayload": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "acceptInitialPlan"
+            },
+            "arguments": {
+              "$ref": "#/$defs/acceptInitialPlanArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "configureLoad"
+            },
+            "arguments": {
+              "$ref": "#/$defs/configureLoadArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "start"
+            },
+            "arguments": {
+              "$ref": "#/$defs/startArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "skip"
+            },
+            "arguments": {
+              "$ref": "#/$defs/skipArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "setPaused"
+            },
+            "arguments": {
+              "$ref": "#/$defs/setPausedArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "saveSet"
+            },
+            "arguments": {
+              "$ref": "#/$defs/saveSetArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "finish"
+            },
+            "arguments": {
+              "$ref": "#/$defs/finishArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "reportPain"
+            },
+            "arguments": {
+              "$ref": "#/$defs/reportPainArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "exclude"
+            },
+            "arguments": {
+              "$ref": "#/$defs/excludeArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "correctSet"
+            },
+            "arguments": {
+              "$ref": "#/$defs/correctSetArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "resolveConflict"
+            },
+            "arguments": {
+              "$ref": "#/$defs/resolveConflictArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "deleteSession"
+            },
+            "arguments": {
+              "$ref": "#/$defs/deleteSessionArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "deleteMeal"
+            },
+            "arguments": {
+              "$ref": "#/$defs/deleteMealArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "saveMeal"
+            },
+            "arguments": {
+              "$ref": "#/$defs/saveMealArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "library": {
+              "$ref": "#/$defs/Library"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "library",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "StateResult": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Bool"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "additionalProperties": false
+    },
+    "RecommendationResult": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Decision"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "additionalProperties": false
+    },
+    "RecoveryResult": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/String"
+        },
+        "reason": {
+          "$ref": "#/$defs/String"
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RecoveryObservation"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "reason",
+        "observations"
+      ],
+      "additionalProperties": false
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/String"
+        },
+        "message": {
+          "$ref": "#/$defs/String"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Decision"
+            },
+            {
+              "$ref": "#/$defs/Decision"
+            },
+            {
+              "$ref": "#/$defs/Program"
+            },
+            {
+              "$ref": "#/$defs/StateResult"
+            },
+            {
+              "$ref": "#/$defs/RecommendationResult"
+            },
+            {
+              "$ref": "#/$defs/Nutrients"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Session"
+              }
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/SetLog"
+              }
+            },
+            {
+              "$ref": "#/$defs/Bool"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/CatalogExercise"
+              }
+            },
+            {
+              "$ref": "#/$defs/RecoveryResult"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "error": {
+          "$ref": "#/$defs/Error"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "error"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

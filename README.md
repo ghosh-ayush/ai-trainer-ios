@@ -1,115 +1,114 @@
-# AI Trainer iOS
+# AI Trainer
 
-Native SwiftUI development build organized around the documented P0-P4 phases. The shared `AITrainerCore` package contains the versioned state model, local persistence, deterministic Training Brain, and behavior tests. Existing product specifications remain unchanged.
+A local-first monorepo with a Python domain core and a native SwiftUI iPhone app.
+The app embeds CPython and calls it **in process**, through a small C bridge and
+versioned JSON contracts. There is no HTTP server, AWS dependency, required API,
+account, API key, or runtime download. All training and catalog functionality works
+offline after installation. Camera/Vision/RepCounterSDK processing stays native.
 
-**Development preview, not an App Store release.** The repository does not contain approved training prescriptions or validated camera/recovery algorithms. Debug builds explicitly opt into numerical fixtures; Release builds reject fixture-based program activation.
-
-## Run the app
-
-1. Open `iOS/AITrainer.xcodeproj` directly in Xcode 16 or newer, with an iOS 17+ SDK/runtime. Keep the complete repository together. Close any other Xcode window that opened the repository folder or `Package.swift`; the app needs to load that local package itself.
-2. Select the **AITrainer** scheme and an iPhone simulator. Run the **Debug** configuration.
-3. Complete onboarding and explicitly accept the sample program. The initial fixture covers 2-4 available days, a repeating full-body session, and at least 41 minutes; use 60 minutes to include an optional slot and test shortening.
-4. On Today, confirm your own load and available equipment values. Unknown values remain blank; the app does not infer starting strength.
-5. Check in, start a workout, log sets, pause/resume, and finish. Review or correct recorded performance in History. Request progression on Today or Coach and explicitly accept the preview.
-6. In Labs, enable experimental tools. Camera and real HealthKit testing require a physical iPhone. In Signing & Capabilities, choose your own team and unique bundle identifier; provisioning must support HealthKit.
-
-No API key, paid AI service, backend, or account is required for P1. The initial build downloads the pinned MIT-licensed RepCounterSDK Swift package (Swift 6 / Xcode 16+). Runtime catalog browsing and rep counting work offline. Do not add credentials to source control.
-
-## Troubleshooting: missing AITrainerCore
-
-If Xcode reports `Missing package product 'AITrainerCore'`, check for an accompanying
-`Couldn't load ai-trainer-ios because it is already opened from another project or workspace` error.
-A separate Xcode folder/package workspace can hold the local package open, even when its window is titled `README.md`.
-
-1. Close other Xcode windows containing this repository folder or `Package.swift`.
-2. Quit Xcode, reopen it, and open only `iOS/AITrainer.xcodeproj`.
-3. Choose **File > Packages > Reset Package Caches**, then **Resolve Package Versions** if needed.
-4. Choose **Product > Clean Build Folder**, then build the **AITrainer** scheme for an iPhone simulator.
-
-The project already links `AITrainerCore` through an `XCLocalSwiftPackageReference`
-with `relativePath = ..`, relative to the `iOS` directory. This correctly points to the
-repository-root `Package.swift`. The manifest exports the `AITrainerCore` library,
-and the app lists it in both package product dependencies and its Frameworks build phase.
-Do not change the reference to `../..` or add a remote package to solve a workspace conflict.
-
-If the next error is `Unable to resolve module dependency: 'AITrainerCore'` on a
-specific simulator, regenerate with the current script. Debug uses
-`ONLY_ACTIVE_ARCH = YES` to match SwiftPM's active-architecture build; Release
-uses `NO`. Without that alignment, an Apple Silicon simulator can build the
-package for arm64 while the app also requests an unavailable x86_64 module.
-Generic simulator builds can miss this mismatch because they build both architectures.
-
-For an incomplete download, restore the full repository, including `Package.swift`
-and `Sources/AITrainerCore/`. If the project file was edited, regenerate it from the repository root:
-
-```sh
-python3 scripts/generate_project.py
-xcodebuild -resolvePackageDependencies -project iOS/AITrainer.xcodeproj -scheme AITrainer
-```
-
-A successful command-line build alongside a failing Xcode window can indicate an IDE
-workspace/cache conflict; project regeneration alone does not close the conflicting window.
-
-## Phase status
-
-| Phase | Code available | Not claimed complete |
-| --- | --- | --- |
-| P0 | Local capture harness; measured frame throughput, latency percentiles, thermal/battery display | Physical-device benchmarks and usability validation |
-| P1 | Onboarding, one sample program, manual/extra/warm-up logs, persistent rest timer, resume, corrections, audit/conflict handling, substitutions, shortening, rescheduling, progression proposals, JSON export/deletion | Reviewed content, broader splits, production SQLite/sync, cloud coach, release approval |
-| P2 | Opt-in RepCounterSDK + Apple Vision 2D right-arm curl counter with confidence/visibility/dropout checks | Validated accuracy, general exercise recognition, form coaching, joint forces, automatic promotion to training evidence |
-| P3 | Opt-in read-only HealthKit HRV SDNN, resting HR, and individual sleep samples with source/time | Baselines, readiness scores, wearable-driven program adjustments, weather integration |
-| P4 | Manual meal estimates, corrections, reusable portions, portion scaling, local daily totals | Food database, photo identification, calibrated volume, nutrition-driven training |
-| R | Explicitly excluded from the guidance path | Inverse dynamics, lumbar forces, injury-risk claims, food geometry |
-
-See [implementation and release gaps](docs/IMPLEMENTATION.md) and [physical-device checklist](docs/DEVICE_TEST_PLAN.md).
-
-## Tests and builds
-
-The core has no Apple-framework dependency and can be tested on Linux or macOS:
-
-```sh
-swift test
-```
-
-Regenerate the checked-in Xcode project after adding or removing native Swift files:
-
-```sh
-python3 scripts/generate_project.py
-```
-
-Compile the iOS app on a Mac:
-
-```sh
-xcodebuild -project iOS/AITrainer.xcodeproj -scheme AITrainer \
-  -configuration Debug -sdk iphonesimulator \
-  -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
-```
-
-CI runs core tests and Debug/Release simulator builds. Passing core tests is not proof of native UI correctness, sensor accuracy, or training effectiveness. Native hardware testing and content review remain required.
+This remains a development preview: Debug explicitly permits the existing numerical
+fixtures; Release rejects fixture program activation. No reviewed training policy,
+validated form analysis, readiness score or production prescription was invented.
 
 ## Structure
 
 ```text
-Sources/AITrainerCore/         Domain models, policies, transactions, experiments
-Tests/AITrainerCoreTests/      Executable behavior and regression tests
-iOS/AITrainer/App/             SwiftUI entry point and presentation store
-iOS/AITrainer/Features/        Onboarding, Today, workout, History, Coach, Labs
-iOS/AITrainer/Services/        AVFoundation/Vision and HealthKit adapters
-iOS/AITrainer/Resources/       Permission descriptions, entitlements, privacy manifest
-iOS/AITrainer.xcodeproj/       Shared Xcode project and scheme
-scripts/generate_project.py   Dependency-free project generator
-docs/                         Product specification, implementation notes, device tests
+apps/ios/App/                    SwiftUI app, native services and Xcode project
+apps/ios/Sources/AITrainerCore/   Swift DTOs, local storage, service facade, perception
+apps/ios/PythonBridge/           CPython C API bridge (GIL and memory ownership)
+apps/ios/Tests/                  Swift regression and real embedded-runtime tests
+apps/ios/Vendor/                 Ignored, checksum-pinned CPython build artifact
+core/python/ai_trainer/          Training Brain, progression, state reducers, nutrition
+core/python/tests/               Python unit and contract tests
+shared/schemas/v1/               Explicit versioned request/response JSON schemas
+shared/fixtures/v1/              Cross-language golden contract fixtures
+ml/                             Future offline model training/export workspace
+docs/                           Architecture, migration, specifications, device testing
+scripts/                        Setup, packaging, schema generation, tests and smoke test
+Package.swift                   Native package entry point
 ```
 
-## Documentation
+## Run in Xcode
 
-**01. Athlete State + Training Brain**, version 0.1, September 17, 2026: proposed specification for product, training-domain, design, and engineering review.
+1. On a Mac with Xcode 16+ and an iOS 17+ SDK/runtime, run
+   `scripts/setup_python.sh` from the repository root. This downloads the
+   checksum-verified BeeWare Python 3.13.11 / `3.13-b13` build into the ignored
+   `apps/ios/Vendor/` directory. An offline archive can be supplied as the first
+   argument. This is a developer setup step, not an app network requirement.
+2. Open **`apps/ios/App/AITrainer.xcodeproj`**, choose **AITrainer**, an iPhone
+   simulator, and **Debug**, then Run. Keep the entire monorepo together. Close
+   other Xcode windows that have the root `Package.swift` open if Xcode reports
+   a duplicate local package or missing `AITrainerCore` product.
+3. Xcode resolves the pinned RepCounterSDK package once. The build automatically
+   embeds Python.framework, the standard library, the pure Python core and its
+   schemas. The packaging step is offline; no pip packages are installed in the app.
+4. Complete onboarding and explicitly accept the fixture plan. The current fixture
+   supports 2–4 days/week and at least 41 minutes; choose 60 for an optional slot.
+   Confirm familiar loads and available equipment values, log workouts, then review
+   and accept recommendations. Unknown values remain blank.
+5. For a physical iPhone, choose your development team and bundle identifier in
+   Signing & Capabilities. Provisioning must support HealthKit. Camera and actual
+   Health data still require hardware validation.
 
-- [Read the original specification](docs/AI_Trainer_01_Athlete_State_and_Training_Brain.md)
-- [Download the original Word specification](docs/AI_Trainer_01_Athlete_State_and_Training_Brain.docx)
+The project links the root Swift package at `../../..` relative to `apps/ios/App`.
+After adding native files, `python3 scripts/generate_project.py` can regenerate the
+project; it normalizes settings, so preserve any personal signing changes first.
 
-Detailed rules and numerical fixtures are proposals and test cases, not approved production training prescriptions. The implementation notes explicitly identify narrower coverage and deviations rather than treating the entire roadmap as shipped.
+## Tests and builds
 
-## Open-source integration
+Pure Python tests run on macOS/Linux without Xcode or the downloaded framework:
 
-See [integration boundaries, licenses, and validation](docs/OPEN_SOURCE_INTEGRATION.md). Settings includes a descriptive exercise catalog and the bundled third-party notices.
+```sh
+PYTHONPATH=core/python python3 -m unittest discover -s core/python/tests -v
+```
+
+On macOS, use a Python installation that includes matching headers and libpython
+(`python3-config --embed --ldflags`), then run:
+
+```sh
+scripts/setup_python.sh
+scripts/test.sh
+```
+
+`PYTHON_CONFIG=/path/to/python3-config scripts/test.sh` selects that installation.
+The script sets the desktop interpreter home/module path and runs the Swift tests
+through the **real C bridge and embedded interpreter**, without a subprocess proxy.
+Direct `swift test` needs the same compiler/linker flags and environment; use the
+script to avoid a mismatched Python library. The iOS runtime is independently pinned.
+
+```sh
+xcodebuild -project apps/ios/App/AITrainer.xcodeproj -scheme AITrainer \
+  -configuration Debug -sdk iphonesimulator \
+  -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData \
+  CODE_SIGNING_ALLOWED=NO ARCHS=arm64 build
+scripts/smoke_ios.sh BOOTED_SIMULATOR_UUID
+```
+
+The Debug-only smoke mode uses an in-memory repository and checks onboarding,
+workout evidence, progression/acceptance, nutrition and the offline catalog. It
+writes `Documents/core-smoke-result.json` in the simulator app container and does
+not alter saved athlete data. CI also builds Release and checks schema generation.
+
+## Architecture and scope
+
+Python now owns the deterministic Training Brain, double progression, initial plan
+selection, workout/state transitions, proposal lifecycle, evidence re-evaluation,
+correction/conflict rules, meal lifecycle, nutrient validation/scaling, descriptive
+catalog validation and the explicit unassessed recovery boundary. Swift owns native
+UI, sensors/perception, Codable DTOs, presentation projections and durable local saves.
+
+The existing Swift feature-facing `TrainerService` delegates to
+`LocalPythonTrainerService`. `TrainerCoreTransport.exchange(Data)` is the replaceable
+boundary; a future remote transport can carry the same contracts without changing
+feature/UI callers. Remote concurrency, authentication and offline synchronization
+would still need implementation. Nothing currently switches to a network service.
+
+- [Architecture and API extraction path](docs/LOCAL_PYTHON_ARCHITECTURE.md)
+- [Migration, verification and limitations](docs/PYTHON_MIGRATION.md)
+- [Open-source boundaries and licenses](docs/OPEN_SOURCE_INTEGRATION.md)
+- [Physical-device checklist](docs/DEVICE_TEST_PLAN.md)
+- [Original product specification](docs/AI_Trainer_01_Athlete_State_and_Training_Brain.md)
+
+P0/P2 camera tools, P3 read-only HealthKit and P4 manual nutrition remain opt-in
+experiments. Camera observations and catalog descriptions do not become confirmed
+performance, reviewed guidance, or accepted recommendations automatically.
