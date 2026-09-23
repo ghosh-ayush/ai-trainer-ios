@@ -8,8 +8,8 @@ SwiftUI features -> TrainerService (native persistence facade)
                       LocalPythonTrainerService
                         -> TrainerCoreTransport.exchange(JSON bytes)
                            EmbeddedPythonTransport -> PythonBridge C API
-                             ai_trainer.service.dispatch_json
-                               domain.py / state.py
+                             ai_trainer.api.dispatch_json  (ai_trainer.service is an alias)
+                               rules/ · commands/ · recommendations.py · queries.py
                    <- candidate state + decision or typed error
                    -> StateRepository atomic save -> publish snapshot
 
@@ -35,6 +35,14 @@ Only `math` and `_json` native stdlib extensions are shipped. Optional database,
 crypto/compression, FFI and networking binaries are excluded. Adding Python imports
 that need other extensions requires explicit packaging and license review plus an
 iOS smoke test. Heavyweight ML dependencies belong in `ml/`, not this runtime.
+
+## Python package layout
+
+See `core/python/README.md` for the module map. In short: `api.py` validates and routes;
+`rules/` holds the deterministic Training Brain (eligibility gates, progression, adjustments,
+program selection); `commands/` holds one handler per state mutation; `recommendations.py`
+owns the proposal lifecycle; `queries.py`, `athlete_state.py`, `events.py`, `content.py` and
+`nutrition.py` are pure helpers; `contracts.py` is the dependency-free schema validator.
 
 ## Contracts and deterministic state
 
