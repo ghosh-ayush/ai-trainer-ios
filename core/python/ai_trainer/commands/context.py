@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from dataclasses import dataclass
 from typing import Any
 
 from ..athlete_state import active_session
@@ -13,15 +12,21 @@ from ..events import expire_proposals, record_event
 JSON = dict[str, Any]
 
 
-@dataclass
 class CommandContext:
-    """Everything a handler may touch. ``state`` is already a private copy."""
+    """Everything a handler may touch. ``state`` is already a private copy.
 
-    state: JSON
-    arguments: JSON
-    library: JSON
-    now: float
-    ids: Iterator[str]
+    A plain class on purpose: ``dataclasses`` imports ``inspect`` → ``dis`` → ``_opcode``,
+    an extension module the embedded iOS runtime does not ship (see tests/test_embedded_imports.py).
+    """
+
+    __slots__ = ("arguments", "ids", "library", "now", "state")
+
+    def __init__(self, state: JSON, arguments: JSON, library: JSON, now: float, ids: Iterator[str]) -> None:
+        self.state = state
+        self.arguments = arguments
+        self.library = library
+        self.now = now
+        self.ids = ids
 
     def next_id(self) -> str:
         """The next host-supplied UUID. Exhausting the budget is a contract error."""
