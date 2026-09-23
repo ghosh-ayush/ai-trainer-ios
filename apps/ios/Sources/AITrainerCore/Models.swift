@@ -1,57 +1,90 @@
+// GENERATED FILE — do not edit by hand.
+// Source of truth: core/python/ai_trainer/contract_spec.py
+// Regenerate:      python3 scripts/generate_swift_models.py
+//
+// Codable records shared with the Python core. Field names and JSON shapes must match
+// the v1 contract exactly. Behaviour lives in Models+Helpers.swift.
+
 import Foundation
 
-public enum TrainerError: Error, LocalizedError, Equatable {
-    case invalid(String), notFound, conflict, staleProposal, unsupported, corruptStore
-    public var errorDescription: String? {
-        switch self {
-        case .invalid(let message): return message
-        case .notFound: return "The requested record no longer exists."
-        case .conflict: return "This record changed. Review the conflicting versions before continuing."
-        case .staleProposal: return "The evidence or plan changed. Request a fresh preview."
-        case .unsupported: return "No enabled, reviewed policy supports this request."
-        case .corruptStore: return "Saved data could not be read. It has not been overwritten."
-        }
-    }
+// MARK: - Enums
+
+public enum ReviewStatus: String, Codable {
+    case fixture, approved, disabled
 }
-public enum Phase: String, Codable, CaseIterable, Identifiable {
-    case p0 = "P0", p1 = "P1", p2 = "P2", p3 = "P3", p4 = "P4"
-    public var id: String { rawValue }
-}
-public enum ReviewStatus: String, Codable { case fixture, approved, disabled }
-public enum MassUnit: String, Codable, CaseIterable, Identifiable {
+
+public enum MassUnit: String, Codable, CaseIterable {
     case lb, kg
-    public var id: String { rawValue }
-    public func convert(_ value: Double, to other: MassUnit) -> Double {
-        if self == other { return value }
-        return self == .lb ? value * 0.45359237 : value / 0.45359237
-    }
 }
+
 public enum LoadBasis: String, Codable, CaseIterable {
     case total, perHand, machineSetting, assistance, externalBodyweight
-    public var label: String {
-        switch self {
-        case .total: return "Total load"
-        case .perHand: return "Per dumbbell"
-        case .machineSetting: return "Machine setting"
-        case .assistance: return "Assistance"
-        case .externalBodyweight: return "Added external load"
-        }
+}
+
+public enum SessionStatus: String, Codable {
+    case inProgress, paused, completed, endedEarly, skipped
+}
+
+public enum SetKind: String, Codable {
+    case working, warmUp, extra
+}
+
+public enum DecisionOutcome: String, Codable {
+    case keepPlan, proposeChange, needsInput, unassessed, withholdGuidance
+}
+
+public enum RecommendationStatus: String, Codable {
+    case proposed, applied, rejected, expired
+}
+
+public enum OmissionReason: String, Codable, CaseIterable {
+    case time, equipment, userChoice, pain, interruption, unspecified
+}
+
+// MARK: - Records
+
+/// What the athlete told us at onboarding. No body metrics, no estimated strength.
+public struct Profile: Codable, Equatable {
+    public var adultConfirmed: Bool
+    public var supportedScopeConfirmed: Bool
+    public var goal: String
+    public var experience: String
+    public var daysPerWeek: Int
+    public var minutes: Int
+    public var equipment: Set<String>
+    public var preferredUnit: MassUnit
+    public var timeZone: String
+    public var excludedExercises: Set<String>
+    public var preferredExercises: Set<String>
+
+    public init(
+        adultConfirmed: Bool = false,
+        supportedScopeConfirmed: Bool = false,
+        goal: String = "Hypertrophy",
+        experience: String = "Beginner",
+        daysPerWeek: Int = 3,
+        minutes: Int = 45,
+        equipment: Set<String> = ["dumbbell"],
+        preferredUnit: MassUnit = .lb,
+        timeZone: String = TimeZone.current.identifier,
+        excludedExercises: Set<String> = [],
+        preferredExercises: Set<String> = []
+    ) {
+        self.adultConfirmed = adultConfirmed
+        self.supportedScopeConfirmed = supportedScopeConfirmed
+        self.goal = goal
+        self.experience = experience
+        self.daysPerWeek = daysPerWeek
+        self.minutes = minutes
+        self.equipment = equipment
+        self.preferredUnit = preferredUnit
+        self.timeZone = timeZone
+        self.excludedExercises = excludedExercises
+        self.preferredExercises = preferredExercises
     }
 }
-public struct Profile: Codable, Equatable {
-    public var adultConfirmed = false
-    public var supportedScopeConfirmed = false
-    public var goal = "Hypertrophy"
-    public var experience = "Beginner"
-    public var daysPerWeek = 3
-    public var minutes = 45
-    public var equipment: Set<String> = ["dumbbell"]
-    public var preferredUnit: MassUnit = .lb
-    public var timeZone = TimeZone.current.identifier
-    public var excludedExercises: Set<String> = []
-    public var preferredExercises: Set<String> = []
-    public init() {}
-}
+
+/// One physical piece of equipment as the athlete identifies it. Loads never transfer between identities.
 public struct EquipmentContext: Codable, Equatable, Identifiable {
     public var id: String
     public var name: String
@@ -59,28 +92,89 @@ public struct EquipmentContext: Codable, Equatable, Identifiable {
     public var unit: MassUnit
     public var basis: LoadBasis
     public var availableLoads: [Double]
-    public init(id: String, name: String, kind: String, unit: MassUnit, basis: LoadBasis,
-                availableLoads: [Double] = []) {
-        self.id = id; self.name = name; self.kind = kind; self.unit = unit
-        self.basis = basis; self.availableLoads = availableLoads.sorted()
+
+    public init(
+        id: String,
+        name: String,
+        kind: String,
+        unit: MassUnit,
+        basis: LoadBasis,
+        availableLoads: [Double] = []
+    ) {
+        self.id = id
+        self.name = name
+        self.kind = kind
+        self.unit = unit
+        self.basis = basis
+        self.availableLoads = availableLoads
     }
 }
+
+/// A governed library exercise. ``alternatives`` are directional curated substitutes.
 public struct Exercise: Codable, Equatable, Identifiable {
-    public let id: String
-    public let name: String
-    public let role: String
-    public let equipmentKind: String
-    public let basis: LoadBasis
-    public let alternatives: [String]
-    public let review: ReviewStatus
-    public let contentVersion: String
-    public init(id: String, name: String, role: String, equipmentKind: String,
-                basis: LoadBasis, alternatives: [String], review: ReviewStatus = .fixture) {
-        self.id = id; self.name = name; self.role = role; self.equipmentKind = equipmentKind
-        self.basis = basis; self.alternatives = alternatives; self.review = review
-        self.contentVersion = "fixture-1"
+    public var id: String
+    public var name: String
+    public var role: String
+    public var equipmentKind: String
+    public var basis: LoadBasis
+    public var alternatives: [String]
+    public var review: ReviewStatus
+    public var contentVersion: String
+
+    public init(
+        id: String,
+        name: String,
+        role: String,
+        equipmentKind: String,
+        basis: LoadBasis,
+        alternatives: [String],
+        review: ReviewStatus = .fixture,
+        contentVersion: String = "fixture-1"
+    ) {
+        self.id = id
+        self.name = name
+        self.role = role
+        self.equipmentKind = equipmentKind
+        self.basis = basis
+        self.alternatives = alternatives
+        self.review = review
+        self.contentVersion = contentVersion
     }
 }
+
+/// Progression policy parameters. Values are supplied by the content bundle, never assumed.
+public struct TrainingPolicy: Codable, Equatable {
+    public var id: String
+    public var version: String
+    public var review: ReviewStatus
+    public var requiredExposures: Int
+    public var minimumRIR: Int
+    public var maximumIncreaseFraction: Double
+    public var historyDays: Int
+    public var maximumGapDays: Int
+
+    public init(
+        id: String,
+        version: String,
+        review: ReviewStatus,
+        requiredExposures: Int,
+        minimumRIR: Int,
+        maximumIncreaseFraction: Double,
+        historyDays: Int,
+        maximumGapDays: Int
+    ) {
+        self.id = id
+        self.version = version
+        self.review = review
+        self.requiredExposures = requiredExposures
+        self.minimumRIR = minimumRIR
+        self.maximumIncreaseFraction = maximumIncreaseFraction
+        self.historyDays = historyDays
+        self.maximumGapDays = maximumGapDays
+    }
+}
+
+/// A prescription for one exercise in a session. ``load`` absent means unknown, never zero.
 public struct Prescription: Codable, Equatable, Identifiable {
     public var id: UUID
     public var exerciseID: String
@@ -94,56 +188,125 @@ public struct Prescription: Codable, Equatable, Identifiable {
     public var restSeconds: Int
     public var optional: Bool
     public var estimatedMinutes: Int
-    public init(id: UUID = UUID(), exerciseID: String, equipment: EquipmentContext,
-                load: Double? = nil, optional: Bool = false) {
-        self.id = id; self.exerciseID = exerciseID; self.equipment = equipment
-        self.protocolID = "DP_TEST_01"; self.workingSets = 3; self.lowerReps = 8
-        self.upperReps = 10; self.targets = [8, 8, 8]; self.load = load
-        self.restSeconds = 120; self.optional = optional; self.estimatedMinutes = 12
-    }
-    public var comparisonKey: String {
-        [exerciseID, equipment.id, equipment.unit.rawValue, equipment.basis.rawValue,
-         protocolID, "bilateral-repetition"].joined(separator: "|")
+
+    public init(
+        id: UUID = UUID(),
+        exerciseID: String,
+        equipment: EquipmentContext,
+        protocolID: String,
+        workingSets: Int,
+        lowerReps: Int,
+        upperReps: Int,
+        targets: [Int],
+        load: Double? = nil,
+        restSeconds: Int,
+        optional: Bool,
+        estimatedMinutes: Int
+    ) {
+        self.id = id
+        self.exerciseID = exerciseID
+        self.equipment = equipment
+        self.protocolID = protocolID
+        self.workingSets = workingSets
+        self.lowerReps = lowerReps
+        self.upperReps = upperReps
+        self.targets = targets
+        self.load = load
+        self.restSeconds = restSeconds
+        self.optional = optional
+        self.estimatedMinutes = estimatedMinutes
     }
 }
+
+/// One session's accepted prescriptions. ``modified`` marks a temporary shortened/substituted copy.
 public struct SessionPlan: Codable, Equatable, Identifiable {
-    public var id = UUID()
-    public var revision = 1
+    public var id: UUID
+    public var revision: Int
     public var name: String
     public var slots: [Prescription]
-    public var modified = false
+    public var modified: Bool
     public var scheduledDate: Date?
-    public var warmUpMinutes = 5
-    public var estimatedMinutes: Int { warmUpMinutes + slots.reduce(0) { $0 + $1.estimatedMinutes } }
-    public init(name: String, slots: [Prescription]) { self.name = name; self.slots = slots }
+    public var warmUpMinutes: Int
+
+    public init(
+        id: UUID = UUID(),
+        revision: Int = 1,
+        name: String,
+        slots: [Prescription],
+        modified: Bool = false,
+        scheduledDate: Date? = nil,
+        warmUpMinutes: Int = 5
+    ) {
+        self.id = id
+        self.revision = revision
+        self.name = name
+        self.slots = slots
+        self.modified = modified
+        self.scheduledDate = scheduledDate
+        self.warmUpMinutes = warmUpMinutes
+    }
 }
+
+/// The accepted sequence of session plans; ``sequenceIndex`` points at the next one.
 public struct Program: Codable, Equatable, Identifiable {
-    public var id = UUID()
-    public var revision = 1
-    public var templateID = "FULL_BODY_FIXTURE_01"
-    public var libraryVersion = "fixture-1"
+    public var id: UUID
+    public var revision: Int
+    public var templateID: String
+    public var libraryVersion: String
     public var plans: [SessionPlan]
-    public var sequenceIndex = 0
+    public var sequenceIndex: Int
     public var acceptedAt: Date
-    public init(plans: [SessionPlan], acceptedAt: Date) { self.plans = plans; self.acceptedAt = acceptedAt }
-    public var nextPlan: SessionPlan? { plans.indices.contains(sequenceIndex) ? plans[sequenceIndex] : nil }
+
+    public init(
+        id: UUID = UUID(),
+        revision: Int = 1,
+        templateID: String,
+        libraryVersion: String,
+        plans: [SessionPlan],
+        sequenceIndex: Int = 0,
+        acceptedAt: Date
+    ) {
+        self.id = id
+        self.revision = revision
+        self.templateID = templateID
+        self.libraryVersion = libraryVersion
+        self.plans = plans
+        self.sequenceIndex = sequenceIndex
+        self.acceptedAt = acceptedAt
+    }
 }
-public enum SessionStatus: String, Codable { case inProgress, paused, completed, endedEarly, skipped }
-public enum SetKind: String, Codable { case working, warmUp, extra }
-public enum OmissionReason: String, Codable, CaseIterable { case time, equipment, userChoice, pain, interruption, unspecified }
+
+/// Subjective pre-session input. Recorded, never scored.
 public struct CheckIn: Codable, Equatable {
-    public var energy: String? = nil
-    public var soreness: String? = nil
-    public var painReported = false
+    public var energy: String?
+    public var soreness: String?
+    public var painReported: Bool
     public var minutes: Int?
-    public var unavailableEquipment: Set<String> = []
-    public var occurredAt = Date()
-    public init() {}
+    public var unavailableEquipment: Set<String>
+    public var occurredAt: Date
+
+    public init(
+        energy: String? = nil,
+        soreness: String? = nil,
+        painReported: Bool = false,
+        minutes: Int? = nil,
+        unavailableEquipment: Set<String> = [],
+        occurredAt: Date = Date()
+    ) {
+        self.energy = energy
+        self.soreness = soreness
+        self.painReported = painReported
+        self.minutes = minutes
+        self.unavailableEquipment = unavailableEquipment
+        self.occurredAt = occurredAt
+    }
 }
+
+/// What actually happened in one set. ``operationID`` makes saves idempotent.
 public struct SetLog: Codable, Equatable, Identifiable {
     public var id: UUID
     public var operationID: UUID
-    public var revision = 1
+    public var revision: Int
     public var prescriptionID: UUID
     public var contextKey: String
     public var index: Int
@@ -154,68 +317,128 @@ public struct SetLog: Codable, Equatable, Identifiable {
     public var reps: Int
     public var rir: Int?
     public var occurredAt: Date
-    public var conflicted = false
-    public init(id: UUID = UUID(), operationID: UUID = UUID(), prescription: Prescription,
-                index: Int, kind: SetKind = .working, load: Double?, reps: Int, rir: Int?,
-                occurredAt: Date = Date()) {
-        self.id = id; self.operationID = operationID; self.prescriptionID = prescription.id
-        self.contextKey = prescription.comparisonKey; self.index = index; self.kind = kind
-        self.load = load; self.unit = prescription.equipment.unit; self.basis = prescription.equipment.basis
-        self.reps = reps; self.rir = rir; self.occurredAt = occurredAt
-    }
-    public func validate() throws {
-        struct Payload: Encodable { let log: SetLog }
-        let _: Bool = try LocalPythonTrainerService.shared.call("validateSet", Payload(log: self))
+    public var conflicted: Bool
+
+    public init(
+        id: UUID = UUID(),
+        operationID: UUID = UUID(),
+        revision: Int = 1,
+        prescriptionID: UUID,
+        contextKey: String,
+        index: Int,
+        kind: SetKind,
+        load: Double? = nil,
+        unit: MassUnit,
+        basis: LoadBasis,
+        reps: Int,
+        rir: Int? = nil,
+        occurredAt: Date,
+        conflicted: Bool = false
+    ) {
+        self.id = id
+        self.operationID = operationID
+        self.revision = revision
+        self.prescriptionID = prescriptionID
+        self.contextKey = contextKey
+        self.index = index
+        self.kind = kind
+        self.load = load
+        self.unit = unit
+        self.basis = basis
+        self.reps = reps
+        self.rir = rir
+        self.occurredAt = occurredAt
+        self.conflicted = conflicted
     }
 }
+
+/// A workout from start to summary. Keeps the original and the accepted plan for provenance.
 public struct WorkoutSession: Codable, Equatable, Identifiable {
-    public var id = UUID()
+    public var id: UUID
     public var programID: UUID
     public var programRevision: Int
     public var originalPlan: SessionPlan
     public var plan: SessionPlan
-    public var status: SessionStatus = .inProgress
+    public var status: SessionStatus
     public var startedAt: Date
     public var endedAt: Date?
     public var timeZone: String
     public var checkIn: CheckIn
-    public var logs: [SetLog] = []
-    public var omissions: [String: OmissionReason] = [:]
+    public var logs: [SetLog]
+    public var omissions: [String: OmissionReason]
     public var restEndsAt: Date?
-    public init(program: Program, plan: SessionPlan, checkIn: CheckIn, now: Date, timeZone: String) {
-        self.programID = program.id; self.programRevision = program.revision
-        self.originalPlan = plan; self.plan = plan; self.checkIn = checkIn
-        self.startedAt = now; self.timeZone = timeZone
-    }
-    public var active: Bool { status == .inProgress || status == .paused }
-    public var completeWorkingSets: Int { logs.filter { $0.kind == .working }.count }
-    public func hasWorkingSet(slot: UUID, index: Int) -> Bool {
-        logs.contains { $0.prescriptionID == slot && $0.index == index && $0.kind == .working }
+
+    public init(
+        id: UUID = UUID(),
+        programID: UUID,
+        programRevision: Int,
+        originalPlan: SessionPlan,
+        plan: SessionPlan,
+        status: SessionStatus = .inProgress,
+        startedAt: Date,
+        endedAt: Date? = nil,
+        timeZone: String,
+        checkIn: CheckIn,
+        logs: [SetLog] = [],
+        omissions: [String: OmissionReason] = [:],
+        restEndsAt: Date? = nil
+    ) {
+        self.id = id
+        self.programID = programID
+        self.programRevision = programRevision
+        self.originalPlan = originalPlan
+        self.plan = plan
+        self.status = status
+        self.startedAt = startedAt
+        self.endedAt = endedAt
+        self.timeZone = timeZone
+        self.checkIn = checkIn
+        self.logs = logs
+        self.omissions = omissions
+        self.restEndsAt = restEndsAt
     }
 }
-public enum DecisionOutcome: String, Codable { case keepPlan, proposeChange, needsInput, unassessed, withholdGuidance }
-public enum Request: Codable, Equatable {
-    case progression(UUID)
-    case shorten(Int)
-    case substitute(UUID, String)
-    case reschedule(Date)
+
+/// A set log id/revision a decision relied on.
+public struct Evidence: Codable, Equatable, Identifiable {
+    public var id: UUID
+    public var revision: Int
+
+    public init(
+        id: UUID,
+        revision: Int
+    ) {
+        self.id = id
+        self.revision = revision
+    }
 }
-public enum RecommendationStatus: String, Codable { case proposed, applied, rejected, expired }
-public struct Evidence: Codable, Equatable { public var id: UUID; public var revision: Int }
+
+/// The Training Brain's answer. ``after`` is the proposed plan for ``proposeChange`` outcomes.
 public struct Decision: Codable, Equatable {
     public var outcome: DecisionOutcome
     public var reason: String
     public var explanation: String
     public var after: SessionPlan?
     public var evidence: [Evidence]
-    public init(_ outcome: DecisionOutcome, _ reason: String, _ explanation: String,
-                after: SessionPlan? = nil, evidence: [Evidence] = []) {
-        self.outcome = outcome; self.reason = reason; self.explanation = explanation
-        self.after = after; self.evidence = evidence
+
+    public init(
+        outcome: DecisionOutcome,
+        reason: String,
+        explanation: String,
+        after: SessionPlan? = nil,
+        evidence: [Evidence] = []
+    ) {
+        self.outcome = outcome
+        self.reason = reason
+        self.explanation = explanation
+        self.after = after
+        self.evidence = evidence
     }
 }
+
+/// A proposal pinned to the context it was computed against. Inert until accepted.
 public struct Recommendation: Codable, Equatable, Identifiable {
-    public var id = UUID()
+    public var id: UUID
     public var stateRevision: Int
     public var contextRevision: Int
     public var targetPlanID: UUID
@@ -224,55 +447,279 @@ public struct Recommendation: Codable, Equatable, Identifiable {
     public var decision: Decision
     public var policyVersion: String
     public var createdAt: Date
-    public var status: RecommendationStatus = .proposed
+    public var status: RecommendationStatus
     public var rejectionReason: String?
+
+    public init(
+        id: UUID = UUID(),
+        stateRevision: Int,
+        contextRevision: Int,
+        targetPlanID: UUID,
+        targetPlanRevision: Int,
+        request: Request,
+        decision: Decision,
+        policyVersion: String,
+        createdAt: Date,
+        status: RecommendationStatus = .proposed,
+        rejectionReason: String? = nil
+    ) {
+        self.id = id
+        self.stateRevision = stateRevision
+        self.contextRevision = contextRevision
+        self.targetPlanID = targetPlanID
+        self.targetPlanRevision = targetPlanRevision
+        self.request = request
+        self.decision = decision
+        self.policyVersion = policyVersion
+        self.createdAt = createdAt
+        self.status = status
+        self.rejectionReason = rejectionReason
+    }
 }
+
+/// The set log a correction replaced.
 public struct AuditEntry: Codable, Equatable, Identifiable {
-    public var id = UUID()
+    public var id: UUID
     public var previous: SetLog
     public var correctedAt: Date
+
+    public init(
+        id: UUID = UUID(),
+        previous: SetLog,
+        correctedAt: Date
+    ) {
+        self.id = id
+        self.previous = previous
+        self.correctedAt = correctedAt
+    }
 }
+
+/// Two competing versions of one set. Resolved explicitly by the athlete, never silently.
 public struct Conflict: Codable, Equatable, Identifiable {
-    public var id = UUID()
+    public var id: UUID
     public var sessionID: UUID
     public var current: SetLog
     public var incoming: SetLog
+
+    public init(
+        id: UUID = UUID(),
+        sessionID: UUID,
+        current: SetLog,
+        incoming: SetLog
+    ) {
+        self.id = id
+        self.sessionID = sessionID
+        self.current = current
+        self.incoming = incoming
+    }
 }
+
+/// Local analytics event.
 public struct AnalyticsEvent: Codable, Equatable, Identifiable {
-    public var id = UUID()
+    public var id: UUID
     public var name: String
     public var occurredAt: Date
     public var stateRevision: Int
     public var reason: String?
+
+    public init(
+        id: UUID = UUID(),
+        name: String,
+        occurredAt: Date,
+        stateRevision: Int,
+        reason: String? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.occurredAt = occurredAt
+        self.stateRevision = stateRevision
+        self.reason = reason
+    }
 }
+
+public struct Nutrients: Codable, Equatable {
+    public var calories: Double
+    public var protein: Double
+    public var carbs: Double
+    public var fat: Double
+
+    public init(
+        calories: Double = 0,
+        protein: Double = 0,
+        carbs: Double = 0,
+        fat: Double = 0
+    ) {
+        self.calories = calories
+        self.protein = protein
+        self.carbs = carbs
+        self.fat = fat
+    }
+}
+
+/// A user-confirmed nutrient estimate for one eaten portion.
+public struct Meal: Codable, Equatable, Identifiable {
+    public var id: UUID
+    public var revision: Int
+    public var name: String
+    public var nutrients: Nutrients
+    public var occurredAt: Date
+    public var source: String
+    public var timeZone: String
+
+    public init(
+        id: UUID = UUID(),
+        revision: Int = 1,
+        name: String,
+        nutrients: Nutrients,
+        occurredAt: Date = Date(),
+        source: String = "user_confirmed_estimate",
+        timeZone: String = TimeZone.current.identifier
+    ) {
+        self.id = id
+        self.revision = revision
+        self.name = name
+        self.nutrients = nutrients
+        self.occurredAt = occurredAt
+        self.source = source
+        self.timeZone = timeZone
+    }
+}
+
+public struct MealAudit: Codable, Equatable, Identifiable {
+    public var id: UUID
+    public var previous: Meal
+    public var correctedAt: Date
+
+    public init(
+        id: UUID = UUID(),
+        previous: Meal,
+        correctedAt: Date
+    ) {
+        self.id = id
+        self.previous = previous
+        self.correctedAt = correctedAt
+    }
+}
+
+/// An immutable saved portion.
+public struct Recipe: Codable, Equatable, Identifiable {
+    public var id: UUID
+    public var name: String
+    public var perServing: Nutrients
+    public var source: String
+
+    public init(
+        id: UUID = UUID(),
+        name: String,
+        perServing: Nutrients,
+        source: String = "user_estimate"
+    ) {
+        self.id = id
+        self.name = name
+        self.perServing = perServing
+        self.source = source
+    }
+}
+
+/// Everything the app persists. One file, one athlete.
 public struct AthleteState: Codable, Equatable {
-    public var schemaVersion = 1
-    public var athleteID = UUID()
-    public var revision = 0
-    public var contextRevision = 0
+    public var schemaVersion: Int
+    public var athleteID: UUID
+    public var revision: Int
+    public var contextRevision: Int
     public var profile: Profile?
     public var program: Program?
     public var nextPlanOverride: SessionPlan?
-    public var previousPrograms: [Program] = []
-    public var sessions: [WorkoutSession] = []
-    public var recommendations: [Recommendation] = []
-    public var painExclusions: Set<String> = []
-    public var audits: [AuditEntry] = []
-    public var conflicts: [Conflict] = []
-    public var operations: Set<UUID> = []
-    public var events: [AnalyticsEvent] = []
-    public var meals: [Meal] = []
-    public var mealAudits: [MealAudit] = []
-    public var recipes: [Recipe] = []
-    public init() {}
-    public var activeSession: WorkoutSession? { sessions.last(where: \.active) }
-    public var nextPlan: SessionPlan? { nextPlanOverride ?? program?.nextPlan }
-    public mutating func expireProposals() {
-        for index in recommendations.indices where recommendations[index].status == .proposed {
-            recommendations[index].status = .expired
-        }
+    public var previousPrograms: [Program]
+    public var sessions: [WorkoutSession]
+    public var recommendations: [Recommendation]
+    public var painExclusions: Set<String>
+    public var audits: [AuditEntry]
+    public var conflicts: [Conflict]
+    public var operations: Set<UUID>
+    public var events: [AnalyticsEvent]
+    public var meals: [Meal]
+    public var mealAudits: [MealAudit]
+    public var recipes: [Recipe]
+
+    public init(
+        schemaVersion: Int = 1,
+        athleteID: UUID = UUID(),
+        revision: Int = 0,
+        contextRevision: Int = 0,
+        profile: Profile? = nil,
+        program: Program? = nil,
+        nextPlanOverride: SessionPlan? = nil,
+        previousPrograms: [Program] = [],
+        sessions: [WorkoutSession] = [],
+        recommendations: [Recommendation] = [],
+        painExclusions: Set<String> = [],
+        audits: [AuditEntry] = [],
+        conflicts: [Conflict] = [],
+        operations: Set<UUID> = [],
+        events: [AnalyticsEvent] = [],
+        meals: [Meal] = [],
+        mealAudits: [MealAudit] = [],
+        recipes: [Recipe] = []
+    ) {
+        self.schemaVersion = schemaVersion
+        self.athleteID = athleteID
+        self.revision = revision
+        self.contextRevision = contextRevision
+        self.profile = profile
+        self.program = program
+        self.nextPlanOverride = nextPlanOverride
+        self.previousPrograms = previousPrograms
+        self.sessions = sessions
+        self.recommendations = recommendations
+        self.painExclusions = painExclusions
+        self.audits = audits
+        self.conflicts = conflicts
+        self.operations = operations
+        self.events = events
+        self.meals = meals
+        self.mealAudits = mealAudits
+        self.recipes = recipes
     }
-    public mutating func record(_ name: String, now: Date, reason: String? = nil) {
-        events.append(AnalyticsEvent(name: name, occurredAt: now, stateRevision: revision + 1, reason: reason))
+}
+
+/// Descriptive record from free-exercise-db. Never a governed Exercise.
+public struct CatalogExercise: Codable, Equatable, Identifiable {
+    public var id: String
+    public var name: String
+    public var force: String?
+    public var level: String
+    public var mechanic: String?
+    public var equipment: String?
+    public var primaryMuscles: [String]
+    public var secondaryMuscles: [String]
+    public var instructions: [String]
+    public var category: String
+    public var images: [String]
+
+    public init(
+        id: String,
+        name: String,
+        force: String?,
+        level: String,
+        mechanic: String?,
+        equipment: String?,
+        primaryMuscles: [String],
+        secondaryMuscles: [String],
+        instructions: [String],
+        category: String,
+        images: [String]
+    ) {
+        self.id = id
+        self.name = name
+        self.force = force
+        self.level = level
+        self.mechanic = mechanic
+        self.equipment = equipment
+        self.primaryMuscles = primaryMuscles
+        self.secondaryMuscles = secondaryMuscles
+        self.instructions = instructions
+        self.category = category
+        self.images = images
     }
 }

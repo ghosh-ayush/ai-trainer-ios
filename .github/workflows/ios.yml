@@ -19,15 +19,16 @@ jobs:
       - name: Lint and type-check the core
         working-directory: core/python
         run: |
-          pip install --quiet "ruff>=0.15" "mypy>=1.20"
-          ruff check .
-          ruff format --check .
+          pip install --quiet "ruff==0.16.8" "mypy==2.3.1"  # pinned: tool drift must not break master
+          ruff check . ../../scripts
+          ruff format --check . ../../scripts
           mypy
       - run: PYTHONPATH=core/python python -m unittest discover -s core/python/tests -v
-      - name: Versioned schemas remain reproducible
+      - name: Generated contracts and Swift models match the spec
         run: |
           python scripts/generate_schemas.py
-          git diff --exit-code -- shared/schemas core/python/ai_trainer
+          python scripts/generate_swift_models.py
+          git diff --exit-code -- shared/schemas core/python/ai_trainer apps/ios/Sources/AITrainerCore/Models.swift
   ios:
     runs-on: macos-15
     timeout-minutes: 30

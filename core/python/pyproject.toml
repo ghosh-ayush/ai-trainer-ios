@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "ai-trainer-core"
 version = "0.1.0"
 description = "Offline deterministic AI Trainer domain core"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = []
 
 [tool.setuptools.package-data]
@@ -14,7 +14,7 @@ ai_trainer = ["*.json"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py310"
 src = ["."]
 
 [tool.ruff.lint]
@@ -22,7 +22,7 @@ select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
 ignore = ["RUF012"]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 strict = true
 warn_unreachable = true
 packages = ["ai_trainer"]

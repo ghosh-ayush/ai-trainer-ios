@@ -10,8 +10,8 @@ final class TrainerTests: XCTestCase {
         profile.equipment = ["barbell", "dumbbell", "machine"]; profile.minutes = 60
         state.profile = profile
         let equipment = EquipmentContext(id: "rack-1", name: "Rack 1", kind: "barbell", unit: .lb, basis: .total, availableLoads: [100, 105, 110])
-        let slot = Prescription(exerciseID: "bench", equipment: equipment, load: 100)
-        state.program = Program(plans: [SessionPlan(name: "Fixture", slots: [slot])], acceptedAt: now)
+        let slot = Prescription.developmentFixture(exerciseID: "bench", equipment: equipment, load: 100)
+        state.program = Program(templateID: "FULL_BODY_FIXTURE_01", libraryVersion: "fixture-1", plans: [SessionPlan(name: "Fixture", slots: [slot])], acceptedAt: now)
         return state
     }
     func exposure(_ state: AthleteState, daysAgo: Int, reps: [Int] = [10, 10, 10], rir: Int? = 2) -> WorkoutSession {
