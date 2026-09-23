@@ -17,7 +17,9 @@ final class HealthKitService: ObservableObject {
     @Published private(set) var loading = false
     private let healthStore = HKHealthStore()
     private var generation = 0
-    func requestAndRead() async {
+    /// Reads samples and asks the domain core to classify them. The core always answers
+    /// `unassessed` today (no reviewed readiness policy); anything else is treated as an error.
+    func requestAndRead(using core: any TrainerDomainService) async {
         guard !loading else { return }
         guard HKHealthStore.isHealthDataAvailable() else { message = "HealthKit is not available on this device."; return }
         guard let hrv = HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN),
@@ -54,7 +56,7 @@ final class HealthKitService: ObservableObject {
             guard requestGeneration == generation else { return }
             struct Payload: Encodable { let observations: [HealthReading] }
             struct Assessment: Decodable { let status: String; let reason: String }
-            let assessment: Assessment = try LocalPythonTrainerService.shared.call("recovery", Payload(observations: result))
+            let assessment: Assessment = try core.call("recovery", Payload(observations: result))
             guard assessment.status == "unassessed" else { throw TrainerError.unsupported }
             readings = result.sorted { $0.date > $1.date }
             message = result.isEmpty ? "No readable samples. Data may be absent, outside the shared window, or not permitted." : "Read-only samples; no readiness score or training adjustment."

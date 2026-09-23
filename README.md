@@ -51,8 +51,9 @@ Package.swift                   Native package entry point
    Health data still require hardware validation.
 
 The project links the root Swift package at `../../..` relative to `apps/ios/App`.
-After adding native files, `python3 scripts/generate_project.py` can regenerate the
-project; it normalizes settings, so preserve any personal signing changes first.
+Files under `apps/ios/Sources` and `apps/ios/Tests` are discovered by the package
+automatically; files under `apps/ios/App/AITrainer` belong to the app target and must be
+added through Xcode, which owns `AITrainer.xcodeproj` (see ADR-011).
 
 ## Tests and builds
 

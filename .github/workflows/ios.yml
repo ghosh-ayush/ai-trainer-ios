@@ -41,8 +41,6 @@ jobs:
         run: scripts/setup_python.sh
       - name: Python and Swift tests through embedded CPython
         run: scripts/test.sh
-      - name: Verify generated Xcode project builds
-        run: python3 scripts/generate_project.py
       - name: Build and exercise simulator runtime
         run: |
           set -o pipefail

@@ -179,7 +179,7 @@ struct SwapView: View {
         NavigationStack {
             List {
                 Text("Alternatives are directional library entries, not a claim of identical loading or safety. The final preview checks your equipment and exclusions.")
-                ForEach(store.service?.brain.library.exercise(slot.exerciseID)?.alternatives ?? [], id: \.self) { id in
+                ForEach(store.service?.library.exercise(slot.exerciseID)?.alternatives ?? [], id: \.self) { id in
                     Button(store.name(id)) { store.request(.substitute(slot.id, id)); dismiss() }
                 }
             }.navigationTitle("Curated alternatives").toolbar { Button("Cancel") { dismiss() } }

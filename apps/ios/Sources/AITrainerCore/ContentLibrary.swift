@@ -1,6 +1,10 @@
 import Foundation
 
-/// No fixture value in this file is an approved real-world training prescription.
+/// The exercises and progression policy the host offers to the Python core.
+///
+/// Swift only carries this data across the bridge; every judgement about it (eligibility,
+/// substitution, progression) is made in `core/python`. No fixture value in this file is an
+/// approved real-world training prescription — Release builds refuse `review: fixture` content.
 public struct ContentLibrary {
     public let exercises: [Exercise]
     public let policy: TrainingPolicy
@@ -10,6 +14,7 @@ public struct ContentLibrary {
         self.permitsFixtures = permitsFixtures; self.exercises = exercises; self.policy = policy
     }
     public func exercise(_ id: String) -> Exercise? { exercises.first { $0.id == id } }
+    /// Mirrors `content.is_enabled` in Python; used only for display decisions, never for guidance.
     public func enabled(_ status: ReviewStatus) -> Bool {
         status == .approved || (status == .fixture && permitsFixtures)
     }
@@ -23,22 +28,4 @@ public struct ContentLibrary {
         .init(id: "leg_press", name: "Leg press", role: "squat", equipmentKind: "machine", basis: .machineSetting, alternatives: ["goblet_squat"]),
         .init(id: "db_curl", name: "Bilateral dumbbell curl", role: "accessory", equipmentKind: "dumbbell", basis: .perHand, alternatives: [])
     ]
-    public func initialProgram(profile: Profile, now: Date) throws -> Program {
-        try LocalPythonTrainerService.shared.initialProgram(profile: profile, library: self, now: now)
-    }
-    public func context(for exercise: Exercise, unit: MassUnit) -> EquipmentContext {
-        .init(id: "local-\(exercise.id)", name: "My \(exercise.name) equipment", kind: exercise.equipmentKind,
-              unit: unit, basis: exercise.basis)
-    }
-}
-
-public struct TrainingBrain {
-    public let library: ContentLibrary
-    public init(library: ContentLibrary) {
-        self.library = library
-    }
-    public func decide(state: AthleteState, request: Request, now: Date) -> Decision {
-        do { return try LocalPythonTrainerService.shared.decide(state: state, request: request, library: library, now: now) }
-        catch { return .init(.withholdGuidance, "LOCAL_CORE_UNAVAILABLE", "Local training rules could not run. No change was applied.") }
-    }
 }

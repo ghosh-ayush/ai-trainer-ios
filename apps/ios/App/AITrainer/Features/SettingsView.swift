@@ -18,7 +18,11 @@ struct SettingsView: View {
         Form {
             Section("Privacy and storage") {
                 Label("Stored on this device", systemImage: "lock.shield")
-                Text("Workout data is saved atomically with iOS file protection. Automatic backup, cloud sync, accounts, model training, and remote analytics are not enabled.").font(.footnote)
+                Text("Workout data is saved atomically with iOS file protection. Cloud sync, accounts, model training, and remote analytics are not enabled.").font(.footnote)
+                Toggle("Include in iPhone backups", isOn: Binding(get: { store.includeInDeviceBackup }, set: { store.setIncludeInDeviceBackup($0) }))
+                Text(store.includeInDeviceBackup
+                     ? "Your training file travels with iCloud Backup and computer backups of this iPhone, encrypted by iOS like the rest of the device. Restoring a backup brings the file back as it was when that backup was made."
+                     : "Your training file is left out of iCloud Backup and computer backups. If this iPhone is lost or the app is deleted, the data is gone unless you exported it.").font(.caption)
                 Button("Export all local data as JSON") {
                     guard let service = store.service else { return }
                     do { exportDocument = StateExport(data: try service.repository.export()); showExport = true }
@@ -27,7 +31,7 @@ struct SettingsView: View {
                 Text("Exports contain your training records. Keep copies private. Deleting app data cannot delete files you exported elsewhere.").font(.caption)
             }
             Section("Exercise exclusions") {
-                ForEach(store.service?.brain.library.exercises ?? []) { exercise in
+                ForEach(store.service?.library.exercises ?? []) { exercise in
                     Toggle(exercise.name, isOn: Binding(get: { store.state.profile?.excludedExercises.contains(exercise.id) ?? false }, set: { value in
                         store.perform { try $0.exclude(exerciseID: exercise.id, excluded: value) }
                     }))
@@ -73,6 +77,7 @@ struct SettingsView: View {
 
 /// Browsing imported descriptions does not enroll an exercise into guidance.
 private struct ExerciseCatalogView: View {
+    @EnvironmentObject private var store: AppStore
     @State private var catalog: ExerciseCatalog?
     @State private var query = ""
     @State private var error: String?
@@ -103,8 +108,8 @@ private struct ExerciseCatalogView: View {
         }.navigationTitle("Exercise catalog")
             .searchable(text: $query)
             .task {
-                guard catalog == nil else { return }
-                do { catalog = try ExerciseCatalog.bundled() }
+                guard catalog == nil, let core = store.service?.core else { return }
+                do { catalog = try ExerciseCatalog.bundled(core: core) }
                 catch { self.error = error.localizedDescription }
             }
     }

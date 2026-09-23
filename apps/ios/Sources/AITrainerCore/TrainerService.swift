@@ -2,12 +2,15 @@ import Foundation
 
 /// Native persistence orchestration. All mutations are computed by the domain service,
 /// then saved atomically before the new snapshot becomes visible to feature code.
+///
+/// This is the only object feature code talks to. It owns the content library, the state
+/// repository and the domain core it was composed with; nothing here reaches for a global.
 public final class TrainerService {
     public let repository: StateRepository
-    public let brain: TrainingBrain
+    public let library: ContentLibrary
     public let core: any TrainerDomainService
-    public init(repository: StateRepository, library: ContentLibrary, core: any TrainerDomainService = LocalPythonTrainerService.shared) {
-        self.repository = repository; self.core = core; brain = TrainingBrain(library: library)
+    public init(repository: StateRepository, library: ContentLibrary, core: any TrainerDomainService) {
+        self.repository = repository; self.library = library; self.core = core
     }
     private struct Arguments: Encodable {
         var profile: Profile?; var slotID: UUID?; var load: Double?; var options: [Double]?
@@ -24,12 +27,12 @@ public final class TrainerService {
     @discardableResult private func command(_ name: String, _ arguments: Arguments = Arguments(), now: Date = Date()) throws -> Bool? {
         try repository.transaction { state in
             let result: Result = try core.call("stateCommand", Payload(command: name, state: state, arguments: arguments,
-                library: LibraryDTO(brain.library), now: now, ids: (0..<10).map { _ in UUID() }))
+                library: LibraryDTO(library), now: now, ids: (0..<10).map { _ in UUID() }))
             state = result.state; return result.value
         }
     }
     public func previewInitialPlan(profile: Profile, now: Date = Date()) throws -> Program {
-        try core.initialProgram(profile: profile, library: brain.library, now: now)
+        try core.initialProgram(profile: profile, library: library, now: now)
     }
     public func scaleNutrients(_ nutrients: Nutrients, servings: Double) throws -> Nutrients {
         try core.nutrients(nutrients, servings: servings)
@@ -71,19 +74,19 @@ public final class TrainerService {
     public func deleteSession(id: UUID) throws { try command("deleteSession", Arguments(id: id)) }
     @discardableResult public func request(_ request: Request, now: Date = Date()) throws -> Decision {
         try repository.transaction { state in
-            let result = try core.recommendation("request", state: state, request: request, library: brain.library, now: now)
+            let result = try core.recommendation("request", state: state, request: request, library: library, now: now)
             guard let decision = result.decision else { throw TrainerError.invalid("Missing decision.") }
             state = result.state; return decision
         }
     }
     public func acceptRecommendation(id: UUID, now: Date = Date()) throws {
         try repository.transaction { state in
-            state = try core.recommendation("accept", state: state, id: id, library: brain.library, now: now).state
+            state = try core.recommendation("accept", state: state, id: id, library: library, now: now).state
         }
     }
     public func rejectRecommendation(id: UUID, reason: String? = nil, now: Date = Date()) throws {
         try repository.transaction { state in
-            state = try core.recommendation("reject", state: state, id: id, reason: reason, library: brain.library, now: now).state
+            state = try core.recommendation("reject", state: state, id: id, reason: reason, library: library, now: now).state
         }
     }
     public func deleteMeal(id: UUID) throws { try command("deleteMeal", Arguments(id: id)) }

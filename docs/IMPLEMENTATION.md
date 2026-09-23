@@ -61,7 +61,7 @@ The camera lab does not save video, measure actual lumbar force, infer effort, i
 
 The read-only HealthKit adapter requests HRV SDNN, resting heart rate and sleep samples only after explicit user action. It reads at most 300 samples per type, with 28-day HRV/RHR and 7-day sleep windows. Source and time remain visible. Individual sleep records are displayed rather than incorrectly summed across devices or overlapping categories.
 
-Permission-request completion is not treated as proof of read access. An empty query is described as no readable samples: missing data, permission restrictions and limited access cannot be safely distinguished here. No health data is written. Raw readings remain in the recovery screen's memory, are cleared on exit, and are not consumed by TrainingBrain. Baseline computation, sufficiency rules, accepted adaptive changes and weather remain unimplemented pending a reviewed policy.
+Permission-request completion is not treated as proof of read access. An empty query is described as no readable samples: missing data, permission restrictions and limited access cannot be safely distinguished here. No health data is written. Raw readings remain in the recovery screen's memory, are cleared on exit, and are never sent to the training rules as evidence. Baseline computation, sufficiency rules, accepted adaptive changes and weather remain unimplemented pending a reviewed policy.
 
 ## P4
 
@@ -71,7 +71,7 @@ Corrections retain the preceding meal revision and reject a stale edit. Meal del
 
 ## Storage and permission boundaries
 
-On iOS, the state directory and atomic writes use complete file protection. Automatic OS backup is disabled for this directory. Unlock is required to access the protected file; startup errors never reset the file. Export is explicit, local JSON and contains sensitive user records. There is no import endpoint to resurrect deleted data. This is logical application deletion, not a promise about forensic erasure of device storage or exported copies.
+On iOS, the state directory and atomic writes use complete file protection. The directory is included in iOS device backups (iCloud Backup and computer backups) by default; Settings → "Include in iPhone backups" excludes it, and the preference is only recorded after the file-system attribute changed. Restoring a backup restores the file as it was; there is no merge, so a restore can resurrect records deleted after the backup was made (ADR-008 tracks the CloudKit snapshot that will add explicit conflict handling). Unlock is required to access the protected file; startup errors never reset the file. Export is explicit, local JSON and contains sensitive user records. There is no import endpoint to resurrect deleted data. This is logical application deletion, not a promise about forensic erasure of device storage or exported copies.
 
 Camera permission is separate from HealthKit authorization and from enabling experimental tools. No microphone, precise location, advertising, tracking, research upload, or model-training consent is requested because those features are absent. The privacy manifest is a starting declaration for this build and requires a fresh audit before distribution or adding dependencies.
 
