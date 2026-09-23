@@ -34,7 +34,7 @@ core/python/ai_trainer/   domain rules, state commands, recommendation lifecycle
 core/python/tests/        Python behaviour + contract tests (fast; run these constantly)
 shared/schemas/v1/        contract v1.0 JSON schemas (generated; do not hand-edit)
 shared/fixtures/v1/       golden request/response fixtures
-apps/ios/App/             SwiftUI app + GENERATED AITrainer.xcodeproj
+apps/ios/App/             SwiftUI app + AITrainer.xcodeproj (Xcode owns it; see ADR-011)
 apps/ios/Sources/AITrainerCore/   Swift DTOs, transport to Python, persistence, perception
 apps/ios/PythonBridge/    C bridge to CPython (rarely changes)
 apps/ios/Vendor/          gitignored: Python.xcframework from scripts/setup_python.sh
@@ -53,7 +53,7 @@ Nothing in `apps/ios` builds until that has run.
 PYTHONPATH=core/python python3 -m unittest discover -s core/python/tests -v   # Python tests (Linux/macOS)
 scripts/test.sh                          # Python + Swift tests through embedded CPython (macOS)
 python3 scripts/generate_schemas.py      # after ANY change to contract shapes; CI diffs the output
-python3 scripts/generate_project.py      # after adding/removing/renaming Swift files; CI diffs the output
+python3 scripts/generate_swift_models.py # after ANY change to contract_spec.py; CI diffs Models.swift
 open apps/ios/App/AITrainer.xcodeproj    # scheme AITrainer, Debug, iPhone simulator
 scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
 ```
@@ -61,13 +61,18 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
 ## Workflow
 - Branch per task: `claude/<topic>`, `codex/<topic>`, `feat/<topic>`. Never commit to `master`.
 - One PR per change; CI (`python` + `ios` jobs) must be green; squash-merge.
-- Definition of done: tests added/updated · schemas regenerated if contracts changed · project
-  regenerated if Swift files changed · docs touched if behaviour changed · ADR in
+- Definition of done: tests added/updated · schemas and Models.swift regenerated if the contract
+  spec changed · new app-target files added through Xcode · docs touched if behaviour changed · ADR in
   `docs/DECISIONS.md` if an architectural or product-policy decision was made · notices updated
   if a dependency was added.
 - Keep the Swift⇄Python contract at version `1.0` unless an ADR says otherwise.
 - Prefer small, readable code over clever one-liners. Descriptive names; a docstring per public
   function; no semicolon-chained statements. Agents: do not compress code to save tokens.
+- Swift never reaches for a global core. `AppStore` composes the one `LocalPythonTrainerService`
+  and passes it down (`TrainerService.core`, `ExerciseCatalog.bundled(core:)`, …). Tests build
+  their own instance. Do not reintroduce a `.shared` singleton.
+- Do not hand-edit or regenerate `AITrainer.xcodeproj`; add app-target files in Xcode. Package
+  files under `apps/ios/Sources` and `apps/ios/Tests` are discovered automatically.
 - Do not run `rm -rf` on `apps/ios/Vendor` or `DerivedData` in someone else's checkout.
 
 ## Things that look like bugs but are intentional
@@ -75,3 +80,5 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
 - Recovery observations always return `unassessed` (no reviewed readiness policy).
 - Curl counter reps are never saved as sets.
 - Dates cross the bridge as binary64 seconds since 2001-01-01 (Foundation reference epoch).
+- Swift has no validators of its own: set and nutrient rules run in Python when a command is
+  saved, so a malformed `SetLog` is rejected by `saveSet`, not by a Swift `validate()`.

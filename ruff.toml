@@ -5,7 +5,3 @@ target-version = "py310"
 [lint]
 select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
 ignore = ["RUF012"]
-
-[lint.per-file-ignores]
-# Legacy generator kept verbatim until the Xcode project workflow is settled (see AGENTS.md).
-"scripts/generate_project.py" = ["E501", "RUF005"]

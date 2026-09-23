@@ -107,11 +107,8 @@ extension SetLog {
             occurredAt: occurredAt, conflicted: false
         )
     }
-
-    public func validate() throws {
-        struct Payload: Encodable { let log: SetLog }
-        let _: Bool = try LocalPythonTrainerService.shared.call("validateSet", Payload(log: self))
-    }
+    // Validity (rep/RIR ranges, finite nonnegative load) is enforced by `validate_set` in Python
+    // when a set is saved or corrected; Swift does not duplicate those rules.
 }
 
 extension WorkoutSession {

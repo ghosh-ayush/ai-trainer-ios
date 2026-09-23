@@ -46,7 +46,9 @@ Why: owner decision (D2). Swift keeps only UI, persistence/CloudKit I/O, camera,
 Codable DTOs; content loading, scheduling, summaries, imports, backup merge and all rules live in Python.
 Consequences: Swift DTOs to be generated from a single Python-side model definition; Swift shims
 (`TrainingBrain`, `ProgressionPolicy`, `PerformanceHistory`) to be removed.
-Status: accepted; implementation tracked in the project plan.
+Status: implemented. DTOs are generated from `contract_spec.py` (PR #10); the shims, the
+`LocalPythonTrainerService.shared` singleton and Swift-side `validate()`/`scaled(by:)` mirrors were
+removed on 2026-09-23 — `AppStore` is the single composition root and Python is the only validator.
 
 ## ADR-008 · 2026-09-22 · Backup via iCloud device backup now, CloudKit private-database snapshot next
 Why: FigJam "backup when online" without a server. Device backup is a one-line change; CloudKit
@@ -57,4 +59,22 @@ Status: accepted.
 ## ADR-009 · 2026-09-22 · Shared repo for multiple coding agents
 Why: owner uses both Claude and Codex. `AGENTS.md` is the single working agreement; `CLAUDE.md`
 imports it. Branch prefixes identify the author; all changes via PR with green CI.
+Status: accepted.
+
+## ADR-010 · 2026-09-23 · The owner is the legal entity for TestFlight and privacy disclosures
+Why: owner decision (D7). The app is published from a personal Apple Developer account; the
+privacy policy, App Privacy answers and health-data disclosures name the owner, not a company.
+Consequences: no organisation-level review gate exists, so the evidence manifest (ADR-006) and the
+in-app "evidence-based, not clinician-reviewed" disclosure carry the compliance story. Revisit if a
+company entity is created or the app leaves TestFlight.
+Status: accepted.
+
+## ADR-011 · 2026-09-23 · Xcode owns `AITrainer.xcodeproj`; the project generator is retired
+Why: `scripts/generate_project.py` had drifted from the Xcode-normalised project (it dropped the
+"Bundle local Python" build phase) and its CI step re-ran it on every build, so a green run
+depended on nobody having touched the project in Xcode. Two writers for one file is one too many.
+Consequences: app-target files are added through Xcode; package files under `apps/ios/Sources`
+and `apps/ios/Tests` need no project edit. The generator and its CI step are deleted. When the
+app target grows past a handful of files, switch it to an Xcode folder-synchronised group so new
+files stop requiring a `pbxproj` change at all.
 Status: accepted.

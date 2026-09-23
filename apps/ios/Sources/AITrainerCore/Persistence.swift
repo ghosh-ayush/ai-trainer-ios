@@ -14,17 +14,30 @@ public final class MemoryPersistence: StatePersistence {
         self.data = data
     }
 }
+/// The athlete state file on disk. On iOS the whole directory gets complete file protection, and
+/// its participation in device backups (iCloud Backup, Finder/Windows backups) is the user's choice.
 public final class FilePersistence: StatePersistence {
     private let url: URL
-    public init(url: URL) throws {
+    private let directory: URL
+    /// - Parameter excludedFromBackup: `true` keeps the state directory out of every device backup.
+    ///   The app reads this from the "Include in iPhone backups" setting (default: included).
+    public init(url: URL, excludedFromBackup: Bool) throws {
         self.url = url
-        let directory = url.deletingLastPathComponent()
+        directory = url.deletingLastPathComponent()
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         #if os(iOS)
         try FileManager.default.setAttributes([.protectionKey: FileProtectionType.complete], ofItemAtPath: directory.path)
-        var excluded = directory
-        var values = URLResourceValues(); values.isExcludedFromBackup = true
-        try excluded.setResourceValues(values)
+        #endif
+        try setExcludedFromBackup(excludedFromBackup)
+    }
+    /// Applies to the directory so the state file and any future siblings follow one rule.
+    /// A no-op outside iOS, where desktop test runs have no backup daemon to inform.
+    public func setExcludedFromBackup(_ excluded: Bool) throws {
+        #if os(iOS)
+        var target = directory
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = excluded
+        try target.setResourceValues(values)
         #endif
     }
     public func load() throws -> Data? {

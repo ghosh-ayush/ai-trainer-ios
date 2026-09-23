@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from ai_trainer.contracts import validate
+from ai_trainer.queries import comparable_sessions, working_logs
 from ai_trainer.service import dispatch_json
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -169,6 +170,36 @@ class DomainTests(unittest.TestCase):
                 (ROOT / f"shared/schemas/v1/{name}.schema.json").read_bytes(),
                 (ROOT / f"core/python/ai_trainer/{name}.schema.json").read_bytes(),
             )
+
+    def test_comparable_sessions_filter_and_order(self):
+        """Comparable history is newest first and excludes active, skipped, future and
+        differently-equipped sessions (formerly asserted by Swift's PerformanceHistory)."""
+        now = self.p["now"]
+        template = self.state["sessions"][-1]
+        day = 86400
+
+        def session(number, days_ago, **overrides):
+            candidate = copy.deepcopy(template)
+            candidate["id"] = uid(number)
+            candidate["startedAt"] = now - days_ago * day
+            candidate.update(overrides)
+            return candidate
+
+        older = session(101, 5)
+        newer = session(102, 1)
+        skipped = session(103, 0, status="skipped")
+        active = session(104, 0, status="paused")
+        different = session(105, 0)
+        different["plan"]["slots"][0]["equipment"]["id"] = "different-rack"
+        future = session(106, -1)
+        self.state["sessions"] = [older, future, skipped, active, different, newer]
+
+        ordered = comparable_sessions(self.state, self.slot, now)
+        self.assertEqual([s["id"] for s in ordered], [newer["id"], older["id"]])
+        self.assertEqual([log["index"] for log in working_logs(newer, self.slot)], [0, 1, 2])
+        # A tie on startedAt is broken by id so replay is deterministic.
+        older["startedAt"] = newer["startedAt"]
+        self.assertEqual([s["id"] for s in comparable_sessions(self.state, self.slot, now)], [older["id"], newer["id"]])
 
 
 if __name__ == "__main__":

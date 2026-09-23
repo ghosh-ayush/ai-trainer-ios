@@ -4,6 +4,8 @@ import XCTest
 final class TrainerTests: XCTestCase {
     let now = Date(timeIntervalSince1970: 1_789_689_600)
     let library = ContentLibrary(permitsFixtures: true)
+    /// One embedded core per test case, composed the same way `AppStore` does it.
+    let core = LocalPythonTrainerService(transport: EmbeddedPythonTransport())
     func fixture() -> AthleteState {
         var state = AthleteState(); var profile = Profile()
         profile.adultConfirmed = true; profile.supportedScopeConfirmed = true
@@ -25,12 +27,18 @@ final class TrainerTests: XCTestCase {
     func qualified() -> AthleteState {
         var state = fixture(); state.sessions = [exposure(state, daysAgo: 5), exposure(state, daysAgo: 2)]; return state
     }
-    func decision(_ state: AthleteState) -> Decision {
-        TrainingBrain(library: library).decide(state: state, request: .progression(state.nextPlan!.slots[0].id), now: now)
+    /// Read-only evaluation of `request` against `state` through the core; nothing is persisted.
+    func decision(_ state: AthleteState, request: Request? = nil, library: ContentLibrary? = nil) -> Decision {
+        let request = request ?? .progression(state.nextPlan!.slots[0].id)
+        do { return try core.decide(state: state, request: request, library: library ?? self.library, now: now) }
+        catch {
+            XCTFail("Core call failed: \(error)")
+            return Decision(.withholdGuidance, "TEST_CORE_FAILURE", String(describing: error))
+        }
     }
     func service(_ state: AthleteState, storage: MemoryPersistence = MemoryPersistence()) throws -> TrainerService {
         storage.data = try JSONEncoder().encode(state)
-        return TrainerService(repository: try StateRepository(persistence: storage), library: library)
+        return TrainerService(repository: try StateRepository(persistence: storage), library: library, core: core)
     }
     func testQualifyingFixtureProposes105AndThreeBy8() {
         let result = decision(qualified())
@@ -85,17 +93,16 @@ final class TrainerTests: XCTestCase {
     }
     func testProductionRejectsFixturePolicy() {
         let state = fixture()
-        let result = TrainingBrain(library: ContentLibrary()).decide(state: state, request: .progression(state.nextPlan!.slots[0].id), now: now)
-        XCTAssertEqual(result.reason, "POLICY_NOT_APPROVED")
-        XCTAssertThrowsError(try ContentLibrary().initialProgram(profile: state.profile!, now: now))
+        XCTAssertEqual(decision(state, library: ContentLibrary()).reason, "POLICY_NOT_APPROVED")
+        XCTAssertThrowsError(try core.initialProgram(profile: state.profile!, library: ContentLibrary(), now: now))
     }
     func testMissingRequiredProfileDoesNotInventProgram() {
-        XCTAssertThrowsError(try library.initialProgram(profile: Profile(), now: now))
+        XCTAssertThrowsError(try core.initialProgram(profile: Profile(), library: library, now: now))
     }
     func testSubstitutionClearsOriginalLoad() {
         let state = fixture(), id = fixture().athleteID // IDs are independent; never used for inference.
         XCTAssertNotEqual(id, state.athleteID)
-        let result = TrainingBrain(library: library).decide(state: state, request: .substitute(state.nextPlan!.slots[0].id, "machine_press"), now: now)
+        let result = decision(state, request: .substitute(state.nextPlan!.slots[0].id, "machine_press"))
         XCTAssertEqual(result.outcome, .proposeChange)
         XCTAssertNil(result.after?.slots[0].load)
         XCTAssertEqual(result.after?.slots[0].equipment.basis, .machineSetting)
@@ -103,19 +110,19 @@ final class TrainerTests: XCTestCase {
     }
     func testUnsupportedSubstitutionDoesNotWrite() {
         let state = fixture()
-        XCTAssertEqual(TrainingBrain(library: library).decide(state: state, request: .substitute(state.nextPlan!.slots[0].id, "made_up"), now: now).outcome, .withholdGuidance)
+        XCTAssertEqual(decision(state, request: .substitute(state.nextPlan!.slots[0].id, "made_up")).outcome, .withholdGuidance)
     }
     func testShorteningPreservesRestAndWarmup() {
         var state = fixture()
         var extra = state.nextPlan!.slots[0]; extra.id = UUID(); extra.optional = true
         state.program!.plans[0].slots.append(extra)
-        let result = TrainingBrain(library: library).decide(state: state, request: .shorten(20), now: now)
+        let result = decision(state, request: .shorten(20))
         XCTAssertEqual(result.after?.slots.count, 1)
         XCTAssertEqual(result.after?.slots[0].restSeconds, 120)
         XCTAssertEqual(result.after?.warmUpMinutes, 5)
     }
     func testRequiredWorkCannotBeSilentlyCompressed() {
-        XCTAssertEqual(TrainingBrain(library: library).decide(state: fixture(), request: .shorten(5), now: now).reason, "REQUIRED_WORK_DOES_NOT_FIT")
+        XCTAssertEqual(decision(fixture(), request: .shorten(5)).reason, "REQUIRED_WORK_DOES_NOT_FIT")
     }
     func testRepeatedSaveCreatesOneSet() throws {
         let service = try service(fixture()); try service.start(now: now)
@@ -159,10 +166,13 @@ final class TrainerTests: XCTestCase {
         XCTAssertEqual(service.repository.snapshot.activeSession?.logs.first?.reps, 0)
         XCTAssertNil(service.repository.snapshot.activeSession?.logs.first?.load)
     }
-    func testNegativeOrNonfiniteLoadIsRejected() {
-        let slot = fixture().nextPlan!.slots[0]
-        XCTAssertThrowsError(try SetLog(prescription: slot, index: 0, load: .infinity, reps: 8, rir: 2).validate())
-        XCTAssertThrowsError(try SetLog(prescription: slot, index: 0, load: -1, reps: 8, rir: 2).validate())
+    func testNegativeOrNonfiniteLoadIsRejected() throws {
+        let service = try service(fixture()); try service.start(now: now)
+        let session = service.repository.snapshot.activeSession!, slot = session.plan.slots[0]
+        XCTAssertThrowsError(try service.saveSet(SetLog(prescription: slot, index: 0, load: .infinity, reps: 8, rir: 2), sessionID: session.id))
+        XCTAssertThrowsError(try service.saveSet(SetLog(prescription: slot, index: 0, load: -1, reps: 8, rir: 2), sessionID: session.id))
+        XCTAssertThrowsError(try service.saveSet(SetLog(prescription: slot, index: 0, load: 100, reps: 8, rir: 11), sessionID: session.id))
+        XCTAssertTrue(service.repository.snapshot.activeSession!.logs.isEmpty)
     }
     func testUnitConversionDoesNotMutateHistory() {
         let state = qualified(), original = state.sessions[0].logs[0]
@@ -244,11 +254,12 @@ final class TrainerTests: XCTestCase {
         XCTAssertEqual(service.repository.snapshot.nextPlan?.slots[0].exerciseID, "bench")
     }
     func testNutritionPortionsAndDailyTotals() throws {
-        let nutrients = try Nutrients(calories: 200, protein: 10, carbs: 20, fat: 9).scaled(by: 1.5)
+        let service = try service(fixture())
+        let nutrients = try service.scaleNutrients(Nutrients(calories: 200, protein: 10, carbs: 20, fat: 9), servings: 1.5)
         XCTAssertEqual(nutrients.calories, 300)
         let meal = Meal(name: "Fixture", nutrients: nutrients, occurredAt: now)
         XCTAssertEqual(Meal.total([meal], on: now).protein, 15)
-        XCTAssertThrowsError(try nutrients.scaled(by: -1))
+        XCTAssertThrowsError(try service.scaleNutrients(nutrients, servings: -1))
     }
     func testMealLoggingDoesNotChangeTrainingDecision() throws {
         let service = try service(qualified()), before = decision(service.repository.snapshot)
