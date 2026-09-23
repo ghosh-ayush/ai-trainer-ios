@@ -1,23 +1,12 @@
 import Foundation
 
 /// No fixture value in this file is an approved real-world training prescription.
-public struct TrainingPolicy: Codable, Equatable {
-    public var id = "DP_TEST_01"
-    public var version = "fixture-1"
-    public var review: ReviewStatus = .fixture
-    public var requiredExposures = 2
-    public var minimumRIR = 2
-    public var maximumIncreaseFraction = 0.05
-    public var historyDays = 28
-    public var maximumGapDays = 14
-    public init() {}
-}
 public struct ContentLibrary {
     public let exercises: [Exercise]
     public let policy: TrainingPolicy
     public let permitsFixtures: Bool
     public init(permitsFixtures: Bool = false, exercises: [Exercise] = ContentLibrary.fixtureExercises,
-                policy: TrainingPolicy = TrainingPolicy()) {
+                policy: TrainingPolicy = .developmentFixture) {
         self.permitsFixtures = permitsFixtures; self.exercises = exercises; self.policy = policy
     }
     public func exercise(_ id: String) -> Exercise? { exercises.first { $0.id == id } }

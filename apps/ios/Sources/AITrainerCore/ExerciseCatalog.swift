@@ -1,21 +1,5 @@
 import Foundation
 
-/// Descriptive upstream data only. This type deliberately has no review, load basis,
-/// alternatives, progression, or camera-support policy fields and cannot become Exercise.
-public struct CatalogExercise: Codable, Equatable, Identifiable {
-    public let id: String
-    public let name: String
-    public let force: String?
-    public let level: String
-    public let mechanic: String?
-    public let equipment: String?
-    public let primaryMuscles: [String]
-    public let secondaryMuscles: [String]
-    public let instructions: [String]
-    public let category: String
-    public let images: [String]
-}
-
 public struct ExerciseCatalog {
     public static let sourceRevision = "a859101d633a01c4a1a920d6a8ce41dabba0705f"
     public let exercises: [CatalogExercise]
