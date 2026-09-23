@@ -17,15 +17,15 @@ point. `core/python`, `shared/schemas`, `ml`, and migration documentation are ne
 
 | Previous Swift responsibility | Python owner / behavior |
 | --- | --- |
-| `TrainingBrain.decide` | `domain.decide`: profile/session/review gates, pain/exclusions, progression, shortening, curated substitution and rescheduling |
-| `ContentLibrary.initialProgram` | `domain.initial_program`: supported profile scope, role/equipment selection and preference ordering; host supplies IDs |
-| `DoubleProgressionPolicy` | `domain.progression`: exact comparable evidence, stale/gap rules, RIR unknowns, rep targets, available steps and bounded increases |
-| `TrainerService` mutations | `state.reduce_state`: plan/load setup, check-in, workout start/pause/finish/skip, idempotent set logging, exclusions, correction/conflict resolution and deletion |
-| Recommendation lifecycle | `service.recommendation_command`: proposals, reject/accept, version checks, stored-request re-evaluation and audit events |
-| Set validation | `state.validate_set`: reps/index/RIR/load validation |
-| Meal lifecycle | `state.reduce_state`: revisions, correction audit, recipe creation and deletion |
-| Nutrient validation/scaling | `service.nutrients`: finite/nonnegative validation, servings and overflow |
-| Catalog content validation | `service.dispatch` catalog operation: typed schema and duplicate-ID checks, with no promotion to reviewed policy |
+| `TrainingBrain.decide` | `rules.eligibility.decide`: profile/session/review gates, pain/exclusions, progression, shortening, curated substitution and rescheduling |
+| `ContentLibrary.initialProgram` | `rules.program.initial_program`: supported profile scope, role/equipment selection and preference ordering; host supplies IDs |
+| `DoubleProgressionPolicy` | `rules.progression.propose_progression`: exact comparable evidence, stale/gap rules, RIR unknowns, rep targets, available steps and bounded increases |
+| `TrainerService` mutations | `commands.plan` / `commands.workout` / `commands.records`: plan/load setup, check-in, workout start/pause/finish/skip, idempotent set logging, exclusions, correction/conflict resolution and deletion |
+| Recommendation lifecycle | `recommendations.handle_recommendation`: proposals, reject/accept, version checks, stored-request re-evaluation and audit events |
+| Set validation | `commands.workout.validate_set`: reps/index/RIR/load validation |
+| Meal lifecycle | `commands.meals`: revisions, correction audit, recipe creation and deletion |
+| Nutrient validation/scaling | `nutrition.scale_nutrients`: finite/nonnegative validation, servings and overflow |
+| Catalog content validation | `api.dispatch` catalog operation: typed schema and duplicate-ID checks, with no promotion to reviewed policy |
 | Recovery boundary | Explicit `unassessed` response over read-only source/time observations; no invented readiness algorithm |
 
 The native `TrainerService` is now a persistence/service facade. Swift retains
