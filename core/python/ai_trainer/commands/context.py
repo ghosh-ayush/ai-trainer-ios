@@ -19,7 +19,7 @@ class CommandContext:
     an extension module the embedded iOS runtime does not ship (see tests/test_embedded_imports.py).
     """
 
-    __slots__ = ("arguments", "ids", "library", "now", "state")
+    __slots__ = ("arguments", "decision", "ids", "library", "now", "state")
 
     def __init__(self, state: JSON, arguments: JSON, library: JSON, now: float, ids: Iterator[str]) -> None:
         self.state = state
@@ -27,6 +27,8 @@ class CommandContext:
         self.library = library
         self.now = now
         self.ids = ids
+        # A Training Brain answer the host shows the athlete (set by ``requestChange``).
+        self.decision: JSON | None = None
 
     def next_id(self) -> str:
         """The next host-supplied UUID. Exhausting the budget is a contract error."""

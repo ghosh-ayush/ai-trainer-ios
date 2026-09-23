@@ -30,9 +30,8 @@ Architecture: `docs/LOCAL_PYTHON_ARCHITECTURE.md`. Decisions: `docs/DECISIONS.md
 
 ## Repository map
 ```
-core/python/ai_trainer/   domain rules, state commands, recommendation lifecycle, contracts
+core/python/ai_trainer/   domain rules, state commands, content bundle, migrations, contract schemas
 core/python/tests/        Python behaviour + contract tests (fast; run these constantly)
-shared/schemas/v1/        contract v1.0 JSON schemas (generated; do not hand-edit)
 shared/fixtures/v1/       golden request/response fixtures
 apps/ios/App/             SwiftUI app + AITrainer.xcodeproj (Xcode owns it; see ADR-011)
 apps/ios/Sources/AITrainerCore/   Swift DTOs, transport to Python, persistence, perception
@@ -52,7 +51,7 @@ Nothing in `apps/ios` builds until that has run.
 ```
 PYTHONPATH=core/python python3 -m unittest discover -s core/python/tests -v   # Python tests (Linux/macOS)
 scripts/test.sh                          # Python + Swift tests through embedded CPython (macOS)
-python3 scripts/generate_schemas.py      # after ANY change to contract shapes; CI diffs the output
+python3 scripts/generate_schemas.py      # after ANY change to contract_spec.py; CI diffs ai_trainer/*.schema.json
 python3 scripts/generate_swift_models.py # after ANY change to contract_spec.py; CI diffs Models.swift
 open apps/ios/App/AITrainer.xcodeproj    # scheme AITrainer, Debug, iPhone simulator
 scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
@@ -81,4 +80,8 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
 - Curl counter reps are never saved as sets.
 - Dates cross the bridge as binary64 seconds since 2001-01-01 (Foundation reference epoch).
 - Swift has no validators of its own: set and nutrient rules run in Python when a command is
-  saved, so a malformed `SetLog` is rejected by `saveSet`, not by a Swift `validate()`.
+  saved, so a malformed set is rejected by `saveSet`, not by a Swift `validate()`.
+- Swift never sends training content. It passes `permitsFixtures`; Python loads
+  `ai_trainer/fixture_content.json` (exercises, policy, program template) itself.
+- Saved state files are upgraded by Python (`migrations.py`) before Swift decodes them. Bump
+  `STATE_SCHEMA_VERSION` in `contract_spec.py` and add a migration step for any stored-shape change.

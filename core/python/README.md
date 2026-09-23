@@ -9,18 +9,18 @@ embedded CPython.
 
 ```
 ai_trainer/
-├── api.py                 dispatch_json / dispatch — validate the envelope, route the operation
-├── service.py             alias of api (the C bridge imports ai_trainer.service.dispatch_json)
+├── api.py                 dispatch_json / dispatch — the C bridge's entry point; validates and routes
 ├── contracts.py           bounded JSON-Schema validator + bundled request/response schemas
 ├── errors.py              DomainError(code, message) + require()
 ├── messages.py            decision(reason, …) builder; reason → outcome/explanation table
 ├── decisions.json         the 32 reason codes and their user-facing explanations
 ├── athlete_state.py       read-only accessors: next_plan, active_session, comparison_key, …
 ├── events.py              record_event, expire_proposals, store_plan
-├── content.py             ReviewStatus gating: is_enabled, exercises_by_id
+├── content.py             loads the content bundle; ReviewStatus gating: is_enabled, exercises_by_id
+├── fixture_content.json   exercises, progression policy and program template (review: fixture)
+├── migrations.py          upgrades saved state files to the current state schema version
 ├── queries.py             comparable_sessions, working_logs, evidence_from
 ├── nutrition.py           validate_nutrients, scale_nutrients
-├── recommendations.py     request → proposed → applied | rejected | expired
 ├── rules/
 │   ├── eligibility.py     decide(): spec §5.2 gate order, then routes to a rule
 │   ├── progression.py     TB-04 double progression on comparable evidence
@@ -32,7 +32,8 @@ ai_trainer/
     ├── plan.py            acceptInitialPlan · configureLoad
     ├── workout.py         start · skip · setPaused · saveSet · finish · reportPain · exclude
     ├── records.py         correctSet · resolveConflict · deleteSession
-    └── meals.py           saveMeal · deleteMeal
+    ├── meals.py           saveMeal · deleteMeal
+    └── proposals.py       requestChange · acceptRecommendation · rejectRecommendation
 ```
 
 ## Reading order for a newcomer
@@ -41,7 +42,7 @@ ai_trainer/
 2. `rules/eligibility.py` — the gate order every request passes.
 3. `rules/progression.py` — the one non-trivial algorithm.
 4. `commands/workout.py` — how a session is recorded.
-5. `recommendations.py` — why nothing changes without acceptance.
+5. `commands/proposals.py` — why nothing changes without acceptance.
 
 ## Invariants (enforced by tests)
 

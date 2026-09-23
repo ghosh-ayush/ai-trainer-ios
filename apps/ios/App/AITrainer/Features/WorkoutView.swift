@@ -106,9 +106,9 @@ struct SetLogView: View {
                         if rir.isEmpty { effort = nil }
                         else if let parsed = Int(rir) { effort = parsed }
                         else { throw TrainerError.invalid("Enter whole-number RIR or leave it blank.") }
-                        let log = SetLog(id: logID, operationID: operationID, prescription: slot, index: setIndex, kind: kind,
-                                         load: try parseOptionalNumber(load), reps: count, rir: effort)
-                        try service.saveSet(log, sessionID: sessionID)
+                        try service.saveSet(sessionID: sessionID, slotID: slot.id, index: setIndex, kind: kind,
+                                            load: try parseOptionalNumber(load), reps: count, rir: effort,
+                                            logID: logID, operationID: operationID)
                     }) { dismiss() }
                 }.buttonStyle(.borderedProminent)
             }.navigationTitle("Record performance").toolbar { Button("Cancel") { dismiss() } }

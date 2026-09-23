@@ -3,7 +3,7 @@
   "operation": "decide",
   "payload": {
     "state": {
-      "schemaVersion": 1,
+      "schemaVersion": 2,
       "athleteID": "00000000-0000-0000-0000-000000000004",
       "revision": 0,
       "contextRevision": 0,
@@ -371,34 +371,7 @@
       "kind": "progression",
       "slotID": "00000000-0000-0000-0000-000000000001"
     },
-    "library": {
-      "exercises": [
-        {
-          "id": "bench",
-          "name": "Barbell bench press",
-          "role": "press",
-          "equipmentKind": "barbell",
-          "basis": "total",
-          "alternatives": [
-            "machine_press",
-            "db_floor_press"
-          ],
-          "review": "fixture",
-          "contentVersion": "fixture-1"
-        }
-      ],
-      "policy": {
-        "id": "DP_TEST_01",
-        "version": "fixture-1",
-        "review": "fixture",
-        "requiredExposures": 2,
-        "minimumRIR": 2,
-        "maximumIncreaseFraction": 0.05,
-        "historyDays": 28,
-        "maximumGapDays": 14
-      },
-      "permitsFixtures": true
-    },
+    "permitsFixtures": true,
     "now": 811382400
   }
 }

@@ -1,8 +1,10 @@
 """TB-01: initial program selection.
 
-Today there is exactly one repeating full-body template built from the
-library's fixture exercises. Reviewed multi-day templates arrive with the
-evidence-based content bundle (Track C) and will replace the constants below.
+The program is built from the content bundle's ``template``: one repeating
+full-body session with one exercise per required role and an optional
+accessory. Every number (sets, reps, rest, minutes) comes from the template;
+none is defined here. Reviewed multi-day templates arrive with the
+evidence-based content bundle (Track C).
 """
 
 from __future__ import annotations
@@ -15,18 +17,6 @@ from ..errors import DomainError
 
 JSON = dict[str, Any]
 
-SUPPORTED_GOALS = ("Hypertrophy", "Strength")
-MIN_DAYS, MAX_DAYS = 2, 4
-MIN_SESSION_MINUTES = 41
-OPTIONAL_SLOT_MINUTES = 53
-REQUIRED_ROLES = ("press", "pull", "squat")
-OPTIONAL_ACCESSORY_ID = "db_curl"
-
-FIXTURE_TEMPLATE_ID = "FULL_BODY_FIXTURE_01"
-FIXTURE_LIBRARY_VERSION = "fixture-1"
-FIXTURE_PLAN_NAME = "Full body - development fixture"
-WARM_UP_MINUTES = 5
-
 # IDs the host must supply: program, plan, then up to four slots.
 REQUIRED_ID_COUNT = 6
 
@@ -38,78 +28,74 @@ def initial_program(profile: JSON, library: JSON, now: float, ids: list[str]) ->
     """
     if not library["permitsFixtures"] or not policy_is_enabled(library):
         raise DomainError("unsupported")
-    _require_supported_profile(profile)
+    template = library["template"]
+    _require_supported_profile(profile, template)
 
     selected: list[tuple[JSON, bool]] = []
-    for role in REQUIRED_ROLES:
+    for role in template["requiredRoles"]:
         exercise = _first_eligible_exercise(role, profile, library)
         if exercise is None:
             raise DomainError("unsupported")
         selected.append((exercise, False))
 
-    accessory = next((e for e in library["exercises"] if e["id"] == OPTIONAL_ACCESSORY_ID), None)
-    include_accessory = (
-        profile["minutes"] >= OPTIONAL_SLOT_MINUTES
-        and "dumbbell" in profile["equipment"]
-        and OPTIONAL_ACCESSORY_ID not in profile["excludedExercises"]
-        and accessory is not None
-    )
-    if include_accessory:
-        assert accessory is not None
+    accessory = _eligible_accessory(profile, library, template["accessory"])
+    if accessory is not None:
         selected.append((accessory, True))
 
     slots = [
-        _fixture_slot(ids[index + 2], exercise, profile["preferredUnit"], optional)
+        _slot(ids[index + 2], exercise, profile["preferredUnit"], optional, template["slot"])
         for index, (exercise, optional) in enumerate(selected)
     ]
     plan = {
         "id": ids[1],
         "revision": 1,
-        "name": FIXTURE_PLAN_NAME,
+        "name": template["name"],
         "slots": slots,
         "modified": False,
-        "warmUpMinutes": WARM_UP_MINUTES,
+        "warmUpMinutes": template["warmUpMinutes"],
     }
     return {
         "id": ids[0],
         "revision": 1,
-        "templateID": FIXTURE_TEMPLATE_ID,
-        "libraryVersion": FIXTURE_LIBRARY_VERSION,
+        "templateID": template["id"],
+        "libraryVersion": library["policy"]["version"],
         "plans": [plan],
         "sequenceIndex": 0,
         "acceptedAt": now,
     }
 
 
-def _fixture_slot(slot_id: str, exercise: JSON, unit: str, optional: bool) -> JSON:
-    """One DP_TEST_01 prescription slot — test data, not an approved prescription."""
+def _slot(slot_id: str, exercise: JSON, unit: str, optional: bool, prescription: JSON) -> JSON:
+    """One prescription slot from the template. The working load starts unknown."""
     return {
         "id": slot_id,
         "exerciseID": exercise["id"],
         "equipment": equipment_context(exercise, unit),
-        "protocolID": "DP_TEST_01",
-        "workingSets": 3,
-        "lowerReps": 8,
-        "upperReps": 10,
-        "targets": [8, 8, 8],
-        "restSeconds": 120,
+        "protocolID": prescription["protocolID"],
+        "workingSets": prescription["workingSets"],
+        "lowerReps": prescription["lowerReps"],
+        "upperReps": prescription["upperReps"],
+        "targets": [prescription["lowerReps"]] * prescription["workingSets"],
+        "restSeconds": prescription["restSeconds"],
         "optional": optional,
-        "estimatedMinutes": 12,
+        "estimatedMinutes": prescription["estimatedMinutes"],
     }
 
 
-def _require_supported_profile(profile: JSON) -> None:
+def _require_supported_profile(profile: JSON, template: JSON) -> None:
     supported = (
         profile["adultConfirmed"]
         and profile["supportedScopeConfirmed"]
-        and profile["goal"] in SUPPORTED_GOALS
-        and MIN_DAYS <= profile["daysPerWeek"] <= MAX_DAYS
-        and profile["minutes"] >= MIN_SESSION_MINUTES
+        and profile["goal"] in template["supportedGoals"]
+        and template["minDaysPerWeek"] <= profile["daysPerWeek"] <= template["maxDaysPerWeek"]
+        and profile["minutes"] >= template["minSessionMinutes"]
     )
     if not supported:
         raise DomainError(
             "invalid",
-            "This fixture covers adults, strength/hypertrophy, 2-4 days, and sessions of at least 41 minutes.",
+            f"This template covers adults, {'/'.join(template['supportedGoals']).lower()}, "
+            f"{template['minDaysPerWeek']}-{template['maxDaysPerWeek']} days, "
+            f"and sessions of at least {template['minSessionMinutes']} minutes.",
         )
 
 
@@ -125,3 +111,16 @@ def _first_eligible_exercise(role: str, profile: JSON, library: JSON) -> JSON | 
     ]
     eligible.sort(key=lambda exercise: (exercise["id"] not in profile["preferredExercises"], exercise["id"]))
     return eligible[0] if eligible else None
+
+
+def _eligible_accessory(profile: JSON, library: JSON, accessory: JSON) -> JSON | None:
+    """The template's optional accessory, if the session is long enough and the athlete can do it."""
+    exercise = next((e for e in library["exercises"] if e["id"] == accessory["exerciseID"]), None)
+    usable = (
+        exercise is not None
+        and is_enabled(exercise["review"], library)
+        and profile["minutes"] >= accessory["minSessionMinutes"]
+        and accessory["equipmentKind"] in profile["equipment"]
+        and accessory["exerciseID"] not in profile["excludedExercises"]
+    )
+    return exercise if usable else None

@@ -174,6 +174,23 @@ public struct TrainingPolicy: Codable, Equatable {
     }
 }
 
+/// The bundled content the core runs against, as the host displays it.
+public struct ContentLibrary: Codable, Equatable {
+    public var exercises: [Exercise]
+    public var policy: TrainingPolicy
+    public var permitsFixtures: Bool
+
+    public init(
+        exercises: [Exercise],
+        policy: TrainingPolicy,
+        permitsFixtures: Bool
+    ) {
+        self.exercises = exercises
+        self.policy = policy
+        self.permitsFixtures = permitsFixtures
+    }
+}
+
 /// A prescription for one exercise in a session. ``load`` absent means unknown, never zero.
 public struct Prescription: Codable, Equatable, Identifiable {
     public var id: UUID
@@ -436,6 +453,29 @@ public struct Decision: Codable, Equatable {
     }
 }
 
+/// One training request. Which fields are set depends on ``kind``.
+public struct TrainingRequest: Codable, Equatable {
+    public var kind: String
+    public var slotID: UUID?
+    public var minutes: Int?
+    public var alternativeID: String?
+    public var date: Date?
+
+    public init(
+        kind: String,
+        slotID: UUID? = nil,
+        minutes: Int? = nil,
+        alternativeID: String? = nil,
+        date: Date? = nil
+    ) {
+        self.kind = kind
+        self.slotID = slotID
+        self.minutes = minutes
+        self.alternativeID = alternativeID
+        self.date = date
+    }
+}
+
 /// A proposal pinned to the context it was computed against. Inert until accepted.
 public struct Recommendation: Codable, Equatable, Identifiable {
     public var id: UUID
@@ -443,7 +483,7 @@ public struct Recommendation: Codable, Equatable, Identifiable {
     public var contextRevision: Int
     public var targetPlanID: UUID
     public var targetPlanRevision: Int
-    public var request: Request
+    public var request: TrainingRequest
     public var decision: Decision
     public var policyVersion: String
     public var createdAt: Date
@@ -456,7 +496,7 @@ public struct Recommendation: Codable, Equatable, Identifiable {
         contextRevision: Int,
         targetPlanID: UUID,
         targetPlanRevision: Int,
-        request: Request,
+        request: TrainingRequest,
         decision: Decision,
         policyVersion: String,
         createdAt: Date,
@@ -643,7 +683,7 @@ public struct AthleteState: Codable, Equatable {
     public var recipes: [Recipe]
 
     public init(
-        schemaVersion: Int = 1,
+        schemaVersion: Int = 2,
         athleteID: UUID = UUID(),
         revision: Int = 0,
         contextRevision: Int = 0,

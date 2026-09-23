@@ -57,26 +57,26 @@ public final class StateRepository {
     private let lock = NSRecursiveLock()
     private let persistence: StatePersistence
     private var state: AthleteState
-    public init(persistence: StatePersistence) throws {
+    /// Loads the saved file through the Python core, which upgrades older state versions.
+    /// A file that cannot be read or upgraded is left on disk untouched.
+    public init(persistence: StatePersistence, core: LocalPythonTrainerService) throws {
         self.persistence = persistence
         if let data = try persistence.load() {
-            do {
-                let loaded = try JSONDecoder().decode(AthleteState.self, from: data)
-                guard loaded.schemaVersion == 1 else { throw TrainerError.corruptStore }
-                state = loaded
-            } catch { throw TrainerError.corruptStore }
+            do { state = try core.migrate(savedState: data) } catch { throw TrainerError.corruptStore }
         } else { state = AthleteState() }
     }
     public var snapshot: AthleteState {
         lock.lock(); defer { lock.unlock() }; return state
     }
+    /// Runs `operation` on a copy. A changed candidate is saved, then published; an unchanged
+    /// one (for example a request answered without a proposal) touches neither disk nor revision.
     @discardableResult public func transaction<T>(_ operation: (inout AthleteState) throws -> T) throws -> T {
         lock.lock(); defer { lock.unlock() }
         var candidate = state
         let result = try operation(&candidate)
+        guard candidate != state else { return result }
         candidate.revision += 1
-        let data = try JSONEncoder().encode(candidate)
-        try persistence.save(data)
+        try persistence.save(JSONEncoder().encode(candidate))
         state = candidate
         return result
     }

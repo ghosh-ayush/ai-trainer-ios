@@ -101,29 +101,27 @@ def set_paused(context: CommandContext) -> None:
 
 
 def save_set(context: CommandContext) -> None:
-    """Append a set log idempotently and start the rest timer.
+    """Record one set against a slot of the session's pinned plan and start the rest timer.
 
-    A repeated ``operationID`` with identical contents is a no-op (AS-03);
-    the same id with different contents is rejected.
+    The host sends only what the athlete entered; context key, unit and basis are
+    copied from the slot here. A repeated ``operationID`` with identical contents
+    is a no-op (AS-03); the same id with different contents is rejected.
     """
     state = context.state
-    log = context.arguments["log"]
+    arguments = context.arguments
+    session = context.session_by_id(arguments["sessionID"])
+    require(session is not None, "notFound")
+    assert session is not None
+    slot = next((candidate for candidate in session["plan"]["slots"] if candidate["id"] == arguments["slotID"]), None)
+    require(slot is not None, "notFound")
+    assert slot is not None
+    log = _set_log(arguments, slot, context.now)
     validate_set(log)
     if log["operationID"] in state["operations"]:
-        already_saved = any(log == existing for session in state["sessions"] for existing in session["logs"])
-        require(already_saved, "invalid", "Operation ID was reused with different contents.")
+        existing = next((item for item in session["logs"] if item["operationID"] == log["operationID"]), None)
+        require(existing == log, "invalid", "Operation ID was reused with different contents.")
         return
-    session = context.session_by_id(context.arguments["sessionID"])
-    require(session is not None and session["status"] == "inProgress")
-    assert session is not None
-    slot = next((candidate for candidate in session["plan"]["slots"] if candidate["id"] == log["prescriptionID"]), None)
-    require(
-        slot is not None
-        and comparison_key(slot) == log["contextKey"]
-        and slot["equipment"]["unit"] == log["unit"]
-        and slot["equipment"]["basis"] == log["basis"]
-    )
-    assert slot is not None
+    require(session["status"] == "inProgress")
     if log["kind"] == "working":
         require(
             log["index"] < slot["workingSets"] and not has_working_set(session, slot["id"], log["index"]),
@@ -185,6 +183,28 @@ def exclude(context: CommandContext) -> None:
     elif exercise_id in exclusions:
         exclusions.remove(exercise_id)
     context.mark_context_changed()
+
+
+def _set_log(arguments: JSON, slot: JSON, occurred_at: float) -> JSON:
+    """A SetLog record at ``occurred_at``. Absent load or RIR stays absent — unknown is never defaulted."""
+    log: JSON = {
+        "id": arguments["logID"],
+        "operationID": arguments["operationID"],
+        "revision": 1,
+        "prescriptionID": slot["id"],
+        "contextKey": comparison_key(slot),
+        "index": arguments["index"],
+        "kind": arguments["kind"],
+        "unit": slot["equipment"]["unit"],
+        "basis": slot["equipment"]["basis"],
+        "reps": arguments["reps"],
+        "occurredAt": occurred_at,
+        "conflicted": False,
+    }
+    for optional in ("load", "rir"):
+        if arguments.get(optional) is not None:
+            log[optional] = arguments[optional]
+    return log
 
 
 def _new_session(
