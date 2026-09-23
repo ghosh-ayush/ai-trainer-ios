@@ -37,10 +37,7 @@ def object_of(fields: dict[str, Schema], required: list[str] | None = None) -> S
 
 
 def field_schema(field: spec.FieldSpec) -> Schema:
-    if field.is_array:
-        schema = array_of(ref(field.element_type))
-    else:
-        schema = ref(field.type)
+    schema = array_of(ref(field.element_type)) if field.is_array else ref(field.type)
     return {"anyOf": [schema, {"type": "null"}]} if field.optional else schema
 
 

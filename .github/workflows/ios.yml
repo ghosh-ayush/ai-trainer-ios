@@ -19,7 +19,7 @@ jobs:
       - name: Lint and type-check the core
         working-directory: core/python
         run: |
-          pip install --quiet "ruff>=0.15" "mypy>=1.20"
+          pip install --quiet "ruff==0.16.8" "mypy==2.3.1"  # pinned: tool drift must not break master
           ruff check . ../../scripts
           ruff format --check . ../../scripts
           mypy

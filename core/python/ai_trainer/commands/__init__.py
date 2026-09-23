@@ -16,8 +16,9 @@ Command handlers are grouped by concern:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from copy import deepcopy
-from typing import Any, Callable
+from typing import Any
 
 from ..errors import DomainError
 from . import meals, plan, records, workout
