@@ -173,6 +173,7 @@ extension StitchCard where Content == StitchCardText {
 public struct StitchCardText: View {
     let title: String
     let text: String
+    public init(title: String, text: String) { self.title = title; self.text = text }
     public var body: some View {
         Text(title).stitch(.displayH3).foregroundStyle(Stitch.textPrimary)
         Text(text).stitch(.body13).foregroundStyle(Stitch.textSecondary)

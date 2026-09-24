@@ -10,16 +10,35 @@ no network at runtime, no LLM in the decision path. Product spec: `docs/AI_Train
 Architecture: `docs/LOCAL_PYTHON_ARCHITECTURE.md`. Decisions: `docs/DECISIONS.md`.
 
 ## Non-negotiable rules
-1. **Never invent training content.** Exercises, templates, rep/set/RIR/rest values and progression
-   parameters ship only from a content bundle whose `manifest.json` cites its evidence basis.
-   Fixture values are test data; they must not become defaults. Release builds refuse
-   `review: fixture` content — keep it that way.
+1. **Every suggestion traces to well-cited research, and nothing else.** The app adapts exercise
+   and diet guidance to the athlete automatically, and every rule and number behind that guidance
+   (exercises and their selection, templates, rep/set/RIR/rest values, progression and adaptation
+   thresholds, nutrition targets) ships from a content bundle or evidence file whose every value
+   cites a qualifying source with a locator and a certainty grade (ADR-014).
+   - **Qualifying source:** a peer-reviewed human study or official reference report with a DOI or
+     PMID (an official report may cite its ISBN): position stand, official guideline (DRI, FAO/WHO), umbrella review, meta-analysis,
+     systematic review, randomised, crossover or non-randomised trial, cohort or cross-sectional
+     study, or narrative review (`content.QUALIFYING_DESIGNS`). Each is read from the paper itself
+     (PubMed, PMC, publisher or DOI) and independently re-checked against it before it is used.
+     Only a synthesis or official reference may be graded above low certainty.
+   - **Never a source:** videos, influencers, blogs, forums, podcasts, apps, preprints, animal or
+     cadaver studies, opinion columns, AI-generated text or any "the internet says". They may point
+     you to a paper; the paper is what gets cited.
+   - No human approval step: content goes live automatically once `content.bundle_problems` finds
+     nothing. Where the literature gives no number, the value is marked `"source": "owner"` with a
+     rationale built from cited sources; never a bare guess.
+   - Fixture values are test data; they must not become defaults. Release builds refuse
+     `review: fixture` content — keep it that way.
 2. **Unknown stays unknown.** `load`, `rir`, effort and any sensor-derived value are optional.
    Never default them to favourable values or estimate strength.
-3. **Proposals, not mutations.** Any plan change is a `Recommendation` that the user explicitly
-   accepts. Acceptance re-evaluates the stored request and requires an identical decision.
-4. **Sensors never write evidence.** Camera, HealthKit, catalog and nutrition data must not feed
-   progression or become `SetLog` records.
+3. **Proposals, not mutations.** The app suggests changes automatically, but any plan change is a
+   `Recommendation` that the user explicitly accepts. Acceptance re-evaluates the stored request
+   and requires an identical decision.
+4. **Sensors never write evidence.** Camera, HealthKit and nutrition data never become `SetLog`
+   records or stand in for what the athlete logged; load progression reads only logged sets.
+   Lifestyle signals (sleep, activity, nutrition, schedule) may shape suggestions only through a
+   rule whose thresholds are cited under rule 1. Catalog research annotations (`evidence`) may
+   inform exercise selection and substitution; the catalog's upstream descriptions never do.
 5. **Licenses.** Only MIT / BSD / Apache-2.0 / Unlicense / public-domain / CC0 code and data.
    Fonts may also be SIL OFL-1.1, bundled unmodified (ADR-013). No AGPL, GPL, LGPL, SSPL,
    PolyForm, CC-BY-SA data, or unlicensed datasets — not even as a reference implementation. Add every new dependency or dataset to
@@ -31,6 +50,9 @@ Architecture: `docs/LOCAL_PYTHON_ARCHITECTURE.md`. Decisions: `docs/DECISIONS.md
 ## Repository map
 ```
 core/python/ai_trainer/   domain rules, state commands, content bundle, migrations, contract schemas
+  diet*.py, foods.py      diet engine (targets, trend, adjustments, safety) and USDA food search/suggestions
+  diet_bundles/<id>/      cited diet policy (same evidence gate as training bundles)
+  data/foods.json         USDA FoodData Central extract (CC0), built by scripts/build_food_data.py
 core/python/tests/        Python behaviour + contract tests (fast; run these constantly)
 shared/fixtures/v1/       golden request/response fixtures
 apps/ios/App/             SwiftUI app + AITrainer.xcodeproj (Xcode owns it; see ADR-011)
@@ -53,6 +75,9 @@ PYTHONPATH=core/python python3 -m unittest discover -s core/python/tests -v   # 
 scripts/test.sh                          # Python + Swift tests through embedded CPython (macOS)
 python3 scripts/generate_schemas.py      # after ANY change to contract_spec.py; CI diffs ai_trainer/*.schema.json
 python3 scripts/generate_swift_models.py # after ANY change to contract_spec.py; CI diffs Models.swift
+python3 scripts/annotate_catalog.py      # after ANY change to docs/research/exercise-evidence.json
+python3 scripts/content_review_sheet.py <bundle-id>  # after ANY change to a content bundle
+python3 scripts/build_food_data.py <dir> # rebuild data/foods.json from unzipped USDA FDC downloads
 open apps/ios/App/AITrainer.xcodeproj    # scheme AITrainer, Debug, iPhone simulator
 scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
 ```
@@ -76,11 +101,21 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
 
 ## Things that look like bugs but are intentional
 - Release builds cannot activate a plan until an `approved` content bundle exists. Bundles live in
-  `ai_trainer/bundles/<id>/` (`manifest.json` + `content.json`); an approved one always runs, the
-  fixture runs only in Debug, and a `pending` draft never runs. Non-fixture bundles must cite every
-  policy/template value (or mark it an owner decision); `scripts/content_review_sheet.py <id>`
-  writes the sheet the owner approves from.
-- Recovery observations always return `unassessed` (no reviewed readiness policy).
+  `ai_trainer/bundles/<id>/` (`manifest.json` + `content.json`). `approved` means the bundle passed
+  the automated evidence gate, not that a person signed it (ADR-014): it always runs, the fixture
+  runs only in Debug, and a `draft` (research still in progress) never runs. The gate refuses any
+  uncited value and any source without a DOI/PMID and a qualifying design;
+  `scripts/content_review_sheet.py <id>` writes a transparency sheet of what each value rests on.
+- Tests pin the fixture with `AI_TRAINER_CONTENT_BUNDLE=fixture-1` (`support.py`, `scripts/test.sh`,
+  `scripts/smoke_ios.sh`), so rule tests do not change whenever research updates shipped content.
+  Pinning never bypasses a gate: only the fixture (still Debug-only) or an approved bundle can be pinned.
+- Recovery observations always return `unassessed` (no cited readiness policy yet).
+- Diet targets need a weigh-in and are withheld (never estimated) for anyone the diet policy
+  excludes: under 18, pregnancy, breastfeeding, a positive SCOFF screen, or a listed condition.
+  Logged meals are shown against the targets but never used to recompute energy, because
+  self-reported intake is systematically low. Weight-trend adjustments are suggestions only.
+- Food nutrients always come from the bundled USDA table (`saveFoodMeal`); the host sends a food
+  id and grams, never nutrient values, except for the athlete's own estimates via `saveMeal`.
 - Curl counter reps are never saved as sets.
 - Today requests a slot's progression proposal automatically when the core's `views` names
   it (`autoRequest`). It is still only a proposal: nothing changes until the athlete taps Accept.

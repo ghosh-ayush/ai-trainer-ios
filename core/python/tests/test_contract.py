@@ -93,6 +93,8 @@ class MigrationTests(unittest.TestCase):
     def saved_v1(self):
         state = golden_request()["payload"]["state"]
         state["schemaVersion"] = 1
+        del state["weighIns"]
+        del state["dietDecisions"]
         decision = json.loads((FIXTURES / "qualifying-response.json").read_text())["result"]
         state["recommendations"] = [
             {
@@ -112,11 +114,37 @@ class MigrationTests(unittest.TestCase):
 
     def test_v1_stored_request_becomes_explicit(self):
         migrated = result("migrateState", {"state": self.saved_v1()})
-        self.assertEqual(migrated["schemaVersion"], 2)
+        self.assertEqual(migrated["schemaVersion"], 3)
         self.assertEqual(
             migrated["recommendations"][0]["request"],
             {"kind": "substitute", "slotID": uid(1), "alternativeID": "machine_press"},
         )
+
+    def test_v2_file_gains_empty_diet_records(self):
+        state = golden_request()["payload"]["state"]
+        state["schemaVersion"] = 2
+        del state["weighIns"]
+        del state["dietDecisions"]
+        migrated = result("migrateState", {"state": state})
+        self.assertEqual((migrated["schemaVersion"], migrated["weighIns"], migrated["dietDecisions"]), (3, [], []))
+        self.assertNotIn("dietProfile", migrated)
+
+    def test_early_v3_diet_files_keep_a_positive_screen(self):
+        state = golden_request()["payload"]["state"]
+        del state["excludedWeighIns"]
+        state["dietProfile"] = {
+            "sex": "female",
+            "birthYear": 1990,
+            "heightCm": 165.0,
+            "activity": "lowActive",
+            "goal": "maintenance",
+            "pattern": "omnivore",
+            "cuisines": [],
+            "screening": {"pregnant": False, "lactating": False, "conditions": [], "scoffYesCount": 2},
+        }
+        migrated = result("migrateState", {"state": state})
+        self.assertEqual(sum(migrated["dietProfile"]["screening"]["scoffAnswers"]), 2)
+        self.assertEqual(migrated["excludedWeighIns"], [])
 
     def test_current_state_passes_through_unchanged(self):
         state = golden_request()["payload"]["state"]
@@ -124,7 +152,7 @@ class MigrationTests(unittest.TestCase):
 
     def test_newer_or_corrupt_state_fails_closed(self):
         newer = golden_request()["payload"]["state"]
-        newer["schemaVersion"] = 3
+        newer["schemaVersion"] = 4
         self.assertEqual(call("migrateState", {"state": newer})["error"]["code"], "unsupported")
         corrupt = golden_request()["payload"]["state"]
         del corrupt["sessions"]

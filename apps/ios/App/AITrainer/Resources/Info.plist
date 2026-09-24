@@ -21,7 +21,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Process pose observations on your device for an optional camera experiment. No video is recorded or uploaded.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Display your HRV, resting heart rate, and sleep samples in the optional read-only Recovery lab. These samples do not change your training plan.</string>
+	<string>Read your body weight so your diet targets can adapt to your weight trend, and display HRV, resting heart rate, and sleep samples in the optional read-only Recovery lab. Nothing is written to Health, and these samples never change your training plan.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

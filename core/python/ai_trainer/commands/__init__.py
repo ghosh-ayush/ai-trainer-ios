@@ -15,6 +15,8 @@ Command handlers are grouped by concern:
 - ``records``   — correctSet, resolveConflict, deleteSession
 - ``meals``     — saveMeal, deleteMeal
 - ``proposals`` — requestChange, acceptRecommendation, rejectRecommendation
+- ``diet``      — setDietTargets, saveDietProfile, logWeighIn, importWeighIns, deleteWeighIn,
+                  acceptDietAdjustment, rejectDietAdjustment, saveFoodMeal
 """
 
 from __future__ import annotations
@@ -23,7 +25,7 @@ from collections.abc import Callable
 from typing import Any
 
 from ..errors import DomainError
-from . import meals, plan, proposals, records, workout
+from . import diet, meals, plan, proposals, records, workout
 from .context import CommandContext
 
 JSON = dict[str, Any]
@@ -47,6 +49,14 @@ HANDLERS: dict[str, Handler] = {
     "requestChange": proposals.request_change,
     "acceptRecommendation": proposals.accept,
     "rejectRecommendation": proposals.reject,
+    "setDietTargets": diet.set_diet_targets,
+    "saveDietProfile": diet.save_diet_profile,
+    "logWeighIn": diet.log_weigh_in,
+    "importWeighIns": diet.import_weigh_ins,
+    "deleteWeighIn": diet.delete_weigh_in,
+    "acceptDietAdjustment": diet.accept_diet_adjustment,
+    "rejectDietAdjustment": diet.reject_diet_adjustment,
+    "saveFoodMeal": diet.save_food_meal,
 }
 
 

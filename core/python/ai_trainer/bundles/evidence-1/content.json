@@ -7,7 +7,7 @@
       "equipmentKind": "dumbbell",
       "basis": "perHand",
       "alternatives": ["machine_press", "bench"],
-      "review": "pending",
+      "review": "approved",
       "contentVersion": "evidence-1",
       "sources": [
         {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body push region)"},
@@ -21,11 +21,13 @@
       "equipmentKind": "barbell",
       "basis": "total",
       "alternatives": ["machine_press", "db_floor_press"],
-      "review": "pending",
+      "review": "approved",
       "contentVersion": "evidence-1",
       "sources": [
         {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body push region)"},
-        {"source": "IVERSEN21", "locator": "Abstract (at least one upper-body push)"}
+        {"source": "IVERSEN21", "locator": "Abstract (at least one upper-body push)"},
+        {"source": "OGASAWARA2012", "locator": "Results; Table I; Fig. 1. PMC3831787 full text; docs/research/exercise-evidence.json finding OGASAWARA2012-1 (hypertrophy, chest, triceps)"},
+        {"source": "KIKUCHI2017", "locator": "Results 3.1; Discussion paragraph 2 (percent changes); docs/research/exercise-evidence.json finding KIKUCHI2017-1 (hypertrophy, chest, triceps)"}
       ]
     },
     {
@@ -35,11 +37,12 @@
       "equipmentKind": "machine",
       "basis": "machineSetting",
       "alternatives": ["db_floor_press"],
-      "review": "pending",
+      "review": "approved",
       "contentVersion": "evidence-1",
       "sources": [
         {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body push region)"},
-        {"source": "HAUGEN23", "locator": "Abstract; Discussion (machines and free weights give similar gains)"}
+        {"source": "HAUGEN23", "locator": "Abstract; Discussion (machines and free weights give similar gains)"},
+        {"source": "HAUGEN2023", "locator": "Results (direct-strength sub-analyses, Fig. B); docs/research/exercise-evidence.json finding HAUGEN2023-3 (strength, chest)"}
       ]
     },
     {
@@ -49,7 +52,7 @@
       "equipmentKind": "dumbbell",
       "basis": "perHand",
       "alternatives": ["cable_row"],
-      "review": "pending",
+      "review": "approved",
       "contentVersion": "evidence-1",
       "sources": [
         {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body pull region)"},
@@ -63,7 +66,7 @@
       "equipmentKind": "machine",
       "basis": "machineSetting",
       "alternatives": ["db_row"],
-      "review": "pending",
+      "review": "approved",
       "contentVersion": "evidence-1",
       "sources": [
         {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body pull region)"},
@@ -77,7 +80,7 @@
       "equipmentKind": "dumbbell",
       "basis": "total",
       "alternatives": ["leg_press"],
-      "review": "pending",
+      "review": "approved",
       "contentVersion": "evidence-1",
       "sources": [
         {"source": "ACSM26", "locator": "Discussion, limitations paragraph (lower-body push region)"},
@@ -91,11 +94,13 @@
       "equipmentKind": "machine",
       "basis": "machineSetting",
       "alternatives": ["goblet_squat"],
-      "review": "pending",
+      "review": "approved",
       "contentVersion": "evidence-1",
       "sources": [
         {"source": "IVERSEN21", "locator": "Abstract (one leg-press or squat pattern)"},
-        {"source": "HAUGEN23", "locator": "Abstract; Discussion (machines and free weights give similar gains)"}
+        {"source": "HAUGEN23", "locator": "Abstract; Discussion (machines and free weights give similar gains)"},
+        {"source": "KINOSHITA2026", "locator": "Results, Experiment 1; Table 1 (ALL); Conclusions; docs/research/exercise-evidence.json finding KINOSHITA2026-6 (hypertrophy, quadriceps, glutes, adductors, hamstrings)"},
+        {"source": "KINOSHITA2026", "locator": "Results, Experiment 1; Table 1; docs/research/exercise-evidence.json finding KINOSHITA2026-2 (hypertrophy, quadriceps)"}
       ]
     },
     {
@@ -105,7 +110,7 @@
       "equipmentKind": "dumbbell",
       "basis": "perHand",
       "alternatives": [],
-      "review": "pending",
+      "review": "approved",
       "contentVersion": "evidence-1",
       "sources": [
         {"source": "ACSM09", "locator": "Table 2, p. 700 (include single- and multi-joint exercises; Evidence A)"}
@@ -115,7 +120,7 @@
   "policy": {
     "id": "DP_EVIDENCE_01",
     "version": "evidence-1",
-    "review": "pending",
+    "review": "approved",
     "requiredExposures": {
       "value": 2,
       "source": "ACSM09",

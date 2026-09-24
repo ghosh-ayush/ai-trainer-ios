@@ -73,4 +73,21 @@ final class HealthKitService: ObservableObject {
         }
     }
     func clear() { generation += 1; readings = []; message = "Local display cleared. Manage Health permissions in iOS Settings." }
+
+    /// Body-mass samples from the last `days` days as weigh-ins for the diet engine (ADR-016).
+    /// Read-only: nothing is written to Health. An empty answer can also mean read access was
+    /// not granted — HealthKit does not say which — so the caller must not treat it as "no change".
+    func bodyMassWeighIns(days: Int = 90) async throws -> [WeighIn] {
+        guard HKHealthStore.isHealthDataAvailable() else { throw TrainerError.invalid("Apple Health is not available on this device.") }
+        guard let bodyMass = HKObjectType.quantityType(forIdentifier: .bodyMass) else { return [] }
+        loading = true
+        defer { loading = false }
+        try await healthStore.requestAuthorization(toShare: [], read: [bodyMass])
+        let since = Date().addingTimeInterval(-Double(days) * 86400)
+        return try await samples(type: bodyMass, since: since).compactMap { $0 as? HKQuantitySample }.map { sample in
+            WeighIn(id: UUID(), kg: sample.quantity.doubleValue(for: .gramUnit(with: .kilo)), measuredAt: sample.startDate,
+                    source: "appleHealth", timeZone: TimeZone.current.identifier,
+                    utcOffsetSeconds: TimeZone.current.secondsFromGMT(for: sample.startDate))
+        }
+    }
 }

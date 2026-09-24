@@ -3,7 +3,7 @@
   "operation": "decide",
   "payload": {
     "state": {
-      "schemaVersion": 2,
+      "schemaVersion": 3,
       "athleteID": "00000000-0000-0000-0000-000000000004",
       "revision": 0,
       "contextRevision": 0,
@@ -365,7 +365,10 @@
       "events": [],
       "meals": [],
       "mealAudits": [],
-      "recipes": []
+      "recipes": [],
+      "weighIns": [],
+      "dietDecisions": [],
+      "excludedWeighIns": []
     },
     "request": {
       "kind": "progression",

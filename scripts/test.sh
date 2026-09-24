@@ -2,6 +2,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export AI_TRAINER_PYTHON_PATH="$PWD/core/python"
+# Flow and contract tests run against the fixture, not the shipped research content (ADR-014).
+export AI_TRAINER_CONTENT_BUNDLE=fixture-1
 # Use one matching interpreter, headers and library for real in-process desktop tests.
 PYTHON_CONFIG="${PYTHON_CONFIG:-python3-config}"
 export AI_TRAINER_PYTHON_HOME="$("$PYTHON_CONFIG" --prefix)"
