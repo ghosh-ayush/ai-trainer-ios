@@ -77,3 +77,16 @@ extension Meal {
         meals.filter { calendar.isDate($0.occurredAt, inSameDayAs: date) }.reduce(Nutrients()) { $0 + $1.nutrients }
     }
 }
+
+/// Names for the core's weekdays, 0-6 with Monday = 0 (ADR-017).
+public enum Weekday {
+    public static let shortNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    public static let names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+    public static func short(_ day: Int) -> String {
+        shortNames.indices.contains(day) ? shortNames[day] : "Day \(day + 1)"
+    }
+    public static func name(_ day: Int) -> String {
+        names.indices.contains(day) ? names[day] : "Day \(day + 1)"
+    }
+}

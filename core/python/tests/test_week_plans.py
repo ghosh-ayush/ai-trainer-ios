@@ -7,6 +7,7 @@ from the bundle, cited.
 """
 
 import unittest
+from itertools import pairwise
 
 from ai_trainer.errors import DomainError
 from ai_trainer.rules.plan_ranking import rank_weeks
@@ -63,8 +64,24 @@ STRUCTURES = {
 
 RANKING = {
     "weights": {
-        "Hypertrophy": {"volume": 4, "exposures": 1, "recovery": 2, "variety": 2, "adherence": 2, "preference": 1},
-        "Strength": {"volume": 3, "exposures": 3, "recovery": 2, "variety": 1, "adherence": 2, "preference": 1},
+        "Hypertrophy": {
+            "volume": 4,
+            "exposures": 1,
+            "recovery": 2,
+            "spread": 2,
+            "variety": 2,
+            "adherence": 2,
+            "preference": 1,
+        },
+        "Strength": {
+            "volume": 3,
+            "exposures": 3,
+            "recovery": 2,
+            "spread": 2,
+            "variety": 1,
+            "adherence": 2,
+            "preference": 1,
+        },
     },
     "varietyRoles": ["UPH", "UPV", "ULH", "ULV", "HH", "SL"],
     "adherenceSlack": 1,
@@ -163,6 +180,20 @@ class GuardrailTests(unittest.TestCase):
         self.assertNotIn("HH", used)
         self.assertNotIn("KF", used)
 
+    def test_a_missing_role_falls_back_to_its_sibling(self):
+        structures = {**STRUCTURES, "fallbacks": {"ULV": "ULH", "UPV": "UPH"}}
+        roles = ALL_ROLES - {"ULV"}
+        candidates = week_candidates([MON, THU], {MON: 60, THU: 60}, WEEKLY, structures, 10, roles)
+        upper = next(
+            session
+            for candidate in candidates
+            if candidate["split"] == "upperLower"
+            for session in candidate["sessions"]
+            if session["type"] == "upper"
+        )
+        pulls = [slot["role"] for slot in upper["slots"] if slot["role"] in ("ULH", "ULV")]
+        self.assertEqual(pulls, ["ULH"])  # one horizontal pull, not a duplicate and not none
+
     def test_no_free_day_is_invalid(self):
         with self.assertRaises(DomainError):
             weeks([], 60)
@@ -204,6 +235,12 @@ class RankingTests(unittest.TestCase):
         self.assertIn("A_SPLIT_YOU_LIKE", liked[position(liked)]["reasons"])
         # Upper/lower on two days trains each muscle once; a stated liking does not outrank the evidence.
         self.assertNotEqual(liked[0]["split"], "upperLower")
+
+    def test_sessions_spread_across_the_week_beat_bunched_ones(self):
+        best = self.rank(list(range(7)))[0]
+        days = best["days"]
+        gaps = [later - earlier for earlier, later in pairwise(days)] + [days[0] + 7 - days[-1]]
+        self.assertLessEqual(max(gaps), 3, days)  # not four sessions bunched into Fri-Mon
 
     def test_ranking_is_deterministic(self):
         first = [item["id"] for item in self.rank([MON, WED, FRI, SAT])]

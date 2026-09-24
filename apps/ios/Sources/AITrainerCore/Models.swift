@@ -71,7 +71,7 @@ public enum AdaptationPace: String, Codable, CaseIterable {
 
 // MARK: - Records
 
-/// What the athlete told us at onboarding. No body metrics, no estimated strength.
+/// What the athlete told us at onboarding. No body metrics, no estimated strength. ``freeDays`` are weekdays 0-6 (Monday = 0) and ``minutesByDay`` maps a weekday to that day's minutes; both stay absent until the athlete gives them (ADR-017).
 public struct Profile: Codable, Equatable {
     public var adultConfirmed: Bool
     public var supportedScopeConfirmed: Bool
@@ -84,6 +84,8 @@ public struct Profile: Codable, Equatable {
     public var timeZone: String
     public var excludedExercises: Set<String>
     public var preferredExercises: Set<String>
+    public var freeDays: [Int]?
+    public var minutesByDay: [String: Int]?
 
     public init(
         adultConfirmed: Bool = false,
@@ -96,7 +98,9 @@ public struct Profile: Codable, Equatable {
         preferredUnit: MassUnit = .lb,
         timeZone: String = TimeZone.current.identifier,
         excludedExercises: Set<String> = [],
-        preferredExercises: Set<String> = []
+        preferredExercises: Set<String> = [],
+        freeDays: [Int]? = nil,
+        minutesByDay: [String: Int]? = nil
     ) {
         self.adultConfirmed = adultConfirmed
         self.supportedScopeConfirmed = supportedScopeConfirmed
@@ -109,6 +113,8 @@ public struct Profile: Codable, Equatable {
         self.timeZone = timeZone
         self.excludedExercises = excludedExercises
         self.preferredExercises = preferredExercises
+        self.freeDays = freeDays
+        self.minutesByDay = minutesByDay
     }
 }
 
@@ -263,7 +269,7 @@ public struct Prescription: Codable, Equatable, Identifiable {
     }
 }
 
-/// One session's accepted prescriptions. ``modified`` marks a temporary shortened/substituted copy.
+/// One session's accepted prescriptions. ``modified`` marks a temporary shortened/substituted copy. ``weekday`` (0-6, Monday = 0) is the day a weekly plan (ADR-017) puts this session on.
 public struct SessionPlan: Codable, Equatable, Identifiable {
     public var id: UUID
     public var revision: Int
@@ -272,6 +278,7 @@ public struct SessionPlan: Codable, Equatable, Identifiable {
     public var modified: Bool
     public var scheduledDate: Date?
     public var warmUpMinutes: Int
+    public var weekday: Int?
 
     public init(
         id: UUID = UUID(),
@@ -280,7 +287,8 @@ public struct SessionPlan: Codable, Equatable, Identifiable {
         slots: [Prescription],
         modified: Bool = false,
         scheduledDate: Date? = nil,
-        warmUpMinutes: Int = 5
+        warmUpMinutes: Int = 5,
+        weekday: Int? = nil
     ) {
         self.id = id
         self.revision = revision
@@ -289,6 +297,7 @@ public struct SessionPlan: Codable, Equatable, Identifiable {
         self.modified = modified
         self.scheduledDate = scheduledDate
         self.warmUpMinutes = warmUpMinutes
+        self.weekday = weekday
     }
 }
 
@@ -861,7 +870,7 @@ public struct AthleteState: Codable, Equatable {
     public var excludedWeighIns: [Date]
 
     public init(
-        schemaVersion: Int = 3,
+        schemaVersion: Int = 4,
         athleteID: UUID = UUID(),
         revision: Int = 0,
         contextRevision: Int = 0,
@@ -1362,5 +1371,66 @@ public struct DietOptions: Codable, Equatable {
         self.paceQuestion = paceQuestion
         self.paceNote = paceNote
         self.policyVersion = policyVersion
+    }
+}
+
+/// One session of a weekly option: its day, session type, estimated minutes and working sets.
+public struct WeekSession: Codable, Equatable {
+    public var weekday: Int
+    public var name: String
+    public var minutes: Double
+    public var exercises: Int
+    public var sets: Int
+
+    public init(
+        weekday: Int,
+        name: String,
+        minutes: Double,
+        exercises: Int,
+        sets: Int
+    ) {
+        self.weekday = weekday
+        self.name = name
+        self.minutes = minutes
+        self.exercises = exercises
+        self.sets = sets
+    }
+}
+
+/// One week the athlete may choose (ADR-017). ``volume`` is ``full`` or ``reduced`` (time-limited); ``reasons`` are codes the host explains. Choosing it is still a proposal the athlete accepts.
+public struct WeekOption: Codable, Equatable, Identifiable {
+    public var id: String
+    public var split: String
+    public var name: String
+    public var days: [Int]
+    public var sessions: [WeekSession]
+    public var sessionsPerWeek: Int
+    public var weeklyMinutes: Double
+    public var volume: String
+    public var score: Double
+    public var reasons: [String]
+
+    public init(
+        id: String,
+        split: String,
+        name: String,
+        days: [Int],
+        sessions: [WeekSession],
+        sessionsPerWeek: Int,
+        weeklyMinutes: Double,
+        volume: String,
+        score: Double,
+        reasons: [String]
+    ) {
+        self.id = id
+        self.split = split
+        self.name = name
+        self.days = days
+        self.sessions = sessions
+        self.sessionsPerWeek = sessionsPerWeek
+        self.weeklyMinutes = weeklyMinutes
+        self.volume = volume
+        self.score = score
+        self.reasons = reasons
     }
 }

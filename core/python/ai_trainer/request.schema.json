@@ -199,6 +199,32 @@
           "items": {
             "$ref": "#/$defs/String"
           }
+        },
+        "freeDays": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Int"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "minutesByDay": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/Int"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -459,6 +485,16 @@
         },
         "warmUpMinutes": {
           "$ref": "#/$defs/Int"
+        },
+        "weekday": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -1296,7 +1332,7 @@
       "type": "object",
       "properties": {
         "schemaVersion": {
-          "const": 3
+          "const": 4
         },
         "athleteID": {
           "$ref": "#/$defs/UUID"
@@ -2211,6 +2247,91 @@
       ],
       "additionalProperties": false
     },
+    "WeekSession": {
+      "type": "object",
+      "properties": {
+        "weekday": {
+          "$ref": "#/$defs/Int"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "minutes": {
+          "$ref": "#/$defs/Number"
+        },
+        "exercises": {
+          "$ref": "#/$defs/Int"
+        },
+        "sets": {
+          "$ref": "#/$defs/Int"
+        }
+      },
+      "required": [
+        "weekday",
+        "name",
+        "minutes",
+        "exercises",
+        "sets"
+      ],
+      "additionalProperties": false
+    },
+    "WeekOption": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/String"
+        },
+        "split": {
+          "$ref": "#/$defs/String"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "days": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Int"
+          }
+        },
+        "sessions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WeekSession"
+          }
+        },
+        "sessionsPerWeek": {
+          "$ref": "#/$defs/Int"
+        },
+        "weeklyMinutes": {
+          "$ref": "#/$defs/Number"
+        },
+        "volume": {
+          "$ref": "#/$defs/String"
+        },
+        "score": {
+          "$ref": "#/$defs/Number"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "split",
+        "name",
+        "days",
+        "sessions",
+        "sessionsPerWeek",
+        "weeklyMinutes",
+        "volume",
+        "score",
+        "reasons"
+      ],
+      "additionalProperties": false
+    },
     "decidePayload": {
       "type": "object",
       "properties": {
@@ -2253,6 +2374,16 @@
             "$ref": "#/$defs/UUID"
           },
           "minItems": 6
+        },
+        "optionID": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -2260,6 +2391,22 @@
         "permitsFixtures",
         "now",
         "ids"
+      ],
+      "additionalProperties": false
+    },
+    "weekOptionsPayload": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/$defs/Profile"
+        },
+        "permitsFixtures": {
+          "$ref": "#/$defs/Bool"
+        }
+      },
+      "required": [
+        "profile",
+        "permitsFixtures"
       ],
       "additionalProperties": false
     },
@@ -2427,6 +2574,16 @@
       "properties": {
         "profile": {
           "$ref": "#/$defs/Profile"
+        },
+        "optionID": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -3868,6 +4025,26 @@
         },
         "payload": {
           "$ref": "#/$defs/initialProgramPayload"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "operation": {
+          "const": "weekOptions"
+        },
+        "payload": {
+          "$ref": "#/$defs/weekOptionsPayload"
         }
       },
       "required": [

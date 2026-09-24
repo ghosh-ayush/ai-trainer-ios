@@ -25,7 +25,11 @@ ai_trainer/
 │   ├── eligibility.py     decide(): spec §5.2 gate order, then routes to a rule
 │   ├── progression.py     TB-04 double progression on comparable evidence
 │   ├── adjustments.py     TB-02/03/06 reschedule · shorten · curated substitution
-│   └── program.py         TB-01 initial program selection
+│   ├── program.py         TB-01 initial program selection (one-session template, or the weekly planner)
+│   ├── selection.py       exercise for a role, per-goal prescription (shared by both program paths)
+│   ├── week_plans.py      ADR-017: every week the guardrails allow on the athlete's free days
+│   ├── plan_ranking.py    ADR-017: orders valid weeks for one athlete, with reason codes
+│   └── week_program.py    ADR-017: distinct options, and the Program the chosen one becomes
 └── commands/
     ├── __init__.py        reduce_state(payload): command → handler table
     ├── context.py         CommandContext: state copy, arguments, now, id supply, event helper

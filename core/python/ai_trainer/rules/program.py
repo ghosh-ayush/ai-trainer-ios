@@ -10,11 +10,14 @@ evidence-based content bundle (Track C).
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import Any
 
 from ..athlete_state import equipment_context
 from ..content import is_enabled, policy_is_enabled
 from ..errors import DomainError
+from .selection import first_eligible_exercise, prescription
+from .week_program import week_program
 
 JSON = dict[str, Any]
 
@@ -22,19 +25,27 @@ JSON = dict[str, Any]
 REQUIRED_ID_COUNT = 6
 
 
-def initial_program(profile: JSON, library: JSON, now: float, ids: list[str]) -> JSON:
+def initial_program(profile: JSON, library: JSON, now: float, ids: Iterable[str], option_id: str | None = None) -> JSON:
     """Build the initial Program for ``profile`` or raise ``DomainError``.
 
-    ``ids[0]`` is the program id, ``ids[1]`` the plan id, ``ids[2:]`` slot ids.
+    A bundle with a weekly ``planner`` (ADR-017) builds one plan per session of the week
+    ``option_id`` names (the best week when ``None``); ``ids[0]`` is the program id and the rest
+    supply plans and slots in order. Otherwise the one-session template is used: ``ids[0]`` is
+    the program id, ``ids[1]`` the plan id, ``ids[2:]`` slot ids, and ``option_id`` must be absent.
     """
     if not policy_is_enabled(library):
         raise DomainError("unsupported")  # approved content, or fixtures where the host permits them
+    if "planner" in library:
+        return week_program(profile, library, now, ids, option_id)
+    if option_id is not None:
+        raise DomainError("invalid", "This content has no weekly options to choose from.")
+    ids = list(ids)
     template = library["template"]
     _require_supported_profile(profile, template)
 
     selected: list[tuple[JSON, bool]] = []
     for role in template["requiredRoles"]:
-        exercise = _first_eligible_exercise(role, profile, library)
+        exercise = first_eligible_exercise(role, profile, library)
         if exercise is None:
             raise DomainError("unsupported")
         selected.append((exercise, False))
@@ -44,7 +55,7 @@ def initial_program(profile: JSON, library: JSON, now: float, ids: list[str]) ->
         selected.append((accessory, True))
 
     slots = [
-        _slot(ids[index + 2], exercise, profile["preferredUnit"], optional, _prescription(template, profile["goal"]))
+        _slot(ids[index + 2], exercise, profile["preferredUnit"], optional, prescription(template, profile["goal"]))
         for index, (exercise, optional) in enumerate(selected)
     ]
     plan = {
@@ -64,13 +75,6 @@ def initial_program(profile: JSON, library: JSON, now: float, ids: list[str]) ->
         "sequenceIndex": 0,
         "acceptedAt": now,
     }
-
-
-def _prescription(template: JSON, goal: str) -> JSON:
-    """The goal's own prescription when the template gives one (``slotByGoal``), else the shared ``slot``."""
-    by_goal: JSON = template.get("slotByGoal") or {}
-    prescription: JSON = by_goal.get(goal) or template["slot"]
-    return prescription
 
 
 def _slot(slot_id: str, exercise: JSON, unit: str, optional: bool, prescription: JSON) -> JSON:
@@ -105,20 +109,6 @@ def _require_supported_profile(profile: JSON, template: JSON) -> None:
             f"{template['minDaysPerWeek']}-{template['maxDaysPerWeek']} days, "
             f"and sessions of at least {template['minSessionMinutes']} minutes.",
         )
-
-
-def _first_eligible_exercise(role: str, profile: JSON, library: JSON) -> JSON | None:
-    """Enabled exercise for ``role`` matching the athlete's equipment; preferred first, then by id."""
-    eligible = [
-        exercise
-        for exercise in library["exercises"]
-        if exercise["role"] == role
-        and is_enabled(exercise["review"], library)
-        and exercise["equipmentKind"] in profile["equipment"]
-        and exercise["id"] not in profile["excludedExercises"]
-    ]
-    eligible.sort(key=lambda exercise: (exercise["id"] not in profile["preferredExercises"], exercise["id"]))
-    return eligible[0] if eligible else None
 
 
 def _eligible_accessory(profile: JSON, library: JSON, accessory: JSON) -> JSON | None:

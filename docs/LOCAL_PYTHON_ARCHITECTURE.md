@@ -51,7 +51,9 @@ define version **1.0**. There are nine operations: `stateCommand` (every mutatio
 `decide` (read-only preview), `initialProgram`, `library`, `migrateState`, `nutrients`,
 `recovery`, and two read-only view models for the P1 screens — `views` (Today's slot
 needs-states, proposal titles and the one slot to auto-request, plus Progress's recorded
-values per exercise, in one pass) and `loadSteps` (available loads around a confirmed load). Requests
+values per exercise, in one pass) and `loadSteps` (available loads around a confirmed load).
+`weekOptions` (ADR-017) returns up to three distinct weeks for the athlete's free weekdays and
+minutes, and `initialProgram` / `acceptInitialPlan` take the chosen `optionID`. Requests
 have `schemaVersion`, `operation` and a typed operation payload. Responses contain
 that version and either a result or `{code,message}` error. The core validates its
 bounded schema subset without third-party runtime dependencies. CI regenerates the

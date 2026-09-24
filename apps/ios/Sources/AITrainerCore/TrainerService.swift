@@ -18,6 +18,7 @@ public final class TrainerService {
         var reps: Int?; var rir: Int?; var logID: UUID?; var operationID: UUID?; var reason: String?
         var exerciseID: String?; var excluded: Bool?; var expectedRevision: Int?; var id: UUID?
         var useIncoming: Bool?; var meal: Meal?; var asRecipe: Bool?; var request: TrainingRequest?
+        var optionID: String?
     }
     private struct Payload<CommandArguments: Encodable>: Encodable {
         let command: String; let state: AthleteState; let arguments: CommandArguments
@@ -26,10 +27,10 @@ public final class TrainerService {
     private struct Result: Decodable { let state: AthleteState; let value: Bool?; let decision: Decision? }
 
     @discardableResult private func command<CommandArguments: Encodable>(_ name: String, _ arguments: CommandArguments,
-                                                                        now: Date = Date()) throws -> Result {
+                                                                        now: Date = Date(), idCount: Int = 10) throws -> Result {
         try repository.transaction { state in
             let result: Result = try core.call("stateCommand", Payload(command: name, state: state, arguments: arguments,
-                permitsFixtures: library.permitsFixtures, now: now, ids: (0..<10).map { _ in UUID() }))
+                permitsFixtures: library.permitsFixtures, now: now, ids: (0..<idCount).map { _ in UUID() }))
             state = result.state
             return result
         }
@@ -39,13 +40,30 @@ public final class TrainerService {
     }
 
     // MARK: Plan
-    public func previewInitialPlan(profile: Profile, now: Date = Date()) throws -> Program {
-        struct Preview: Encodable { let profile: Profile; let permitsFixtures: Bool; let now: Date; let ids: [UUID] }
-        return try core.call("initialProgram", Preview(profile: profile, permitsFixtures: library.permitsFixtures,
-                                                      now: now, ids: (0..<6).map { _ in UUID() }))
+    /// Ids a weekly program (ADR-017) may need: the program, then one per plan and slot, plus events.
+    static let programIDCount = 80
+
+    /// Up to three genuinely different weeks for the athlete's free days and minutes, best first.
+    /// Empty when the active content has no weekly planner (it then builds one repeating session).
+    public func weekOptions(profile: Profile) throws -> [WeekOption] {
+        struct Options: Encodable { let profile: Profile; let permitsFixtures: Bool }
+        return try core.call("weekOptions", Options(profile: profile, permitsFixtures: library.permitsFixtures))
     }
-    public func acceptInitialPlan(profile: Profile, now: Date = Date()) throws {
-        try command("acceptInitialPlan", Arguments(profile: profile), now: now)
+    /// What accepting would create. `optionID` names a week from `weekOptions`; `nil` takes the best one.
+    public func previewInitialPlan(profile: Profile, optionID: String? = nil, now: Date = Date()) throws -> Program {
+        struct Preview: Encodable {
+            let profile: Profile
+            let permitsFixtures: Bool
+            let now: Date
+            let ids: [UUID]
+            let optionID: String?
+        }
+        return try core.call("initialProgram", Preview(profile: profile, permitsFixtures: library.permitsFixtures, now: now,
+                                                      ids: (0..<Self.programIDCount).map { _ in UUID() }, optionID: optionID))
+    }
+    /// The core rebuilds the week from the same inputs and refuses an option that no longer fits.
+    public func acceptInitialPlan(profile: Profile, optionID: String? = nil, now: Date = Date()) throws {
+        try command("acceptInitialPlan", Arguments(profile: profile, optionID: optionID), now: now, idCount: Self.programIDCount)
     }
     public func configureLoad(slotID: UUID, load: Double?, options: [Double]) throws {
         try command("configureLoad", Arguments(slotID: slotID, load: load, options: options))

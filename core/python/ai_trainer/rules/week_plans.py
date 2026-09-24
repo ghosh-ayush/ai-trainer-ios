@@ -43,20 +43,22 @@ def week_candidates(
     structures: JSON,
     target: float,
     available_roles: set[str],
+    max_sessions: int | None = None,
 ) -> list[JSON]:
     """Every week the guardrails allow on ``free_days``, in a stable order.
 
     ``free_days`` are weekdays 0-6 (Monday = 0) and ``minutes_by_day`` gives the session minutes
     the athlete has on each of them. ``target`` is the weekly working sets per major muscle to aim
     for, between the floor and the ceiling. Roles outside ``available_roles`` (no eligible
-    exercise for this athlete) are left out of every session.
+    exercise for this athlete) are left out of every session. ``max_sessions`` lowers the
+    bundle's session maximum, for an athlete who said how many days but not which.
     """
     days = sorted(set(free_days))
     if not days or any(day not in range(DAYS_PER_WEEK) for day in days):
         raise DomainError("invalid", "Choose at least one free weekday.")
     if any(day not in minutes_by_day for day in days):
         raise DomainError("invalid", "Give the session minutes for every free day.")
-    most_sessions = min(len(days), weekly["maxSessionsPerWeek"])
+    most_sessions = min(len(days), weekly["maxSessionsPerWeek"], max_sessions or DAYS_PER_WEEK)
     trainable = _trainable_major_muscles(structures, available_roles)
 
     candidates: list[JSON] = []
@@ -95,20 +97,21 @@ def _build(
 ) -> JSON | None:
     """One candidate for ``layout``, filled towards ``target``; ``None`` if a session cannot fit."""
     week = _Week(weekly, structures)
+    required_by_session: list[list[str]] = []
     for day, session_type in layout:
         definition = structures["sessions"][session_type]
-        required = [role for role in definition["roles"] if role in available_roles]
-        optional = [role for role in definition.get("optional", []) if role in available_roles]
+        required = _usable_roles(definition["roles"], available_roles, structures.get("fallbacks", {}))
+        optional = [role for role in definition.get("optional", []) if role in available_roles and role not in required]
         capacity = _set_capacity(minutes_by_day[day], weekly)
         if not required or capacity < len(required) * weekly["setsPerExerciseMin"]:
             return None
         week.add_session(day, session_type, capacity, optional)
-    for index, (_, session_type) in enumerate(layout):
-        for role in structures["sessions"][session_type]["roles"]:
-            if role in available_roles:
-                if not week.can_add(index, role, weekly["setsPerExerciseMin"]):
-                    return None
-                week.add_slot(index, role, weekly["setsPerExerciseMin"])
+        required_by_session.append(required)
+    for index, required in enumerate(required_by_session):
+        for role in required:
+            if not week.can_add(index, role, weekly["setsPerExerciseMin"]):
+                return None
+            week.add_slot(index, role, weekly["setsPerExerciseMin"])
     week.fill(target, accessories=False)
     week.add_accessories(target)
     week.fill(target, accessories=True)
@@ -236,6 +239,20 @@ class _Week:
                 below = any(self.weekly_totals.get(muscle, 0.0) < target for muscle in self.primaries[role])
                 if below and self.can_add(index, role, minimum):
                     self.add_slot(index, role, minimum)
+
+
+def _usable_roles(roles: list[str], available_roles: set[str], fallbacks: dict[str, str]) -> list[str]:
+    """A session's roles the athlete can do, each missing one replaced by its fallback once.
+
+    ACSM26 treats horizontal and vertical upper-body work as optional per session or per week,
+    so a free-weight athlete with no vertical pull gets a second horizontal pull instead of none.
+    """
+    usable: list[str] = []
+    for role in roles:
+        choice = role if role in available_roles else fallbacks.get(role)
+        if choice is not None and choice in available_roles and choice not in usable:
+            usable.append(choice)
+    return usable
 
 
 def _meets_floor(candidate: JSON, weekly: JSON, trainable: set[str]) -> bool:

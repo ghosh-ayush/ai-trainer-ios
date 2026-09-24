@@ -73,14 +73,18 @@ _IDENTIFIERS = frozenset({"id", "name", "version", "review", "exerciseID", "equi
 
 
 def load_library(permits_fixtures: bool) -> JSON:
-    """The library the rules run against: exercises, policy, template and the fixture flag."""
+    """The library the rules run against: exercises, policy, template, the weekly planner
+    (when the bundle has one, ADR-017) and the fixture flag."""
     bundle = _active_bundle()
-    return {
+    library = {
         "exercises": bundle["exercises"],
         "policy": bundle["policy"],
         "template": bundle["template"],
         "permitsFixtures": permits_fixtures,
     }
+    if "planner" in bundle:
+        library["planner"] = bundle["planner"]
+    return library
 
 
 def public_library(library: JSON) -> JSON:
@@ -136,7 +140,7 @@ def bundle_problems(manifest: JSON, content: JSON) -> list[str]:
         problems.extend(source_problems(source, f"manifest.sources.{key}"))
     if resolve(content["policy"]).get("review") != review:
         problems.append(f"policy.review must match the manifest ({review})")
-    for section in ("policy", "template"):
+    for section in _cited_sections(content):
         problems.extend(_citation_problems(content[section], section, sources))
     for path, value in cited_parameters(content):
         source = sources.get(value["source"]) or {}
@@ -215,11 +219,16 @@ def citation_problems(node: Any, path: str, sources: JSON) -> list[str]:
 
 
 def cited_parameters(content: JSON) -> list[tuple[str, JSON]]:
-    """Every cited value in a bundle's policy and template, as ``(dotted.path, cited value)``."""
+    """Every cited value in a bundle's policy, template and planner, as ``(dotted.path, cited value)``."""
     found: list[tuple[str, JSON]] = []
-    for section in ("policy", "template"):
+    for section in _cited_sections(content):
         _collect(content[section], section, found)
     return found
+
+
+def _cited_sections(content: JSON) -> list[str]:
+    """The sections whose every value must be cited: policy, template and, when present, planner."""
+    return [section for section in ("policy", "template", "planner") if section in content]
 
 
 def resolve(node: Any) -> Any:

@@ -122,7 +122,7 @@ final class AppFlowTests: XCTestCase {
         object["dietDecisions"] = nil
         storage.data = try JSONSerialization.data(withJSONObject: object)
         let migrated = try StateRepository(persistence: storage, core: core).snapshot
-        XCTAssertEqual(migrated.schemaVersion, 3)
+        XCTAssertEqual(migrated.schemaVersion, 4)
         XCTAssertEqual(migrated.weighIns, [])
         XCTAssertEqual(migrated.recommendations.first?.request, .progression(slot.id))
     }

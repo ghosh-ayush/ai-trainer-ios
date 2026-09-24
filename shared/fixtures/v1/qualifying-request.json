@@ -3,7 +3,7 @@
   "operation": "decide",
   "payload": {
     "state": {
-      "schemaVersion": 3,
+      "schemaVersion": 4,
       "athleteID": "00000000-0000-0000-0000-000000000004",
       "revision": 0,
       "contextRevision": 0,

@@ -121,6 +121,11 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
   it (`autoRequest`). It is still only a proposal: nothing changes until the athlete taps Accept.
 - A one-tap "Done as planned" set records the planned reps and load with RIR unknown; effort is
   never assumed. "4+" RIR is recorded as 4.
+- Weekly plans (ADR-017) never guess weekdays: onboarding starts with no free day selected, and a
+  migrated profile keeps `freeDays` absent. Seven free days give at most six sessions (no qualifying
+  7-day trial); the cap is a cited owner decision in the bundle, not code.
+- `evidence-1` is `disabled`, superseded by `evidence-2` (the weekly planner); only one bundle may
+  be `approved` at a time.
 - Dates cross the bridge as binary64 seconds since 2001-01-01 (Foundation reference epoch).
 - Swift has no validators of its own: set and nutrient rules run in Python when a command is
   saved, so a malformed set is rejected by `saveSet`, not by a Swift `validate()`.

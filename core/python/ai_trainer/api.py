@@ -26,6 +26,7 @@ from .nutrition import scale_nutrients
 from .progress import progress_summary
 from .rules.eligibility import decide
 from .rules.program import initial_program
+from .rules.week_program import option_summaries, week_options
 from .today import today_status
 
 JSON = dict[str, Any]
@@ -81,7 +82,12 @@ def dispatch(envelope: JSON) -> Any:
         return decide(payload["state"], payload["request"], load_library(payload["permitsFixtures"]), payload["now"])
     if operation == "initialProgram":
         library = load_library(payload["permitsFixtures"])
-        return initial_program(payload["profile"], library, payload["now"], payload["ids"])
+        return initial_program(payload["profile"], library, payload["now"], payload["ids"], payload.get("optionID"))
+    if operation == "weekOptions":
+        library = load_library(payload["permitsFixtures"])
+        if "planner" not in library:
+            return []
+        return option_summaries(week_options(payload["profile"], library), library)
     if operation == "library":
         return public_library(load_library(payload["permitsFixtures"]))
     if operation == "migrateState":

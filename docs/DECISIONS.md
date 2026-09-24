@@ -238,4 +238,17 @@ Consequences:
     weekdays stay unknown
   - an operation that returns distinct top options with reasons
   - the onboarding weekday picker
-Status: proposed. Planner core on `claude/frequency-1-7`; integration waits for the bundle merge.
+- Implemented on 2026-09-24 in `claude/frequency-1-7`:
+  - `evidence-2` supersedes `evidence-1`, which is now `disabled`. It adds a cited `planner` section
+    (weekly guardrails, targets, structures, ranking) and 29 exercises for eleven roles. Every
+    exercise citation was re-checked independently: 101 checked, 16 locators corrected, 5 removed.
+  - A role with no exercise for the athlete's equipment falls back to its sibling (vertical to
+    horizontal pull or press, single-leg to squat, knee flexion to hinge), per ACSM26.
+  - The ranking adds `spread` (even spacing of each muscle's sessions), so free days are not
+    bunched together.
+  - The profile gains `freeDays` and `minutesByDay` and each plan gains `weekday`, so the state
+    schema moves to 4 with no data filled in. Onboarding asks for free weekdays and minutes, then
+    shows up to three options with plain reasons.
+  - Not yet: re-planning from adherence history. The first plan uses no history, so preview and
+    accept stay identical. The on-device model choosing among options is also still to come.
+Status: accepted by the owner ("AI chooses, research bounds", 2026-09-24).

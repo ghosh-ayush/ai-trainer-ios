@@ -16,6 +16,9 @@ Features:
 - ``exposures``: share of major muscles trained on at least the minimum number of sessions a week
   (ACSM26: at least two sessions for strength). The bundle weights it by goal.
 - ``recovery``: share of sessions that do not train a muscle the day after it was trained.
+- ``spread``: how evenly each major muscle's sessions are spaced around the week: its shortest
+  gap against the even gap (7 days divided by its sessions), capped at 1. Mon/Thu scores
+  higher than Sat/Mon for the same two sessions.
 - ``variety``: share of the bundle's variety roles (for example horizontal and vertical presses
   and pulls, hinge, single-leg) that appear in the week.
 - ``adherence``: 1 when the week asks for no more sessions than the athlete recently completed plus
@@ -25,11 +28,14 @@ Features:
 
 from __future__ import annotations
 
+from itertools import pairwise
 from typing import Any
 
 JSON = dict[str, Any]
 
 NEUTRAL = 0.5
+# A spread this even (e.g. Mon/Thu for two sessions: 3 of 3.5 days) is worth telling the athlete.
+SPREAD_REASON_THRESHOLD = 0.85
 
 
 def rank_weeks(candidates: list[JSON], athlete: JSON, weekly: JSON, structures: JSON, ranking: JSON) -> list[JSON]:
@@ -68,6 +74,7 @@ def _features(candidate: JSON, athlete: JSON, weekly: JSON, structures: JSON, ra
         "volume": round(volume, 4),
         "exposures": round(len(exposed) / max(len(majors), 1), 4),
         "recovery": _recovery(candidate, structures),
+        "spread": _spread(candidate, majors, structures),
         "variety": _variety(candidate, ranking["varietyRoles"]),
         "adherence": _adherence(len(candidate["sessions"]), athlete.get("recentSessionsPerWeek"), ranking),
         "preference": _preference(candidate["split"], athlete),
@@ -87,6 +94,24 @@ def _recovery(candidate: JSON, structures: JSON) -> float:
         if not overlap:
             clear += 1
     return round(clear / len(sessions), 4)
+
+
+def _spread(candidate: JSON, majors: list[str], structures: JSON) -> float:
+    """Mean over major muscles of (shortest gap between its sessions) / (even gap), capped at 1."""
+    if not majors:
+        return 1.0
+    scores: list[float] = []
+    for muscle in majors:
+        days = sorted(
+            session["day"] for session in candidate["sessions"] if muscle in _primary_muscles_in(session, structures)
+        )
+        if len(days) < 2:
+            scores.append(1.0)
+            continue
+        gaps = [later - earlier for earlier, later in pairwise(days)]
+        gaps.append(days[0] + 7 - days[-1])  # the week repeats
+        scores.append(min(min(gaps) / (7 / len(days)), 1.0))
+    return round(sum(scores) / len(scores), 4)
 
 
 def _variety(candidate: JSON, variety_roles: list[str]) -> float:
@@ -120,6 +145,8 @@ def _reasons(candidate: JSON, features: dict[str, float]) -> list[str]:
         reasons.append("EACH_MUSCLE_TWICE_OR_MORE")
     if features["recovery"] == 1.0:
         reasons.append("NO_MUSCLE_ON_BACK_TO_BACK_DAYS")
+    if features["spread"] >= SPREAD_REASON_THRESHOLD:
+        reasons.append("SPREAD_ACROSS_THE_WEEK")
     if features["adherence"] == 1.0:
         reasons.append("FITS_RECENT_ROUTINE")
     if features["preference"] == 1.0:

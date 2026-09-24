@@ -70,7 +70,9 @@ struct TodayView: View {
 
     private func nextSessionHero(_ plan: SessionPlan) -> some View {
         let confirmed = plan.slots.filter { $0.load != nil }.count
-        let when = plan.scheduledDate.map { "Next session · \($0.formatted(date: .abbreviated, time: .shortened))." } ?? "Next session · today."
+        let when = plan.scheduledDate.map { "Next session · \($0.formatted(date: .abbreviated, time: .shortened))." }
+            ?? plan.weekday.map { "Next session · \(Weekday.name($0)) · \(plan.name)." }
+            ?? "Next session · today."
         let detail = plan.modified
             ? "Temporary session adjustment · for today only. Revision \(plan.revision)."
             : "\(when) Loads confirmed: \(confirmed) of \(plan.slots.count). Revision \(plan.revision)."
