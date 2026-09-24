@@ -24,6 +24,7 @@ from .nutrition import scale_nutrients
 from .progress import progress_summary
 from .rules.eligibility import decide
 from .rules.program import initial_program
+from .spoken_sets import read_set
 from .today import today_status
 
 JSON = dict[str, Any]
@@ -94,6 +95,9 @@ def dispatch(envelope: JSON) -> Any:
         return {"today": today_status(state, library, now), "progress": progress_summary(state, library, now)}
     if operation == "loadSteps":
         return load_steps(payload["base"], payload["step"])
+    if operation == "readSet":
+        library = load_library(payload["permitsFixtures"])
+        return read_set(payload["state"], payload["text"], payload["draft"], library)
     raise DomainError("unsupported", "Unknown operation.")
 
 

@@ -56,6 +56,47 @@ final class AppFlowTests: XCTestCase {
         XCTAssertNil(saved.rir)
         XCTAssertEqual(service.repository.snapshot.activeSession?.restEndsAt, now.addingTimeInterval(120))
     }
+    /// The model's draft stands in for `OnDeviceSetReader`: an RIR the athlete never said is dropped,
+    /// and nothing is recorded until the preview is saved as a normal set.
+    func testWordsBecomeAPreviewThatSavesOnlyWhenConfirmed() throws {
+        let service = try trainedService()
+        try service.start(now: now)
+        let before = service.repository.snapshot
+        let reading = try service.readSet(text: "bench 100 for 8", draft: SpokenSet(reps: 8, load: 100, rir: 2))
+        XCTAssertEqual(service.repository.snapshot, before)
+        XCTAssertEqual(reading.ignored, ["rir"])
+        let preview = try XCTUnwrap(reading.preview)
+        XCTAssertEqual(preview.reps, 8)
+        XCTAssertEqual(preview.load, 100)
+        XCTAssertNil(preview.rir)
+        try service.saveSet(sessionID: preview.sessionID, slotID: preview.slotID, index: preview.index, kind: preview.kind,
+                            load: preview.load, reps: preview.reps, rir: preview.rir, now: now)
+        let saved = try XCTUnwrap(service.repository.snapshot.activeSession?.logs.first)
+        XCTAssertEqual(saved.reps, 8)
+        XCTAssertNil(saved.rir)
+    }
+    /// The real on-device model through the real core. Skipped where Apple's model cannot run (CI);
+    /// runs on a Mac with Apple Intelligence on. Whatever the model returns, a kept number was said.
+    func testOnDeviceModelDraftsAreGroundedInTheAthletesWords() async throws {
+        try XCTSkipUnless(OnDeviceSetReader.isAvailable, "Apple's on-device model is not available here.")
+        let service = try trainedService()
+        try service.start(now: now)
+        let session = try XCTUnwrap(service.repository.snapshot.activeSession)
+        let names = session.plan.slots.map { service.library.exercise($0.exerciseID)?.name ?? $0.exerciseID }
+        let said: [String: [Double]] = [
+            "did 10 reps": [10],
+            "bench 100 for 8, one left in the tank": [100, 8, 1],
+            "felt heavy, maybe 6": [6],
+        ]
+        for (text, numbers) in said {
+            let draft = try await OnDeviceSetReader.draft(from: text, exerciseNames: names)
+            let reading = try service.readSet(text: text, draft: draft)
+            let kept = [reading.preview.map { Double($0.reps) }, reading.preview?.load, reading.preview?.rir.map(Double.init)]
+            for value in kept.compactMap({ $0 }) {
+                XCTAssertTrue(numbers.contains(value), "\(text): kept \(value), which was never said")
+            }
+        }
+    }
     func testDomainErrorsArriveAsTypedSwiftErrors() throws {
         let service = try trainedService()
         XCTAssertThrowsError(try service.acceptRecommendation(id: UUID())) { XCTAssertEqual($0 as? TrainerError, .notFound) }
