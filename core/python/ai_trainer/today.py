@@ -123,7 +123,7 @@ KEPT_CURRENT = (
 )
 
 
-def today_status(state: JSON, library: JSON, now: float) -> JSON:
+def today_status(state: JSON, library: JSON, now: float, utc_offset: int | None = None) -> JSON:
     """Per-slot cards for the next plan, pending proposal titles, and at most one slot to auto-request."""
     plan = next_plan(state)
     if plan is None:
@@ -148,15 +148,19 @@ def today_status(state: JSON, library: JSON, now: float) -> JSON:
             slots.append(status)
     proposals = [_proposal(rec, plan, exercises) for rec in pending]
     today: JSON = {"slots": slots, "proposals": proposals, "autoRequest": auto_request}
-    if auto_request is None and not pending and _replan_to_offer(state, plan, library, now):
+    if auto_request is None and not pending and _replan_to_offer(state, plan, library, now, utc_offset):
         today["autoReplan"] = True
     return today
 
 
-def _replan_to_offer(state: JSON, plan: JSON, library: JSON, now: float) -> bool:
-    """ADR-018: a replan is due, would propose a different week, and was not already rejected."""
-    request = {"kind": "replan"}
-    if not replan_due(state, library, now) or _already_answered(state, plan, request):
+def _replan_to_offer(state: JSON, plan: JSON, library: JSON, now: float, utc_offset: int | None) -> bool:
+    """ADR-018: a replan is due, would propose a different week, and was not already rejected.
+
+    The request carries the host's UTC offset, as the host will send it, so the rejected-request
+    check compares like with like.
+    """
+    request: JSON = {"kind": "replan"} if utc_offset is None else {"kind": "replan", "utcOffset": utc_offset}
+    if not replan_due(state, library, now, utc_offset) or _already_answered(state, plan, request):
         return False
     outcome: str = decide(state, request, library, now)["outcome"]
     return outcome == "proposeChange"

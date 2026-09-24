@@ -72,6 +72,7 @@ RANKING = {
             "variety": 2,
             "adherence": 2,
             "preference": 1,
+            "habit": 2,
         },
         "Strength": {
             "volume": 3,
@@ -81,6 +82,7 @@ RANKING = {
             "variety": 1,
             "adherence": 2,
             "preference": 1,
+            "habit": 2,
         },
     },
     "varietyRoles": ["UPH", "UPV", "ULH", "ULV", "HH", "SL"],

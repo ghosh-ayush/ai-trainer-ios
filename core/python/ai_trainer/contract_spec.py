@@ -366,7 +366,7 @@ REQUEST_KINDS: dict[str, list[tuple[str, str]]] = {
     "shorten": [("minutes", "Int")],
     "substitute": [("slotID", "UUID"), ("alternativeID", "String")],
     "reschedule": [("date", "Date")],
-    "replan": [],
+    "replan": [("utcOffset", "Int")],
 }
 
 
@@ -392,7 +392,7 @@ OPERATIONS: list[tuple[str, str]] = [
     ("migrateState", "state:Object"),
     ("nutrients", "nutrients:Nutrients servings:Number"),
     ("recovery", "observations:[RecoveryObservation]"),
-    ("views", "state:State permitsFixtures:Bool now:Date dayStart?:Date"),
+    ("views", "state:State permitsFixtures:Bool now:Date dayStart?:Date utcOffset?:Int"),
     ("loadSteps", "base:Number step:Number"),
     ("dietOptions", "now:Date"),
     ("dietPreview", "state:State profile:DietProfile now:Date"),
@@ -530,7 +530,8 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "Policy": SwiftModel("TrainingPolicy"),
     "Library": SwiftModel("ContentLibrary"),
     "Request": SwiftModel(
-        "TrainingRequest", defaults={"slotID": "nil", "minutes": "nil", "alternativeID": "nil", "date": "nil"}
+        "TrainingRequest",
+        defaults={"slotID": "nil", "minutes": "nil", "alternativeID": "nil", "date": "nil", "utcOffset": "nil"},
     ),
     "Slot": SwiftModel("Prescription", defaults={"id": "UUID()", "load": "nil"}, identifiable=True),
     "Plan": SwiftModel(

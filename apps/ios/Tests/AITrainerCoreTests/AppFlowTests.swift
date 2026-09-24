@@ -60,7 +60,7 @@ final class AppFlowTests: XCTestCase {
     /// weekly planner, so the core says so and nothing is stored.
     func testReplanRequestIsUnderstoodAndNeedsAWeeklyPlanner() throws {
         let service = try trainedService()
-        let decision = try service.request(.replan, now: now)
+        let decision = try service.request(.replan(utcOffset: 0), now: now)
         XCTAssertEqual(decision.reason, "REPLAN_UNAVAILABLE")
         XCTAssertNil(decision.week)
         XCTAssertTrue(service.repository.snapshot.recommendations.allSatisfy { $0.request.kind != "replan" })

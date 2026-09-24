@@ -111,7 +111,8 @@ def _apply_replan(context: CommandContext, recommendation: JSON, reevaluated: JS
         raise DomainError("staleProposal")
     state = context.state
     ids = (context.next_id() for _ in range(WEEKLY_ID_COUNT))
-    program = replan_program(state, context.library, context.now, ids, week["id"])
+    utc_offset = recommendation["request"].get("utcOffset")
+    program = replan_program(state, context.library, context.now, ids, week["id"], utc_offset)
     state["previousPrograms"].append(state["program"])
     state["program"] = program
     state.pop("nextPlanOverride", None)

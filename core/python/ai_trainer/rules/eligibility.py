@@ -64,7 +64,7 @@ def decide(state: JSON, request: JSON, library: JSON, now: float) -> Decision:
         return propose_reschedule(plan, request["date"], now)
 
     if kind == "replan":
-        return propose_replan(state, library, now)
+        return propose_replan(state, library, now, request.get("utcOffset"))
 
     raise DomainError("unsupported")
 

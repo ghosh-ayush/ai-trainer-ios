@@ -894,10 +894,14 @@
           "properties": {
             "kind": {
               "const": "replan"
+            },
+            "utcOffset": {
+              "$ref": "#/$defs/Int"
             }
           },
           "required": [
-            "kind"
+            "kind",
+            "utcOffset"
           ],
           "additionalProperties": false
         }
@@ -2513,6 +2517,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "utcOffset": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
             },
             {
               "type": "null"

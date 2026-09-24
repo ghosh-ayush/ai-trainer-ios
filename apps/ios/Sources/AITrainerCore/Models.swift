@@ -500,19 +500,22 @@ public struct TrainingRequest: Codable, Equatable {
     public var minutes: Int?
     public var alternativeID: String?
     public var date: Date?
+    public var utcOffset: Int?
 
     public init(
         kind: String,
         slotID: UUID? = nil,
         minutes: Int? = nil,
         alternativeID: String? = nil,
-        date: Date? = nil
+        date: Date? = nil,
+        utcOffset: Int? = nil
     ) {
         self.kind = kind
         self.slotID = slotID
         self.minutes = minutes
         self.alternativeID = alternativeID
         self.date = date
+        self.utcOffset = utcOffset
     }
 }
 

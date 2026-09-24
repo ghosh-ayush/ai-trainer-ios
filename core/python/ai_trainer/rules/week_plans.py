@@ -44,6 +44,7 @@ def week_candidates(
     target: float,
     available_roles: set[str],
     max_sessions: int | None = None,
+    min_sessions: int = 1,
 ) -> list[JSON]:
     """Every week the guardrails allow on ``free_days``, in a stable order.
 
@@ -51,7 +52,8 @@ def week_candidates(
     the athlete has on each of them. ``target`` is the weekly working sets per major muscle to aim
     for, between the floor and the ceiling. Roles outside ``available_roles`` (no eligible
     exercise for this athlete) are left out of every session. ``max_sessions`` lowers the
-    bundle's session maximum, for an athlete who said how many days but not which.
+    bundle's session maximum, for an athlete who said how many days but not which;
+    ``min_sessions`` asks for at least that many (a replan for an athlete training more, ADR-018).
     """
     days = sorted(set(free_days))
     if not days or any(day not in range(DAYS_PER_WEEK) for day in days):
@@ -63,7 +65,7 @@ def week_candidates(
 
     candidates: list[JSON] = []
     seen: set[tuple[tuple[int, str], ...]] = set()
-    for count in range(1, most_sessions + 1):
+    for count in range(max(1, min_sessions), most_sessions + 1):
         for chosen in combinations(days, count):
             for split_id, cycle in structures["splits"].items():
                 for offset in range(len(cycle)):

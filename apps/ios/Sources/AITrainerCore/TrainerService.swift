@@ -126,14 +126,20 @@ public final class TrainerService {
     // MARK: Read-only views computed by the core
 
     private struct StatePayload: Encodable {
-        let state: AthleteState; let permitsFixtures: Bool; let now: Date; let dayStart: Date
+        let state: AthleteState
+        let permitsFixtures: Bool
+        let now: Date
+        let dayStart: Date
+        let utcOffset: Int
     }
     /// Today's slot cards, pending proposal titles, the one slot (if any) to auto-request,
     /// recorded values per exercise and the Diet tab — one pass over the state after each change.
-    /// `dayStart` is the start of the athlete's local day, so "today" follows their time zone.
+    /// `dayStart` is the start of the athlete's local day, so "today" follows their time zone, and
+    /// `utcOffset` lets the core read the weekdays of logged sessions (ADR-018).
     public func views(now: Date = Date(), calendar: Calendar = .current) throws -> CoreViews {
         try core.call("views", StatePayload(state: repository.snapshot, permitsFixtures: library.permitsFixtures, now: now,
-                                            dayStart: calendar.startOfDay(for: now)))
+                                            dayStart: calendar.startOfDay(for: now),
+                                            utcOffset: calendar.timeZone.secondsFromGMT(for: now)))
     }
     /// Available loads around a confirmed working load, in the athlete's own equipment step.
     public func loadSteps(base: Double, step: Double) throws -> [Double] {

@@ -24,8 +24,9 @@ extension TrainingRequest {
         .init(kind: "substitute", slotID: slotID, alternativeID: alternativeID)
     }
     public static func reschedule(_ date: Date) -> TrainingRequest { .init(kind: "reschedule", date: date) }
-    /// ADR-018: a week fitted to the sessions the athlete has actually been completing.
-    public static var replan: TrainingRequest { .init(kind: "replan") }
+    /// ADR-018: a week fitted to the sessions the athlete has actually been completing. `utcOffset`
+    /// (seconds from UTC) lets the core read which weekdays they train on in their own time zone.
+    public static func replan(utcOffset: Int) -> TrainingRequest { .init(kind: "replan", utcOffset: utcOffset) }
 }
 
 extension ContentLibrary {

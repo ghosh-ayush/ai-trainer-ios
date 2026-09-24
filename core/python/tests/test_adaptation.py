@@ -5,6 +5,7 @@ change whenever research updates the shipped content.
 """
 
 import copy
+import math
 import unittest
 
 from support import NOW, Athlete, uid
@@ -13,6 +14,7 @@ from test_week_program import IDS, planner_library, profile
 from ai_trainer.commands import reduce_state
 from ai_trainer.content import load_library
 from ai_trainer.errors import DomainError
+from ai_trainer.rules.adaptation import local_weekday
 from ai_trainer.rules.eligibility import decide
 from ai_trainer.rules.program import initial_program
 from ai_trainer.today import today_status
@@ -162,6 +164,101 @@ class ReplanLifecycleTests(unittest.TestCase):
         self.assertTrue(status["proposals"][0]["title"].startswith("Proposed · "))
         state = command(state, "rejectRecommendation", library, id=state["recommendations"][-1]["id"])["state"]
         self.assertNotIn("autoReplan", today_status(state, library, NOW))
+
+
+def on_weekdays(state, weekdays, weeks=4, status="completed", minutes=30, time_limited=False):
+    """Log sessions on the given weekdays (UTC offset 0) for ``weeks`` weeks inside the replan window."""
+    template = copy.deepcopy(Athlete.qualified().state["sessions"][0])
+    first_day = math.floor(state["program"]["acceptedAt"] / DAY) + 1
+    number = len(state["sessions"])
+    for week in range(weeks):
+        for weekday in weekdays:
+            day = first_day + week * 7 + (weekday - first_day) % 7
+            started = day * DAY + 3600
+            if started > NOW:
+                continue
+            session = copy.deepcopy(template)
+            session.update(id=uid(7500 + number), startedAt=started, endedAt=started + minutes * 60, status=status)
+            if time_limited:
+                session["status"] = "endedEarly"
+                session["omissions"] = {f"{uid(1)}:2": "time"}
+            state["sessions"].append(session)
+            number += 1
+    return state
+
+
+def replan_at_utc(state, library):
+    return decide(state, {"kind": "replan", "utcOffset": 0}, library, NOW)
+
+
+class WeekdayTests(unittest.TestCase):
+    def test_the_reference_epoch_was_a_monday(self):
+        self.assertEqual(local_weekday(0, 0), MON)
+        self.assertEqual(local_weekday(3 * 3600, -5 * 3600), SUN)  # 03:00 UTC Monday is Sunday evening at UTC-5
+        self.assertEqual(local_weekday(23 * 3600, 2 * 3600), TUE)
+
+
+class DriftTests(unittest.TestCase):
+    """ADR-018's other drifts: more sessions, time-limited sessions, other weekdays."""
+
+    def test_training_more_often_proposes_a_bigger_week_on_the_days_you_train(self):
+        library = adaptive_library()
+        state = athlete_on_weekly_plan(library, per_week=0)
+        planned = len(state["program"]["plans"])
+        on_weekdays(state, [MON, TUE, WED, THU, SAT])
+        result = replan_at_utc(state, library)
+        self.assertEqual(result["reason"], "MORE_SESSIONS_REPLAN", result["explanation"])
+        self.assertGreater(result["week"]["sessionsPerWeek"], planned)
+        self.assertIn(WED, result["week"]["days"])  # a day the athlete trains on, though not listed as free
+        self.assertIn("more than the", result["explanation"])
+
+    def test_more_sessions_without_known_weekdays_cannot_go_past_the_free_days(self):
+        library = adaptive_library()
+        state = athlete_on_weekly_plan(library, per_week=0)
+        on_weekdays(state, [MON, TUE, WED, THU, SAT])
+        result = decide(state, REPLAN, library, NOW)  # no UTC offset: weekday habits stay unknown
+        self.assertEqual(result["reason"], "NO_BETTER_WEEK")
+
+    def test_sessions_ending_early_for_time_propose_shorter_sessions(self):
+        library = adaptive_library()
+        state = athlete_on_weekly_plan(library, per_week=0)
+        planned_days = [plan["weekday"] for plan in state["program"]["plans"]]
+        on_weekdays(state, planned_days[:2])
+        on_weekdays(state, planned_days[2:], minutes=27, time_limited=True)
+        result = replan_at_utc(state, library)
+        self.assertEqual(result["reason"], "SHORTER_SESSIONS_REPLAN", result["explanation"])
+        self.assertTrue(all(session["minutes"] <= 25 for session in result["week"]["sessions"]))
+        self.assertIn("ended early for time; they lasted about 25 minutes", result["explanation"])
+
+    def test_training_on_other_days_moves_the_week_onto_them(self):
+        library = adaptive_library()
+        state = athlete_on_weekly_plan(library, per_week=0)
+        planned = len(state["program"]["plans"])
+        habits = [MON, WED, FRI, SUN][:planned]
+        on_weekdays(state, habits)
+        result = replan_at_utc(state, library)
+        self.assertEqual(result["reason"], "TRAINING_DAYS_REPLAN", result["explanation"])
+        self.assertEqual(result["week"]["sessionsPerWeek"], planned)
+        on_habit = sum(1 for day in result["week"]["days"] if day in habits)
+        self.assertGreaterEqual(on_habit, planned - 1)
+        self.assertIn("You have mostly trained on", result["explanation"])
+
+    def test_a_weekday_replan_is_accepted_with_the_same_offset(self):
+        library = adaptive_library()
+        state = athlete_on_weekly_plan(library, per_week=0)
+        on_weekdays(state, [MON, WED, FRI, SUN][: len(state["program"]["plans"])])
+        request = {"kind": "replan", "utcOffset": 0}
+        state = command(state, "requestChange", library, request=request)["state"]
+        week = state["recommendations"][-1]["decision"]["week"]
+        state = command(state, "acceptRecommendation", library, id=state["recommendations"][-1]["id"])["state"]
+        self.assertEqual(state["program"]["templateID"], week["id"])
+
+    def test_today_offers_a_weekday_replan_only_when_it_knows_the_offset(self):
+        library = adaptive_library()
+        state = athlete_on_weekly_plan(library, per_week=0)
+        on_weekdays(state, [MON, WED, FRI, SUN][: len(state["program"]["plans"])])
+        self.assertTrue(today_status(state, library, NOW, 0).get("autoReplan"))
+        self.assertNotIn("autoReplan", today_status(state, library, NOW))  # unknown offset: no weekday drift
 
 
 def athlete_plan_sessions(library):

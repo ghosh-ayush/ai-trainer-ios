@@ -1079,6 +1079,31 @@
         "value": 1,
         "source": "owner",
         "rationale": "A week fitted to attendance is proposed once the athlete completes, on average, at least one session a week fewer than planned. At equal weekly volume, fewer sessions give similar hypertrophy (ACSM26, Results 'Improving hypertrophy'), so fitting the week to real attendance keeps the weekly work instead of losing it to missed days. It is a proposal the athlete may reject; a rejected one is not repeated for the same plan."
+      },
+      "extraSessionsPerWeek": {
+        "value": 1,
+        "source": "owner",
+        "rationale": "An athlete who keeps completing at least one session a week more than planned is offered a week that includes those sessions, so the extra work is planned within the guardrails rather than unstructured. Six sessions a week matched three at equal volume (SARIC19; COLQUHOUN18), and the session maximum still applies."
+      },
+      "endedEarlyForTime": {
+        "value": 2,
+        "source": "owner",
+        "rationale": "Two sessions in the window that the athlete ended early and recorded as short of time are a pattern rather than one bad day. Only the athlete's own 'time' reason counts."
+      },
+      "minimumSessionMinutes": {
+        "value": 15,
+        "source": "owner",
+        "rationale": "The shortest session onboarding offers. Below it, the warm-up and the minimum two sets of the required exercises no longer fit at the cited time per set (SCHOENFELD19V; ACSM26 Discussion, at least two sets per exercise)."
+      },
+      "habitShare": {
+        "value": 0.5,
+        "source": "owner",
+        "rationale": "A weekday counts as one the athlete trains on when they trained on it in at least half the weeks of the window. Weekdays come from the host's UTC offset; without it they stay unknown."
+      },
+      "otherDaysShare": {
+        "value": 0.5,
+        "source": "owner",
+        "rationale": "The week is moved onto the athlete's days when at least half of their completed sessions fell on weekdays the plan does not use. The guardrails and spacing rules still apply to the new days."
       }
     },
     "structures": {
@@ -1336,7 +1361,8 @@
             "spread": 2,
             "variety": 2,
             "adherence": 2,
-            "preference": 1
+            "preference": 1,
+            "habit": 2
           },
           "Strength": {
             "volume": 3,
@@ -1345,7 +1371,8 @@
             "spread": 2,
             "variety": 1,
             "adherence": 2,
-            "preference": 1
+            "preference": 1,
+            "habit": 2
           }
         },
         "varietyRoles": [
@@ -1360,7 +1387,7 @@
         "optionsShown": 3
       },
       "source": "owner",
-      "rationale": "Orders options only; every option already keeps the cited guardrails. Weekly volume weighs most because it is the main driver of hypertrophy (ACSM26 Table 6; SCHOENFELD17V). Exposures weigh more for strength, which rose with frequency where hypertrophy did not (ACSM26 Table 4; PELLAND26 Abstract). Recovery penalises the same muscle on back-to-back days (MORANNAVARRO17), and spread favours even spacing of each muscle's sessions, matching the at-least-48 h spacing of tested designs where free days allow (PEDERSEN22; LASEVICIUS19; IUSCA21 p. 9). Variety rewards horizontal and vertical work, hinge and single-leg coverage (ACSM26 Discussion; IUSCA21 Table 1). Adherence and stated preference are product choices, not training-effect claims: they favour a week the athlete is likely to complete."
+      "rationale": "Orders options only; every option already keeps the cited guardrails. Weekly volume weighs most because it is the main driver of hypertrophy (ACSM26 Table 6; SCHOENFELD17V). Exposures weigh more for strength, which rose with frequency where hypertrophy did not (ACSM26 Table 4; PELLAND26 Abstract). Recovery penalises the same muscle on back-to-back days (MORANNAVARRO17), and spread favours even spacing of each muscle's sessions, matching the at-least-48 h spacing of tested designs where free days allow (PEDERSEN22; LASEVICIUS19; IUSCA21 p. 9). Variety rewards horizontal and vertical work, hinge and single-leg coverage (ACSM26 Discussion; IUSCA21 Table 1). Adherence, habit (sessions on the weekdays the athlete actually trains) and stated preference are product choices, not training-effect claims: they favour a week the athlete is likely to complete."
     }
   }
 }

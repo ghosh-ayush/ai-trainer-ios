@@ -100,7 +100,7 @@ def dispatch(envelope: JSON) -> Any:
         library = load_library(payload["permitsFixtures"])
         state, now = payload["state"], payload["now"]
         return {
-            "today": today_status(state, library, now),
+            "today": today_status(state, library, now, payload.get("utcOffset")),
             "progress": progress_summary(state, library, now),
             "diet": diet_view(state, now, payload.get("dayStart")),
         }

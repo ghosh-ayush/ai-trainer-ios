@@ -272,7 +272,22 @@ Consequences:
   and acceptance rebuilds that week into a new program, keeping the old one in
   `previousPrograms`. The attendance window is anchored to whole days, so a proposal stays
   acceptable for the rest of the day.
-- Not yet: adapting the other way (more sessions for an athlete who keeps adding extra days),
-  adapting session length from sessions ended early for time, and using the weekdays the athlete
-  actually trains on.
-Status: accepted (owner request, 2026-09-24).
+- Extended the same day (owner: "do it then"). The replan now also covers three more cases:
+  - *More sessions*: at least 1 extra completed session a week. It proposes a week with more
+    sessions, still within the free days, the days actually trained, and the session maximum.
+  - *Shorter sessions*: at least 2 sessions in the window ended early with the athlete's own "time"
+    reason. Session minutes are capped at the median length of those sessions, rounded down to
+    5 minutes and never below 15; the planner may spread the work over more days.
+  - *Training days*: a weekday the athlete trained on in at least half the window's weeks is a
+    habit day. Habit days are added to the free days for the replan and preferred by a new
+    `habit` ranking feature. When at least half of the completed sessions fell on weekdays the
+    plan does not use, the week moves onto the habit days.
+- Weekdays need the athlete's time zone, which the embedded core cannot look up. So the host
+  sends its UTC offset with the replan request (stored with it, so acceptance re-evaluates
+  identically) and with `views`. Without it, weekday habits stay unknown and are not used.
+- The new thresholds (`extraSessionsPerWeek` 1, `endedEarlyForTime` 2, `minimumSessionMinutes`
+  15, `habitShare` 0.5, `otherDaysShare` 0.5) and the `habit` weight are `evidence-2` owner
+  decisions with rationales.
+- Reasons: `ADHERENCE_REPLAN`, `SHORTER_SESSIONS_REPLAN`, `MORE_SESSIONS_REPLAN`,
+  `TRAINING_DAYS_REPLAN`. One proposal explains every drift it found.
+Status: accepted (owner requests, 2026-09-24).

@@ -24,6 +24,8 @@ Features:
 - ``adherence``: 1 when the week asks for no more sessions than the athlete recently completed plus
   one, falling off beyond that; neutral (0.5) without history.
 - ``preference``: 1 for a split the athlete likes, 0 for one they avoid, 0.5 otherwise.
+- ``habit``: share of the week's sessions on weekdays the athlete has actually been training on
+  (ADR-018); neutral (0.5) when no such days are known.
 """
 
 from __future__ import annotations
@@ -78,6 +80,7 @@ def _features(candidate: JSON, athlete: JSON, weekly: JSON, structures: JSON, ra
         "variety": _variety(candidate, ranking["varietyRoles"]),
         "adherence": _adherence(len(candidate["sessions"]), athlete.get("recentSessionsPerWeek"), ranking),
         "preference": _preference(candidate["split"], athlete),
+        "habit": _habit(candidate, athlete.get("habitDays")),
     }
 
 
@@ -130,6 +133,14 @@ def _adherence(sessions: int, recent: float | None, ranking: JSON) -> float:
     return round(max(0.0, 1.0 - excess / 3), 4)
 
 
+def _habit(candidate: JSON, habit_days: list[int] | None) -> float:
+    """Share of sessions on the athlete's habitual training days; neutral without any."""
+    if not habit_days:
+        return NEUTRAL
+    on_habit = sum(1 for session in candidate["sessions"] if session["day"] in habit_days)
+    return round(on_habit / len(candidate["sessions"]), 4)
+
+
 def _preference(split: str, athlete: JSON) -> float:
     if split in athlete.get("likedSplits", []):
         return 1.0
@@ -151,6 +162,8 @@ def _reasons(candidate: JSON, features: dict[str, float]) -> list[str]:
         reasons.append("FITS_RECENT_ROUTINE")
     if features["preference"] == 1.0:
         reasons.append("A_SPLIT_YOU_LIKE")
+    if features["habit"] == 1.0:
+        reasons.append("ON_THE_DAYS_YOU_TRAIN")
     return reasons
 
 

@@ -29,35 +29,47 @@ from .week_plans import DAYS_PER_WEEK, week_candidates
 JSON = dict[str, Any]
 
 
-def week_options(
-    profile: JSON,
-    library: JSON,
-    session_cap: int | None = None,
-    recent_sessions_per_week: float | None = None,
-) -> list[JSON]:
+def week_options(profile: JSON, library: JSON, adjust: JSON | None = None) -> list[JSON]:
     """The distinct weeks to show this athlete, best first (at most the bundle's ``optionsShown``).
 
-    ``session_cap`` limits sessions further (a replan fitted to attendance, ADR-018) and
-    ``recent_sessions_per_week`` feeds the ranking's adherence feature; both are absent for a
-    first plan, so a preview and its acceptance stay identical.
+    ``adjust`` fits a replan to what the athlete has been doing (ADR-018); a first plan has none,
+    so a preview and its acceptance stay identical. Its optional keys:
+
+    - ``sessionCap`` / ``minSessions``: bounds on sessions a week;
+    - ``extraDays``: weekdays the athlete has been training on, added to their free days;
+    - ``minutesCap``: session minutes no longer than this on any day;
+    - ``recentSessionsPerWeek`` and ``habitDays``: history for the ranking.
     """
+    adjust = adjust or {}
     planner = library["planner"]
     weekly = _weekly_for_goal(planner["weekly"], profile["goal"])
     structures = planner["structures"]
     target = _target(planner, profile)
     days, max_sessions = _free_days(profile)
-    if session_cap is not None:
-        max_sessions = min(max_sessions or session_cap, session_cap)
+    if adjust.get("extraDays"):
+        days = sorted(set(days) | set(adjust["extraDays"]))
+    if adjust.get("sessionCap") is not None:
+        cap: int = adjust["sessionCap"]
+        max_sessions = min(max_sessions or cap, cap)
+    minutes_by_day = _minutes_by_day(profile, days)
+    if adjust.get("minutesCap") is not None:
+        minutes_by_day = {day: min(minutes, adjust["minutesCap"]) for day, minutes in minutes_by_day.items()}
     candidates = week_candidates(
         days,
-        _minutes_by_day(profile, days),
+        minutes_by_day,
         weekly,
         structures,
         target,
         available_roles(profile, library),
         max_sessions,
+        adjust.get("minSessions", 1),
     )
-    athlete = {"goal": profile["goal"], "target": target, "recentSessionsPerWeek": recent_sessions_per_week}
+    athlete = {
+        "goal": profile["goal"],
+        "target": target,
+        "recentSessionsPerWeek": adjust.get("recentSessionsPerWeek"),
+        "habitDays": adjust.get("habitDays"),
+    }
     ranked = rank_weeks(candidates, athlete, weekly, structures, planner["ranking"])
     return distinct_options(ranked, planner["ranking"]["optionsShown"])
 

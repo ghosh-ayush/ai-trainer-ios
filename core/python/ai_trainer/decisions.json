@@ -146,5 +146,17 @@
   "REPLAN_UNAVAILABLE": [
     "withholdGuidance",
     "This content has no weekly planner, so the week cannot be adapted."
+  ],
+  "SHORTER_SESSIONS_REPLAN": [
+    "proposeChange",
+    "Several sessions ended early for lack of time. A week with shorter sessions keeps your weekly work."
+  ],
+  "MORE_SESSIONS_REPLAN": [
+    "proposeChange",
+    "You have been training more often than this week plans. A week that includes those sessions plans them properly."
+  ],
+  "TRAINING_DAYS_REPLAN": [
+    "proposeChange",
+    "You have mostly trained on other days than this week uses. A week on your days fits better."
   ]
 }
