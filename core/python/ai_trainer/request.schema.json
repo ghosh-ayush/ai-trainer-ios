@@ -1406,6 +1406,25 @@
       ],
       "additionalProperties": false
     },
+    "Views": {
+      "type": "object",
+      "properties": {
+        "today": {
+          "$ref": "#/$defs/TodayStatus"
+        },
+        "progress": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExerciseProgress"
+          }
+        }
+      },
+      "required": [
+        "today",
+        "progress"
+      ],
+      "additionalProperties": false
+    },
     "RecoveryObservation": {
       "type": "object",
       "properties": {
@@ -1541,27 +1560,7 @@
       ],
       "additionalProperties": false
     },
-    "todayStatusPayload": {
-      "type": "object",
-      "properties": {
-        "state": {
-          "$ref": "#/$defs/State"
-        },
-        "permitsFixtures": {
-          "$ref": "#/$defs/Bool"
-        },
-        "now": {
-          "$ref": "#/$defs/Date"
-        }
-      },
-      "required": [
-        "state",
-        "permitsFixtures",
-        "now"
-      ],
-      "additionalProperties": false
-    },
-    "progressPayload": {
+    "viewsPayload": {
       "type": "object",
       "properties": {
         "state": {
@@ -2732,30 +2731,10 @@
           "const": "1.0"
         },
         "operation": {
-          "const": "todayStatus"
+          "const": "views"
         },
         "payload": {
-          "$ref": "#/$defs/todayStatusPayload"
-        }
-      },
-      "required": [
-        "schemaVersion",
-        "operation",
-        "payload"
-      ],
-      "additionalProperties": false
-    },
-    {
-      "type": "object",
-      "properties": {
-        "schemaVersion": {
-          "const": "1.0"
-        },
-        "operation": {
-          "const": "progress"
-        },
-        "payload": {
-          "$ref": "#/$defs/progressPayload"
+          "$ref": "#/$defs/viewsPayload"
         }
       },
       "required": [

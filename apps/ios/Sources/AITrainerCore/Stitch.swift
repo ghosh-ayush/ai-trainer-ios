@@ -452,9 +452,10 @@ public struct StitchLoggedSet: View {
 public struct StitchRootHeader: View {
     let title: String
     let pill: String?
+    let pillTone: StitchPill.Tone
     let onPill: () -> Void
-    public init(_ title: String, pill: String?, onPill: @escaping () -> Void = {}) {
-        self.title = title; self.pill = pill; self.onPill = onPill
+    public init(_ title: String, pill: String?, pillTone: StitchPill.Tone = .amber, onPill: @escaping () -> Void = {}) {
+        self.title = title; self.pill = pill; self.pillTone = pillTone; self.onPill = onPill
     }
     public var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -464,7 +465,7 @@ public struct StitchRootHeader: View {
                 Text(title).foregroundStyle(Stitch.textMuted)
                 Spacer(minLength: 8)
                 if let pill {
-                    Button(action: onPill) { StitchPill(pill).minimumScaleFactor(0.75) }.buttonStyle(.plain)
+                    Button(action: onPill) { StitchPill(pill, tone: pillTone).minimumScaleFactor(0.75) }.buttonStyle(.plain)
                         .layoutPriority(1)
                         .accessibilityHint("Explains the preview build")
                 }

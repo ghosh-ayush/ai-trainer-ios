@@ -32,17 +32,38 @@ VERSION = "1.0"
 
 
 def dispatch_json(raw: str) -> str:
-    """Parse, dispatch and serialize. Never raises; every failure is a typed error envelope."""
+    """Parse, dispatch and serialize. Never raises; every failure is a typed error envelope.
+
+    Malformed payloads come back as ``invalid``. Anything else unexpected comes back as
+    ``internal`` instead of escaping into the C bridge; the host saved nothing either way.
+    """
     try:
-        envelope = json.loads(raw)
+        envelope = json.loads(raw, parse_constant=_reject_non_finite, parse_float=_finite_float)
         result = dispatch(envelope)
         return json.dumps({"schemaVersion": VERSION, "result": result}, allow_nan=False, separators=(",", ":"))
     except DomainError as error:
-        return json.dumps({"schemaVersion": VERSION, "error": {"code": error.code, "message": str(error)}})
+        return _error(error.code, str(error))
     except (KeyError, TypeError, ValueError, IndexError, AttributeError):
-        return json.dumps(
-            {"schemaVersion": VERSION, "error": {"code": "invalid", "message": "Invalid contract payload."}}
-        )
+        return _error("invalid", "Invalid contract payload.")
+    except Exception:
+        return _error("internal", "The training core hit an unexpected error. Nothing was changed.")
+
+
+def _error(code: str, message: str) -> str:
+    return json.dumps({"schemaVersion": VERSION, "error": {"code": code, "message": message}})
+
+
+def _finite_float(text: str) -> float:
+    """Float literals that overflow (``1e999``) become infinity; reject them like NaN."""
+    value = float(text)
+    if not math.isfinite(value):
+        raise DomainError("invalid", "Non-finite values are not supported.")
+    return value
+
+
+def _reject_non_finite(constant: str) -> float:
+    """``json`` accepts NaN and Infinity literals by default; the contract never does."""
+    raise DomainError("invalid", "Non-finite values are not supported.")
 
 
 def dispatch(envelope: JSON) -> Any:
@@ -51,7 +72,6 @@ def dispatch(envelope: JSON) -> Any:
         raise DomainError("unsupported", "Unsupported contract version.")
     contracts.validate(envelope, contracts.REQUEST)
     payload, operation = envelope["payload"], envelope["operation"]
-    _reject_non_finite_numbers(payload)
 
     if operation == "stateCommand":
         return reduce_state(payload, load_library(payload["permitsFixtures"]))
@@ -68,10 +88,10 @@ def dispatch(envelope: JSON) -> Any:
         return scale_nutrients(payload["nutrients"], payload.get("servings", 1))
     if operation == "recovery":
         return _assess_recovery(payload["observations"])
-    if operation == "todayStatus":
-        return today_status(payload["state"], load_library(payload["permitsFixtures"]), payload["now"])
-    if operation == "progress":
-        return progress_summary(payload["state"], load_library(payload["permitsFixtures"]), payload["now"])
+    if operation == "views":
+        library = load_library(payload["permitsFixtures"])
+        state, now = payload["state"], payload["now"]
+        return {"today": today_status(state, library, now), "progress": progress_summary(state, library, now)}
     if operation == "loadSteps":
         return load_steps(payload["base"], payload["step"])
     raise DomainError("unsupported", "Unknown operation.")
@@ -80,14 +100,3 @@ def dispatch(envelope: JSON) -> Any:
 def _assess_recovery(observations: list[JSON]) -> JSON:
     """No reviewed readiness policy exists, so observations can never establish clearance."""
     return {"status": "unassessed", "reason": "NO_REVIEWED_RECOVERY_POLICY", "observations": observations}
-
-
-def _reject_non_finite_numbers(value: Any) -> None:
-    if isinstance(value, float) and not math.isfinite(value):
-        raise DomainError("invalid", "Non-finite values are not supported.")
-    if isinstance(value, dict):
-        for item in value.values():
-            _reject_non_finite_numbers(item)
-    elif isinstance(value, list):
-        for item in value:
-            _reject_non_finite_numbers(item)

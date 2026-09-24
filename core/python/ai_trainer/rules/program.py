@@ -2,7 +2,8 @@
 
 The program is built from the content bundle's ``template``: one repeating
 full-body session with one exercise per required role and an optional
-accessory. Every number (sets, reps, rest, minutes) comes from the template;
+accessory. Every number (sets, reps, rest, minutes) comes from the template —
+per goal when it has ``slotByGoal``, otherwise its shared ``slot``;
 none is defined here. Reviewed multi-day templates arrive with the
 evidence-based content bundle (Track C).
 """
@@ -26,8 +27,8 @@ def initial_program(profile: JSON, library: JSON, now: float, ids: list[str]) ->
 
     ``ids[0]`` is the program id, ``ids[1]`` the plan id, ``ids[2:]`` slot ids.
     """
-    if not library["permitsFixtures"] or not policy_is_enabled(library):
-        raise DomainError("unsupported")
+    if not policy_is_enabled(library):
+        raise DomainError("unsupported")  # approved content, or fixtures where the host permits them
     template = library["template"]
     _require_supported_profile(profile, template)
 
@@ -43,7 +44,7 @@ def initial_program(profile: JSON, library: JSON, now: float, ids: list[str]) ->
         selected.append((accessory, True))
 
     slots = [
-        _slot(ids[index + 2], exercise, profile["preferredUnit"], optional, template["slot"])
+        _slot(ids[index + 2], exercise, profile["preferredUnit"], optional, _prescription(template, profile["goal"]))
         for index, (exercise, optional) in enumerate(selected)
     ]
     plan = {
@@ -63,6 +64,13 @@ def initial_program(profile: JSON, library: JSON, now: float, ids: list[str]) ->
         "sequenceIndex": 0,
         "acceptedAt": now,
     }
+
+
+def _prescription(template: JSON, goal: str) -> JSON:
+    """The goal's own prescription when the template gives one (``slotByGoal``), else the shared ``slot``."""
+    by_goal: JSON = template.get("slotByGoal") or {}
+    prescription: JSON = by_goal.get(goal) or template["slot"]
+    return prescription
 
 
 def _slot(slot_id: str, exercise: JSON, unit: str, optional: bool, prescription: JSON) -> JSON:

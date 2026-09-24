@@ -103,13 +103,10 @@ public final class TrainerService {
     // MARK: Read-only views computed by the core
 
     private struct StatePayload: Encodable { let state: AthleteState; let permitsFixtures: Bool; let now: Date }
-    /// Today's slot cards, pending proposal titles and the one slot (if any) to auto-request.
-    public func todayStatus(now: Date = Date()) throws -> TodayStatus {
-        try core.call("todayStatus", StatePayload(state: repository.snapshot, permitsFixtures: library.permitsFixtures, now: now))
-    }
-    /// Recorded values per exercise in the next plan, newest first.
-    public func progress(now: Date = Date()) throws -> [ExerciseProgress] {
-        try core.call("progress", StatePayload(state: repository.snapshot, permitsFixtures: library.permitsFixtures, now: now))
+    /// Today's slot cards, pending proposal titles, the one slot (if any) to auto-request,
+    /// and recorded values per exercise — one pass over the state after each change.
+    public func views(now: Date = Date()) throws -> CoreViews {
+        try core.call("views", StatePayload(state: repository.snapshot, permitsFixtures: library.permitsFixtures, now: now))
     }
     /// Available loads around a confirmed working load, in the athlete's own equipment step.
     public func loadSteps(base: Double, step: Double) throws -> [Double] {

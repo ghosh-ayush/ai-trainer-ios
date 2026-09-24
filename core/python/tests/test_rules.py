@@ -43,6 +43,17 @@ class ProgressionTests(unittest.TestCase):
             with self.subTest(reason):
                 self.assertEqual(athlete.reason(), reason)
 
+    def test_loads_compare_within_a_tolerance(self):
+        """22.5 typed on the device and 22.5 computed from a step list are the same load."""
+        athlete = Athlete.qualified()
+        for session in athlete.state["sessions"]:
+            for log in session["logs"]:
+                log["load"] = 100.0000000001
+        self.assertEqual(athlete.reason(), "QUALIFYING_EXPOSURES_COMPLETE")
+        for log in athlete.state["sessions"][-1]["logs"]:
+            log["load"] = 100.5
+        self.assertEqual(athlete.reason(), "LOAD_CONTEXT_CHANGED")
+
     def test_failed_middle_exposure_breaks_the_streak(self):
         athlete = athlete_with((6, [10, 10, 10], 2), (4, [8, 8, 8], 2), (1, [10, 10, 10], 2))
         self.assertEqual(athlete.reason(), "MORE_EXPOSURES_REQUIRED")

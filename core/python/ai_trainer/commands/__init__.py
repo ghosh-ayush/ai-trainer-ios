@@ -1,8 +1,10 @@
 """State commands: every mutation of AthleteState, as a pure reducer.
 
 The host sends ``{command, arguments, state, permitsFixtures, now, ids}``. The
-reducer deep-copies ``state``, applies exactly one command, and returns the
-candidate state (plus an optional boolean ``value`` or ``decision``). The host
+payload belongs to this call — ``dispatch_json`` has just parsed it — so the
+reducer applies exactly one command to that state in place (no copy of a
+multi-megabyte history per tap) and returns it as the candidate state (plus an
+optional boolean ``value`` or ``decision``). The host
 saves the candidate atomically and only then publishes it; the state
 ``revision`` is incremented by the host on durable commit, never here.
 
@@ -18,7 +20,6 @@ Command handlers are grouped by concern:
 from __future__ import annotations
 
 from collections.abc import Callable
-from copy import deepcopy
 from typing import Any
 
 from ..errors import DomainError
@@ -50,13 +51,16 @@ HANDLERS: dict[str, Handler] = {
 
 
 def reduce_state(payload: JSON, library: JSON) -> JSON:
-    """Apply one command to a copy of the payload's state and return ``{state, value?, decision?}``."""
+    """Apply one command to the payload's state and return ``{state, value?, decision?}``.
+
+    The payload is consumed: pass one you own (as ``dispatch`` does), not a shared object.
+    """
     handler = HANDLERS.get(payload["command"])
     if handler is None:
         raise DomainError("unsupported")
     context = CommandContext(
-        state=deepcopy(payload["state"]),
-        arguments=deepcopy(payload.get("arguments", {})),
+        state=payload["state"],
+        arguments=payload.get("arguments", {}),
         library=library,
         now=payload["now"],
         ids=iter(payload["ids"]),

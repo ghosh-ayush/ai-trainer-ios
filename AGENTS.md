@@ -75,17 +75,21 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
 - Do not run `rm -rf` on `apps/ios/Vendor` or `DerivedData` in someone else's checkout.
 
 ## Things that look like bugs but are intentional
-- Release builds cannot activate a plan (no approved content yet).
+- Release builds cannot activate a plan until an `approved` content bundle exists. Bundles live in
+  `ai_trainer/bundles/<id>/` (`manifest.json` + `content.json`); an approved one always runs, the
+  fixture runs only in Debug, and a `pending` draft never runs. Non-fixture bundles must cite every
+  policy/template value (or mark it an owner decision); `scripts/content_review_sheet.py <id>`
+  writes the sheet the owner approves from.
 - Recovery observations always return `unassessed` (no reviewed readiness policy).
 - Curl counter reps are never saved as sets.
-- Today requests a slot's progression proposal automatically when the core's `todayStatus` names
+- Today requests a slot's progression proposal automatically when the core's `views` names
   it (`autoRequest`). It is still only a proposal: nothing changes until the athlete taps Accept.
 - A one-tap "Done as planned" set records the planned reps and load with RIR unknown; effort is
   never assumed. "4+" RIR is recorded as 4.
 - Dates cross the bridge as binary64 seconds since 2001-01-01 (Foundation reference epoch).
 - Swift has no validators of its own: set and nutrient rules run in Python when a command is
   saved, so a malformed set is rejected by `saveSet`, not by a Swift `validate()`.
-- Swift never sends training content. It passes `permitsFixtures`; Python loads
-  `ai_trainer/fixture_content.json` (exercises, policy, program template) itself.
+- Swift never sends training content. It passes `permitsFixtures`; Python loads the active bundle
+  (exercises, policy, program template) itself.
 - Saved state files are upgraded by Python (`migrations.py`) before Swift decodes them. Bump
   `STATE_SCHEMA_VERSION` in `contract_spec.py` and add a migration step for any stored-shape change.

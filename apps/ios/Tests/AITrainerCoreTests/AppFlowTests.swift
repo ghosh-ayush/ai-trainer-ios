@@ -137,12 +137,12 @@ final class AppFlowTests: XCTestCase {
     func testTodayAutoRequestsAProposalThenShowsIt() throws {
         let service = try trainedService()
         let slot = try XCTUnwrap(service.repository.snapshot.nextPlan?.slots.first)
-        XCTAssertEqual(try service.todayStatus(now: now).autoRequest, slot.id)
+        XCTAssertEqual(try service.views(now: now).today.autoRequest, slot.id)
         try service.request(.progression(slot.id), now: now)
-        let status = try service.todayStatus(now: now)
-        XCTAssertNil(status.autoRequest)
-        XCTAssertEqual(status.proposals.first?.title, "Proposed · 100 → 105 lb")
-        XCTAssertEqual(try service.progress(now: now).first?.entries.count, 2)
+        let views = try service.views(now: now)
+        XCTAssertNil(views.today.autoRequest)
+        XCTAssertEqual(views.today.proposals.first?.title, "Proposed · 100 → 105 lb")
+        XCTAssertEqual(views.progress.first?.entries.count, 2)
         XCTAssertEqual(try service.loadSteps(base: 100, step: 5).count, 21)
     }
     func testProductionLibraryCannotActivateFixtureContent() throws {

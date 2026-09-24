@@ -6,12 +6,16 @@ import unittest
 from support import NOW, Athlete, call, exposure, result
 
 
+def views(athlete):
+    return result("views", {"state": athlete.state, "permitsFixtures": True, "now": NOW})
+
+
 def today(athlete):
-    return result("todayStatus", {"state": athlete.state, "permitsFixtures": True, "now": NOW})
+    return views(athlete)["today"]
 
 
 def progress(athlete):
-    return result("progress", {"state": athlete.state, "permitsFixtures": True, "now": NOW})
+    return views(athlete)["progress"]
 
 
 class TodayStatusTests(unittest.TestCase):

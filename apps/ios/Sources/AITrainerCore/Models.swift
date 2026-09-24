@@ -872,3 +872,17 @@ public struct ExerciseProgress: Codable, Equatable {
         self.entries = entries
     }
 }
+
+/// Everything the tab screens derive from state, computed in one pass after each change.
+public struct CoreViews: Codable, Equatable {
+    public var today: TodayStatus
+    public var progress: [ExerciseProgress]
+
+    public init(
+        today: TodayStatus = TodayStatus(),
+        progress: [ExerciseProgress] = []
+    ) {
+        self.today = today
+        self.progress = progress
+    }
+}

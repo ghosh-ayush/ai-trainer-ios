@@ -3,6 +3,7 @@
 import copy
 import json
 import unittest
+from unittest import mock
 
 from support import FIXTURES, NOW, ROOT, call, golden_request, result, uid
 
@@ -37,6 +38,18 @@ class GoldenContractTests(unittest.TestCase):
             payload = golden_request()["payload"]
             mutate(payload)
             self.assertIn("error", call("decide", payload))
+
+    def test_overflowing_numbers_are_rejected_like_nan(self):
+        raw = json.dumps(golden_request()).replace('"now": 811382400', '"now": 1e999')
+        self.assertIn("1e999", raw)
+        self.assertEqual(json.loads(dispatch_json(raw))["error"]["code"], "invalid")
+
+    def test_unexpected_exceptions_become_a_typed_error(self):
+        """Nothing escapes into the C bridge: a bug inside a rule still answers with an envelope."""
+        with mock.patch("ai_trainer.api.decide", side_effect=RuntimeError("boom")):
+            response = json.loads(dispatch_json(json.dumps(golden_request())))
+        self.assertEqual(response["error"]["code"], "internal")
+        self.assertNotIn("boom", response["error"]["message"])
 
     def test_request_kinds_are_strict(self):
         payload = golden_request()["payload"]

@@ -39,7 +39,11 @@ and recent meta-analyses give quantitative, citable defaults for healthy adults.
 Consequences: every content parameter carries a citation and certainty grade in
 `content/v1/manifest.json`; the app discloses "evidence-based, not clinician-reviewed"; scope stays
 healthy adults, general resistance training. A human review can later upgrade the manifest.
-Status: accepted.
+Status: accepted. Implemented 2026-09-23 as `core/python/ai_trainer/bundles/<id>/{manifest,content}.json`
+(the ADR's `content/v1/manifest.json`): `content.bundle_problems` refuses any uncited policy or
+template value in a non-fixture bundle, an `approved` bundle needs an `approval` record and always
+wins, and `pending` drafts never run. Approval is a manifest edit the owner makes from the generated
+review sheet.
 
 ## ADR-007 · 2026-09-22 · Python-maximal split
 Why: owner decision (D2). Swift keeps only UI, persistence/CloudKit I/O, camera, HealthKit and
@@ -104,7 +108,7 @@ Consequences: AGENTS.md rule 5 now permits OFL-1.1 fonts bundled unmodified; the
 live in the package resources with their licenses in ThirdPartyNotices.txt and are registered at
 launch. The Stitch components live in `AITrainerCore/Stitch.swift` (package files need no Xcode
 project edit). Tabs are Today · Progress · You; Coach folds into Today, Labs moves to You ▸
-Developer (Debug only). New read-only core operations `todayStatus`, `progress` and `loadSteps`
+Developer (Debug only). New read-only core operations `views` (Today + Progress) and `loadSteps`
 keep the screens' logic in Python; no engine rule changed. Today auto-requests at most one
 progression proposal, never re-proposes one the athlete rejected in the same context, and still
 applies nothing without Accept.

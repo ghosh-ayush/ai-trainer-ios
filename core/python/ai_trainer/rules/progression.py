@@ -55,7 +55,7 @@ def propose_progression(state: JSON, plan: JSON, slot: JSON, policy: JSON, now: 
         return decision("EVIDENCE_CONFLICT")
     if not _all_working_sets_present(latest_logs, slot):
         return decision("INCOMPLETE_EXPOSURE")
-    if not all(log.get("load") == baseline_load for log in latest_logs):
+    if not all(same_load(log.get("load"), baseline_load) for log in latest_logs):
         return decision("LOAD_CONTEXT_CHANGED")
     if any(log.get("rir") is None for log in latest_logs):
         return decision("EFFORT_UNKNOWN")
@@ -86,6 +86,12 @@ def propose_progression(state: JSON, plan: JSON, slot: JSON, policy: JSON, now: 
 
 
 # --- helpers -----------------------------------------------------------------
+
+
+def same_load(recorded: float | None, planned: float) -> bool:
+    """Whether a recorded load is the planned one. Unknown is never the same; floats compare
+    within ``LOAD_EPSILON`` so 22.5 typed on the device matches 22.5 computed from a step list."""
+    return recorded is not None and abs(recorded - planned) <= LOAD_EPSILON
 
 
 def _days_between(earlier: float, later: float) -> float:
@@ -136,7 +142,7 @@ def qualifying_streak(
             and _all_working_sets_present(logs, slot)
             and all(
                 not log["conflicted"]
-                and log.get("load") == baseline_load
+                and same_load(log.get("load"), baseline_load)
                 and log["reps"] >= slot["upperReps"]
                 and log.get("rir") is not None
                 and log["rir"] >= policy["minimumRIR"]

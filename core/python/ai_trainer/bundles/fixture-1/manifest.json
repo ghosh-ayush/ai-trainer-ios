@@ -1,0 +1,7 @@
+{
+  "id": "fixture-1",
+  "version": "fixture-1",
+  "review": "fixture",
+  "evidenceBasis": "None. Development test data for exercising the rules; not an approved training prescription. Release builds refuse it.",
+  "sources": {}
+}

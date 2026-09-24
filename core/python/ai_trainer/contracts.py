@@ -25,79 +25,139 @@ REQUEST: Schema = json.loads((_PACKAGE_DIR / "request.schema.json").read_text())
 RESPONSE: Schema = json.loads((_PACKAGE_DIR / "response.schema.json").read_text())
 
 
+Check = Callable[[Any], bool]
+
+
 def validate(value: Any, schema: Schema, root: Schema = REQUEST) -> None:
-    """Raise ``DomainError('invalid')`` unless ``value`` conforms to ``schema``."""
-    if "$ref" in schema:
-        definition_name = schema["$ref"].split("/")[-1]
-        validate(value, root["$defs"][definition_name], root)
-        return
+    """Raise ``DomainError('invalid')`` unless ``value`` conforms to ``schema``.
 
-    for keyword in ("oneOf", "anyOf"):
-        if keyword in schema:
-            matches = 0
-            for variant in schema[keyword]:
-                try:
-                    validate(value, variant, root)
-                    matches += 1
-                except DomainError:
-                    pass
-            if matches == 0 or (keyword == "oneOf" and matches != 1):
-                _fail()
-
-    if "const" in schema and (type(value) is not type(schema["const"]) or value != schema["const"]):
-        _fail()
-    if "enum" in schema and value not in schema["enum"]:
+    Each schema is compiled once into plain Python checks and cached, so validating a
+    multi-megabyte state does not re-read the schema dictionaries at every node.
+    """
+    if not _compiled(schema, root)(value):
         _fail()
 
-    kind = schema.get("type")
-    if kind == "object":
-        _validate_object(value, schema, root)
-    elif kind == "array":
-        _validate_array(value, schema, root)
-    elif kind == "string":
-        if not isinstance(value, str):
-            _fail()
-        if "pattern" in schema and not re.fullmatch(schema["pattern"], value):
-            _fail()
-    elif kind in _SCALAR_CHECKS and not _SCALAR_CHECKS[kind](value):
-        _fail()
 
-    if "minimum" in schema and value < schema["minimum"]:
-        _fail()
-    if "maximum" in schema and value > schema["maximum"]:
-        _fail()
+def _compiled(schema: Schema, root: Schema) -> Check:
+    key = (id(root), id(schema))
+    check = _CACHE.get(key)
+    if check is None:
+        compiler = _COMPILERS.get(id(root))
+        if compiler is None:
+            compiler = _COMPILERS[id(root)] = _Compiler(root)
+        check = _CACHE[key] = compiler.compile(schema)
+    return check
+
+
+class _Compiler:
+    """Turns one schema root's nodes into closures. ``$defs`` are compiled once and shared."""
+
+    def __init__(self, root: Schema) -> None:
+        self.root = root
+        self.definitions: dict[str, Check] = {}
+
+    def definition(self, name: str) -> Check:
+        if name not in self.definitions:
+            # Placeholder first, so a definition that refers to itself resolves lazily.
+            self.definitions[name] = lambda value: self.definitions[name](value)
+            self.definitions[name] = self.compile(self.root["$defs"][name])
+        return self.definitions[name]
+
+    def compile(self, schema: Schema) -> Check:
+        if "$ref" in schema:
+            return self.definition(schema["$ref"].split("/")[-1])
+        checks: list[Check] = []
+        for keyword in ("oneOf", "anyOf"):
+            if keyword in schema:
+                checks.append(
+                    _variants([self.compile(variant) for variant in schema[keyword]], exactly_one=keyword == "oneOf")
+                )
+        if "const" in schema:
+            constant = schema["const"]
+            checks.append(lambda value: type(value) is type(constant) and value == constant)
+        if "enum" in schema:
+            allowed = schema["enum"]
+            checks.append(lambda value: value in allowed)
+        kind = schema.get("type")
+        if kind == "object":
+            checks.append(self._object(schema))
+        elif kind == "array":
+            checks.append(self._array(schema))
+        elif kind == "string":
+            checks.append(_string(schema.get("pattern")))
+        elif kind in _SCALAR_CHECKS:
+            checks.append(_SCALAR_CHECKS[kind])
+        if "minimum" in schema:
+            minimum = schema["minimum"]
+            checks.append(lambda value: value >= minimum)
+        if "maximum" in schema:
+            maximum = schema["maximum"]
+            checks.append(lambda value: value <= maximum)
+        if len(checks) == 1:
+            return checks[0]
+        return lambda value: all(check(value) for check in checks)
+
+    def _object(self, schema: Schema) -> Check:
+        required = tuple(schema.get("required", []))
+        properties = {name: self.compile(child) for name, child in schema.get("properties", {}).items()}
+        additional = schema.get("additionalProperties")
+        extra: Check | None = self.compile(additional) if isinstance(additional, dict) else None
+        closed = additional is False
+
+        def check(value: Any) -> bool:
+            if not isinstance(value, dict):
+                return False
+            for name in required:
+                if name not in value:
+                    return False
+            for name, item in value.items():
+                child = properties.get(name)
+                if child is not None:
+                    if not child(item):
+                        return False
+                elif closed or (extra is not None and not extra(item)):
+                    return False
+            return True
+
+        return check
+
+    def _array(self, schema: Schema) -> Check:
+        minimum = schema.get("minItems", 0)
+        item_check = self.compile(schema["items"])
+
+        def check(value: Any) -> bool:
+            if not isinstance(value, list) or len(value) < minimum:
+                return False
+            return all(item_check(item) for item in value)
+
+        return check
+
+
+def _variants(checks: list[Check], exactly_one: bool) -> Check:
+    def check(value: Any) -> bool:
+        matches = sum(1 for variant in checks if variant(value))
+        return matches == 1 if exactly_one else matches > 0
+
+    return check
+
+
+def _string(pattern: str | None) -> Check:
+    if pattern is None:
+        return lambda value: isinstance(value, str)
+    compiled = re.compile(pattern)
+    return lambda value: isinstance(value, str) and compiled.fullmatch(value) is not None
 
 
 # Exact-type checks: JSON booleans are not integers, and numbers must be finite.
-_SCALAR_CHECKS: dict[str, Callable[[Any], bool]] = {
+_SCALAR_CHECKS: dict[str, Check] = {
     "boolean": lambda value: type(value) is bool,
     "integer": lambda value: type(value) is int,
     "number": lambda value: type(value) in (int, float) and math.isfinite(value),
     "null": lambda value: value is None,
 }
 
-
-def _validate_object(value: Any, schema: Schema, root: Schema) -> None:
-    if not isinstance(value, dict) or not all(key in value for key in schema.get("required", [])):
-        _fail()
-    properties = schema.get("properties", {})
-    additional = schema.get("additionalProperties")
-    for key, item in value.items():
-        if key in properties:
-            validate(item, properties[key], root)
-        elif additional is False:
-            _fail()
-        elif isinstance(additional, dict):
-            validate(item, additional, root)
-
-
-def _validate_array(value: Any, schema: Schema, root: Schema) -> None:
-    if not isinstance(value, list):
-        _fail()
-    if len(value) < schema.get("minItems", 0):
-        _fail()
-    for item in value:
-        validate(item, schema["items"], root)
+_CACHE: dict[tuple[int, int], Check] = {}
+_COMPILERS: dict[int, _Compiler] = {}
 
 
 def _fail() -> None:
