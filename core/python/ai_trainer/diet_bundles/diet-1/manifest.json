@@ -1,0 +1,149 @@
+{
+  "id": "diet-1",
+  "version": "diet-1",
+  "review": "approved",
+  "evidenceBasis": "Built from docs/research/diet-evidence.json (133 sources read, 849 verified findings, 2026-09-24): NASEM 2023 and IOM 2005 DRIs, FAO/WHO reports, position stands and meta-analyses. Every value was drafted from the findings, reviewed by three independent agents (source fidelity, safety, units) and revised; values the literature does not give are owner decisions with rationales. Evidence-based, not clinician-reviewed.",
+  "verification": {
+    "method": "Automated evidence gate (diet_content.bundle_problems) over values drafted from verified findings and adversarially reviewed on three lenses (ADR-014, ADR-016).",
+    "verifiedOn": "2026-09-24"
+  },
+  "sources": {
+    "CONLIN21": {
+      "citation": "Conlin LA, Aguilar DT, Rogers GE, Campbell BI. Flexible vs. rigid dieting in resistance-trained individuals seeking to optimize their physiques: a randomized controlled trial. J Int Soc Sports Nutr. 2021;18(1):52.",
+      "doi": "10.1186/s12970-021-00452-2",
+      "pmid": "34187492",
+      "design": "randomisedTrial",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.1186/s12970-021-00452-2)"
+    },
+    "DESOUZA14": {
+      "citation": "De Souza MJ, Nattiv A, Joy E, Misra M, Williams NI, Mallinson RJ, et al. 2014 Female Athlete Triad Coalition Consensus Statement on Treatment and Return to Play of the Female Athlete Triad: 1st International Conference held in San Francisco, California, May 2012 and 2nd International Conference held in Indianapolis, Indiana, May 2013. Br J Sports Med. 2014;48(4):289.",
+      "doi": "10.1136/bjsports-2013-093218",
+      "pmid": "24463911",
+      "design": "positionStand",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.1136/bjsports-2013-093218)"
+    },
+    "FAO04": {
+      "citation": "Food and Agriculture Organization of the United Nations, World Health Organization, United Nations University. Human energy requirements: report of a Joint FAO/WHO/UNU Expert Consultation, Rome, 17-24 October 2001. FAO Food and Nutrition Technical Report Series No. 1. Rome: FAO; 2004.",
+      "isbn": "92-5-105212-3",
+      "design": "officialGuideline",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey https://www.fao.org/4/y5686e/y5686e00.htm)"
+    },
+    "FAO13": {
+      "citation": "Food and Agriculture Organization of the United Nations. Dietary protein quality evaluation in human nutrition: report of an FAO Expert Consultation, 31 March-2 April 2011, Auckland, New Zealand. FAO Food and Nutrition Paper 92. Rome: FAO; 2013. ISBN 978-92-5-107417-6.",
+      "isbn": "978-92-5-107417-6",
+      "design": "officialGuideline",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey https://www.fao.org/ag/humannutrition/35978-02317b979a686a57aa4593304ffc17f06.pdf)"
+    },
+    "HALL19": {
+      "citation": "Hall KD, Ayuketah A, Brychta R, Cai H, Cassimatis T, Chen KY, et al. Ultra-processed diets cause excess calorie intake and weight gain: an inpatient randomized controlled trial of ad libitum food intake. Cell Metab. 2019;30(1):67-77.e3.",
+      "doi": "10.1016/j.cmet.2019.05.008",
+      "pmid": "31105044",
+      "design": "crossoverTrial",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.1016/j.cmet.2019.05.008)"
+    },
+    "IOM01": {
+      "citation": "Institute of Medicine (US) Panel on Micronutrients. Dietary Reference Intakes for Vitamin A, Vitamin K, Arsenic, Boron, Chromium, Copper, Iodine, Iron, Manganese, Molybdenum, Nickel, Silicon, Vanadium, and Zinc. Washington (DC): National Academies Press; 2001. Chapter 9, Iron; p. 290-393.",
+      "doi": "10.17226/10026",
+      "design": "officialGuideline",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.17226/10026)"
+    },
+    "IOM05": {
+      "citation": "Institute of Medicine, Panel on Macronutrients, Food and Nutrition Board. Dietary Reference Intakes for Energy, Carbohydrate, Fiber, Fat, Fatty Acids, Cholesterol, Protein, and Amino Acids. Washington (DC): National Academies Press; 2005.",
+      "doi": "10.17226/10490",
+      "design": "officialGuideline",
+      "fullTextRead": false,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.17226/10490)"
+    },
+    "IOM11": {
+      "citation": "Institute of Medicine (US) Committee to Review Dietary Reference Intakes for Vitamin D and Calcium. Dietary Reference Intakes for Calcium and Vitamin D. Washington (DC): National Academies Press; 2011.",
+      "doi": "10.17226/13050",
+      "design": "officialGuideline",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.17226/13050)"
+    },
+    "IOM98": {
+      "citation": "Institute of Medicine (US) Standing Committee on the Scientific Evaluation of Dietary Reference Intakes. Dietary Reference Intakes for Thiamin, Riboflavin, Niacin, Vitamin B6, Folate, Vitamin B12, Pantothenic Acid, Biotin, and Choline. Washington (DC): National Academies Press; 1998. Chapter 9, Vitamin B12; p. 306-56.",
+      "doi": "10.17226/6015",
+      "design": "officialGuideline",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.17226/6015)"
+    },
+    "IRAKI19": {
+      "citation": "Iraki J, Fitschen P, Espinar S, Helms E. Nutrition Recommendations for Bodybuilders in the Off-Season: A Narrative Review. Sports (Basel). 2019;7(7):154.",
+      "doi": "10.3390/sports7070154",
+      "pmid": "31247944",
+      "design": "narrativeReview",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.3390/sports7070154)"
+    },
+    "KUTZ20": {
+      "citation": "Kutz AM, Marsh AG, Gunderson CG, Maguen S, Masheb RM. Eating disorder screening: a systematic review and meta-analysis of diagnostic test characteristics of the SCOFF. J Gen Intern Med. 2020;35(3):885-93.",
+      "doi": "10.1007/s11606-019-05478-6",
+      "pmid": "31705473",
+      "design": "metaAnalysis",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.1007/s11606-019-05478-6)"
+    },
+    "MELINA16": {
+      "citation": "Melina V, Craig W, Levin S. Position of the Academy of Nutrition and Dietetics: vegetarian diets. J Acad Nutr Diet. 2016;116(12):1970-80.",
+      "doi": "10.1016/j.jand.2016.09.025",
+      "pmid": "27886704",
+      "design": "positionStand",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.1016/j.jand.2016.09.025)"
+    },
+    "MORTON18": {
+      "citation": "Morton RW, Murphy KT, McKellar SR, Schoenfeld BJ, Henselmans M, Helms E, et al. A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength in healthy adults. Br J Sports Med. 2018;52(6):376-84.",
+      "doi": "10.1136/bjsports-2017-097608",
+      "pmid": "28698222",
+      "design": "metaAnalysis",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.1136/bjsports-2017-097608)"
+    },
+    "MOUNTJOY23": {
+      "citation": "Mountjoy M, Ackerman KE, Bailey DM, Burke LM, Constantini N, Hackney AC, et al. 2023 International Olympic Committee's (IOC) consensus statement on Relative Energy Deficiency in Sport (REDs). Br J Sports Med. 2023;57(17):1073-97.",
+      "doi": "10.1136/bjsports-2023-106994",
+      "pmid": "37752011",
+      "design": "positionStand",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.1136/bjsports-2023-106994)"
+    },
+    "NASEM23": {
+      "citation": "National Academies of Sciences, Engineering, and Medicine. Dietary Reference Intakes for Energy. Washington (DC): National Academies Press; 2023.",
+      "doi": "10.17226/26818",
+      "pmid": "36693139",
+      "design": "officialGuideline",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.17226/26818)"
+    },
+    "RUIZCASTELLANO21": {
+      "citation": "Ruiz-Castellano C, Espinar S, Contreras C, Mata F, Aragon AA, Martinez-Sanz JM. Achieving an Optimal Fat Loss Phase in Resistance-Trained Athletes: A Narrative Review. Nutrients. 2021;13(9):3255.",
+      "doi": "10.3390/nu13093255",
+      "pmid": "34579132",
+      "design": "narrativeReview",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.3390/nu13093255)"
+    },
+    "THOMAS16": {
+      "citation": "Thomas DT, Erdman KA, Burke LM. American College of Sports Medicine Joint Position Statement. Nutrition and athletic performance. Med Sci Sports Exerc. 2016;48(3):543-68.",
+      "doi": "10.1249/MSS.0000000000000852",
+      "pmid": "26891166",
+      "design": "positionStand",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey 10.1249/MSS.0000000000000852)"
+    },
+    "WHO23": {
+      "citation": "World Health Organization. Carbohydrate intake for adults and children: WHO guideline. Geneva: World Health Organization; 2023. ISBN 978-92-4-007359-3. Available from: https://www.who.int/publications/i/item/9789240073593",
+      "isbn": "978-92-4-007359-3",
+      "design": "officialGuideline",
+      "fullTextRead": true,
+      "findings": "docs/research/diet-evidence.json (paperKey https://www.who.int/publications/i/item/9789240073593)"
+    }
+  }
+}

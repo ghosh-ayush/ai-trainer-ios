@@ -7,7 +7,9 @@ xcrun simctl install "$device_id" "$app_path"
 container=$(xcrun simctl get_app_container "$device_id" com.ghoshayush.AITrainer data)
 result="$container/Documents/core-smoke-result.json"
 rm -f "$result"
-xcrun simctl launch --terminate-running-process "$device_id" com.ghoshayush.AITrainer --core-smoke-test
+# The smoke scenario (3 x 10 @ 100 lb -> 105) is written against the fixture; pin it (ADR-014).
+SIMCTL_CHILD_AI_TRAINER_CONTENT_BUNDLE=fixture-1 \
+    xcrun simctl launch --terminate-running-process "$device_id" com.ghoshayush.AITrainer --core-smoke-test
 python3 - "$result" <<'PY'
 import json, sys, time
 from pathlib import Path

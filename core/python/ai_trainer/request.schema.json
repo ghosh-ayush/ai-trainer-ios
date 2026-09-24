@@ -98,6 +98,63 @@
         "unspecified"
       ]
     },
+    "DietGoal": {
+      "type": "string",
+      "enum": [
+        "fatLoss",
+        "muscleGain",
+        "maintenance",
+        "endurance"
+      ]
+    },
+    "DietPattern": {
+      "type": "string",
+      "enum": [
+        "omnivore",
+        "vegetarian",
+        "vegan"
+      ]
+    },
+    "ActivityLevel": {
+      "type": "string",
+      "enum": [
+        "inactive",
+        "lowActive",
+        "active",
+        "veryActive"
+      ]
+    },
+    "EquationSex": {
+      "type": "string",
+      "enum": [
+        "female",
+        "male"
+      ]
+    },
+    "TrainingLoad": {
+      "type": "string",
+      "enum": [
+        "light",
+        "moderate",
+        "high",
+        "veryHigh"
+      ]
+    },
+    "DietStatus": {
+      "type": "string",
+      "enum": [
+        "ready",
+        "needsInput",
+        "withheld"
+      ]
+    },
+    "AdaptationPace": {
+      "type": "string",
+      "enum": [
+        "slower",
+        "standard"
+      ]
+    },
     "Profile": {
       "type": "object",
       "properties": {
@@ -1028,11 +1085,218 @@
       ],
       "additionalProperties": false
     },
+    "DietScreening": {
+      "type": "object",
+      "properties": {
+        "pregnant": {
+          "$ref": "#/$defs/Bool"
+        },
+        "lactating": {
+          "$ref": "#/$defs/Bool"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "scoffAnswers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Bool"
+          }
+        }
+      },
+      "required": [
+        "pregnant",
+        "lactating",
+        "conditions",
+        "scoffAnswers"
+      ],
+      "additionalProperties": false
+    },
+    "DietProfile": {
+      "type": "object",
+      "properties": {
+        "sex": {
+          "$ref": "#/$defs/EquationSex"
+        },
+        "birthYear": {
+          "$ref": "#/$defs/Int"
+        },
+        "heightCm": {
+          "$ref": "#/$defs/Number"
+        },
+        "activity": {
+          "$ref": "#/$defs/ActivityLevel"
+        },
+        "goal": {
+          "$ref": "#/$defs/DietGoal"
+        },
+        "pattern": {
+          "$ref": "#/$defs/DietPattern"
+        },
+        "cuisines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "trainingLoad": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrainingLoad"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bodyFatPercent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "screening": {
+          "$ref": "#/$defs/DietScreening"
+        },
+        "pace": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AdaptationPace"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "sex",
+        "birthYear",
+        "heightCm",
+        "activity",
+        "goal",
+        "pattern",
+        "cuisines",
+        "screening"
+      ],
+      "additionalProperties": false
+    },
+    "WeighIn": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "kg": {
+          "$ref": "#/$defs/Number"
+        },
+        "measuredAt": {
+          "$ref": "#/$defs/Date"
+        },
+        "source": {
+          "$ref": "#/$defs/String"
+        },
+        "timeZone": {
+          "$ref": "#/$defs/String"
+        },
+        "utcOffsetSeconds": {
+          "$ref": "#/$defs/Int"
+        }
+      },
+      "required": [
+        "id",
+        "kg",
+        "measuredAt",
+        "source",
+        "timeZone",
+        "utcOffsetSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "DietTargets": {
+      "type": "object",
+      "properties": {
+        "energyKcal": {
+          "$ref": "#/$defs/Int"
+        },
+        "proteinG": {
+          "$ref": "#/$defs/Int"
+        },
+        "carbohydrateG": {
+          "$ref": "#/$defs/Int"
+        },
+        "fatG": {
+          "$ref": "#/$defs/Int"
+        },
+        "fibreG": {
+          "$ref": "#/$defs/Int"
+        },
+        "policyVersion": {
+          "$ref": "#/$defs/String"
+        },
+        "basis": {
+          "$ref": "#/$defs/String"
+        },
+        "setAt": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "required": [
+        "energyKcal",
+        "proteinG",
+        "carbohydrateG",
+        "fatG",
+        "fibreG",
+        "policyVersion",
+        "basis",
+        "setAt"
+      ],
+      "additionalProperties": false
+    },
+    "DietDecision": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "kind": {
+          "$ref": "#/$defs/String"
+        },
+        "targets": {
+          "$ref": "#/$defs/DietTargets"
+        },
+        "reason": {
+          "$ref": "#/$defs/String"
+        },
+        "decidedAt": {
+          "$ref": "#/$defs/Date"
+        },
+        "status": {
+          "$ref": "#/$defs/RecommendationStatus"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "targets",
+        "reason",
+        "decidedAt",
+        "status"
+      ],
+      "additionalProperties": false
+    },
     "State": {
       "type": "object",
       "properties": {
         "schemaVersion": {
-          "const": 2
+          "const": 3
         },
         "athleteID": {
           "$ref": "#/$defs/UUID"
@@ -1138,6 +1402,44 @@
           "items": {
             "$ref": "#/$defs/Recipe"
           }
+        },
+        "dietProfile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DietProfile"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "weighIns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WeighIn"
+          }
+        },
+        "dietTargets": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DietTargets"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dietDecisions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DietDecision"
+          }
+        },
+        "excludedWeighIns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Date"
+          }
         }
       },
       "required": [
@@ -1155,7 +1457,10 @@
         "events",
         "meals",
         "mealAudits",
-        "recipes"
+        "recipes",
+        "weighIns",
+        "dietDecisions",
+        "excludedWeighIns"
       ],
       "additionalProperties": false
     },
@@ -1227,6 +1532,19 @@
           "items": {
             "$ref": "#/$defs/String"
           }
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/CatalogEvidence"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -1238,6 +1556,77 @@
         "instructions",
         "category",
         "images"
+      ],
+      "additionalProperties": false
+    },
+    "CatalogEvidence": {
+      "type": "object",
+      "properties": {
+        "findingID": {
+          "$ref": "#/$defs/String"
+        },
+        "outcome": {
+          "$ref": "#/$defs/String"
+        },
+        "muscles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "result": {
+          "$ref": "#/$defs/String"
+        },
+        "finding": {
+          "$ref": "#/$defs/String"
+        },
+        "certainty": {
+          "$ref": "#/$defs/String"
+        },
+        "design": {
+          "$ref": "#/$defs/String"
+        },
+        "citation": {
+          "$ref": "#/$defs/String"
+        },
+        "locator": {
+          "$ref": "#/$defs/String"
+        },
+        "fullTextRead": {
+          "$ref": "#/$defs/Bool"
+        },
+        "doi": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pmid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "findingID",
+        "outcome",
+        "muscles",
+        "result",
+        "finding",
+        "certainty",
+        "design",
+        "citation",
+        "locator",
+        "fullTextRead"
       ],
       "additionalProperties": false
     },
@@ -1406,6 +1795,219 @@
       ],
       "additionalProperties": false
     },
+    "WeightTrend": {
+      "type": "object",
+      "properties": {
+        "latestKg": {
+          "$ref": "#/$defs/Number"
+        },
+        "weeklyChangeKg": {
+          "$ref": "#/$defs/Number"
+        },
+        "weeklyChangeFraction": {
+          "$ref": "#/$defs/Number"
+        },
+        "weighIns": {
+          "$ref": "#/$defs/Int"
+        },
+        "windowDays": {
+          "$ref": "#/$defs/Int"
+        }
+      },
+      "required": [
+        "latestKg",
+        "weeklyChangeKg",
+        "weeklyChangeFraction",
+        "weighIns",
+        "windowDays"
+      ],
+      "additionalProperties": false
+    },
+    "DietAdjustment": {
+      "type": "object",
+      "properties": {
+        "targets": {
+          "$ref": "#/$defs/DietTargets"
+        },
+        "reason": {
+          "$ref": "#/$defs/String"
+        },
+        "title": {
+          "$ref": "#/$defs/String"
+        },
+        "body": {
+          "$ref": "#/$defs/String"
+        }
+      },
+      "required": [
+        "targets",
+        "reason",
+        "title",
+        "body"
+      ],
+      "additionalProperties": false
+    },
+    "FoodPortion": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "$ref": "#/$defs/String"
+        },
+        "grams": {
+          "$ref": "#/$defs/Number"
+        }
+      },
+      "required": [
+        "label",
+        "grams"
+      ],
+      "additionalProperties": false
+    },
+    "FoodSuggestion": {
+      "type": "object",
+      "properties": {
+        "foodID": {
+          "$ref": "#/$defs/Int"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "portion": {
+          "$ref": "#/$defs/FoodPortion"
+        },
+        "nutrients": {
+          "$ref": "#/$defs/Nutrients"
+        },
+        "reason": {
+          "$ref": "#/$defs/String"
+        }
+      },
+      "required": [
+        "foodID",
+        "name",
+        "portion",
+        "nutrients",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "DietCitation": {
+      "type": "object",
+      "properties": {
+        "parameter": {
+          "$ref": "#/$defs/String"
+        },
+        "value": {
+          "$ref": "#/$defs/String"
+        },
+        "citation": {
+          "$ref": "#/$defs/String"
+        },
+        "locator": {
+          "$ref": "#/$defs/String"
+        },
+        "certainty": {
+          "$ref": "#/$defs/String"
+        }
+      },
+      "required": [
+        "parameter",
+        "value",
+        "citation",
+        "locator",
+        "certainty"
+      ],
+      "additionalProperties": false
+    },
+    "DietView": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/DietStatus"
+        },
+        "reason": {
+          "$ref": "#/$defs/String"
+        },
+        "message": {
+          "$ref": "#/$defs/String"
+        },
+        "targets": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DietTargets"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "eaten": {
+          "$ref": "#/$defs/Nutrients"
+        },
+        "remaining": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Nutrients"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "trend": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WeightTrend"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "adjustment": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DietAdjustment"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "suggestions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FoodSuggestion"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DietCitation"
+          }
+        },
+        "policyVersion": {
+          "$ref": "#/$defs/String"
+        }
+      },
+      "required": [
+        "status",
+        "reason",
+        "message",
+        "eaten",
+        "suggestions",
+        "notes",
+        "citations",
+        "policyVersion"
+      ],
+      "additionalProperties": false
+    },
     "Views": {
       "type": "object",
       "properties": {
@@ -1417,11 +2019,167 @@
           "items": {
             "$ref": "#/$defs/ExerciseProgress"
           }
+        },
+        "diet": {
+          "$ref": "#/$defs/DietView"
         }
       },
       "required": [
         "today",
-        "progress"
+        "progress",
+        "diet"
+      ],
+      "additionalProperties": false
+    },
+    "FoodItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Int"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "category": {
+          "$ref": "#/$defs/String"
+        },
+        "per100g": {
+          "$ref": "#/$defs/Nutrients"
+        },
+        "fibre": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "portions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FoodPortion"
+          }
+        },
+        "patterns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DietPattern"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "category",
+        "per100g",
+        "portions",
+        "patterns"
+      ],
+      "additionalProperties": false
+    },
+    "ChoiceOption": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/String"
+        },
+        "title": {
+          "$ref": "#/$defs/String"
+        },
+        "detail": {
+          "$ref": "#/$defs/String"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "detail"
+      ],
+      "additionalProperties": false
+    },
+    "DietOptions": {
+      "type": "object",
+      "properties": {
+        "activityLevels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChoiceOption"
+          }
+        },
+        "goals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChoiceOption"
+          }
+        },
+        "patterns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChoiceOption"
+          }
+        },
+        "cuisines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChoiceOption"
+          }
+        },
+        "trainingLoads": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChoiceOption"
+          }
+        },
+        "exclusions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChoiceOption"
+          }
+        },
+        "scoffQuestions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "minimumAgeYears": {
+          "$ref": "#/$defs/Int"
+        },
+        "paces": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChoiceOption"
+          }
+        },
+        "defaultPace": {
+          "$ref": "#/$defs/AdaptationPace"
+        },
+        "paceQuestion": {
+          "$ref": "#/$defs/String"
+        },
+        "paceNote": {
+          "$ref": "#/$defs/String"
+        },
+        "policyVersion": {
+          "$ref": "#/$defs/String"
+        }
+      },
+      "required": [
+        "activityLevels",
+        "goals",
+        "patterns",
+        "cuisines",
+        "trainingLoads",
+        "exclusions",
+        "scoffQuestions",
+        "minimumAgeYears",
+        "paces",
+        "defaultPace",
+        "paceQuestion",
+        "paceNote",
+        "policyVersion"
       ],
       "additionalProperties": false
     },
@@ -1713,6 +2471,16 @@
         },
         "now": {
           "$ref": "#/$defs/Date"
+        },
+        "dayStart": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -1735,6 +2503,64 @@
       "required": [
         "base",
         "step"
+      ],
+      "additionalProperties": false
+    },
+    "dietOptionsPayload": {
+      "type": "object",
+      "properties": {
+        "now": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "required": [
+        "now"
+      ],
+      "additionalProperties": false
+    },
+    "dietPreviewPayload": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "profile": {
+          "$ref": "#/$defs/DietProfile"
+        },
+        "now": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "required": [
+        "state",
+        "profile",
+        "now"
+      ],
+      "additionalProperties": false
+    },
+    "foodsPayload": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "$ref": "#/$defs/String"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DietPattern"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limit": {
+          "$ref": "#/$defs/Int"
+        }
+      },
+      "required": [
+        "query",
+        "limit"
       ],
       "additionalProperties": false
     },
@@ -2078,6 +2904,125 @@
       },
       "required": [
         "id"
+      ],
+      "additionalProperties": false
+    },
+    "setDietTargetsArguments": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/$defs/DietProfile"
+        },
+        "expected": {
+          "$ref": "#/$defs/DietTargets"
+        }
+      },
+      "required": [
+        "profile",
+        "expected"
+      ],
+      "additionalProperties": false
+    },
+    "saveDietProfileArguments": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/$defs/DietProfile"
+        }
+      },
+      "required": [
+        "profile"
+      ],
+      "additionalProperties": false
+    },
+    "logWeighInArguments": {
+      "type": "object",
+      "properties": {
+        "weighIn": {
+          "$ref": "#/$defs/WeighIn"
+        }
+      },
+      "required": [
+        "weighIn"
+      ],
+      "additionalProperties": false
+    },
+    "importWeighInsArguments": {
+      "type": "object",
+      "properties": {
+        "weighIns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WeighIn"
+          }
+        }
+      },
+      "required": [
+        "weighIns"
+      ],
+      "additionalProperties": false
+    },
+    "deleteWeighInArguments": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "acceptDietAdjustmentArguments": {
+      "type": "object",
+      "properties": {
+        "expected": {
+          "$ref": "#/$defs/DietTargets"
+        }
+      },
+      "required": [
+        "expected"
+      ],
+      "additionalProperties": false
+    },
+    "rejectDietAdjustmentArguments": {
+      "type": "object",
+      "properties": {
+        "expected": {
+          "$ref": "#/$defs/DietTargets"
+        }
+      },
+      "required": [
+        "expected"
+      ],
+      "additionalProperties": false
+    },
+    "saveFoodMealArguments": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "foodID": {
+          "$ref": "#/$defs/Int"
+        },
+        "grams": {
+          "$ref": "#/$defs/Number"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/Date"
+        },
+        "timeZone": {
+          "$ref": "#/$defs/String"
+        }
+      },
+      "required": [
+        "id",
+        "foodID",
+        "grams",
+        "occurredAt",
+        "timeZone"
       ],
       "additionalProperties": false
     },
@@ -2694,6 +3639,294 @@
             "ids"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "setDietTargets"
+            },
+            "arguments": {
+              "$ref": "#/$defs/setDietTargetsArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "saveDietProfile"
+            },
+            "arguments": {
+              "$ref": "#/$defs/saveDietProfileArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "logWeighIn"
+            },
+            "arguments": {
+              "$ref": "#/$defs/logWeighInArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "importWeighIns"
+            },
+            "arguments": {
+              "$ref": "#/$defs/importWeighInsArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "deleteWeighIn"
+            },
+            "arguments": {
+              "$ref": "#/$defs/deleteWeighInArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "acceptDietAdjustment"
+            },
+            "arguments": {
+              "$ref": "#/$defs/acceptDietAdjustmentArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "rejectDietAdjustment"
+            },
+            "arguments": {
+              "$ref": "#/$defs/rejectDietAdjustmentArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "saveFoodMeal"
+            },
+            "arguments": {
+              "$ref": "#/$defs/saveFoodMealArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
         }
       ]
     },
@@ -2921,6 +4154,66 @@
         },
         "payload": {
           "$ref": "#/$defs/loadStepsPayload"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "operation": {
+          "const": "dietOptions"
+        },
+        "payload": {
+          "$ref": "#/$defs/dietOptionsPayload"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "operation": {
+          "const": "dietPreview"
+        },
+        "payload": {
+          "$ref": "#/$defs/dietPreviewPayload"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "operation": {
+          "const": "foods"
+        },
+        "payload": {
+          "$ref": "#/$defs/foodsPayload"
         }
       },
       "required": [

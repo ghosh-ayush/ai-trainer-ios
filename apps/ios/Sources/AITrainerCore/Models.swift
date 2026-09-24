@@ -41,6 +41,34 @@ public enum OmissionReason: String, Codable, CaseIterable {
     case time, equipment, userChoice, pain, interruption, unspecified
 }
 
+public enum DietGoal: String, Codable, CaseIterable {
+    case fatLoss, muscleGain, maintenance, endurance
+}
+
+public enum DietPattern: String, Codable, CaseIterable {
+    case omnivore, vegetarian, vegan
+}
+
+public enum ActivityLevel: String, Codable, CaseIterable {
+    case inactive, lowActive, active, veryActive
+}
+
+public enum EquationSex: String, Codable, CaseIterable {
+    case female, male
+}
+
+public enum TrainingLoad: String, Codable, CaseIterable {
+    case light, moderate, high, veryHigh
+}
+
+public enum DietStatus: String, Codable {
+    case ready, needsInput, withheld
+}
+
+public enum AdaptationPace: String, Codable, CaseIterable {
+    case slower, standard
+}
+
 // MARK: - Records
 
 /// What the athlete told us at onboarding. No body metrics, no estimated strength.
@@ -661,6 +689,151 @@ public struct Recipe: Codable, Equatable, Identifiable {
     }
 }
 
+/// The athlete's own safety answers. ``conditions`` names diet-policy exclusion ids; ``scoffAnswers`` holds one answer per SCOFF question, so reopening setup shows what was answered.
+public struct DietScreening: Codable, Equatable {
+    public var pregnant: Bool
+    public var lactating: Bool
+    public var conditions: [String]
+    public var scoffAnswers: [Bool]
+
+    public init(
+        pregnant: Bool = false,
+        lactating: Bool = false,
+        conditions: [String] = [],
+        scoffAnswers: [Bool] = []
+    ) {
+        self.pregnant = pregnant
+        self.lactating = lactating
+        self.conditions = conditions
+        self.scoffAnswers = scoffAnswers
+    }
+}
+
+/// What the diet engine needs. ``sex`` selects the published equation; body fat is optional and never estimated; ``pace`` is how quickly targets follow the weight trend (the policy default when absent).
+public struct DietProfile: Codable, Equatable {
+    public var sex: EquationSex
+    public var birthYear: Int
+    public var heightCm: Double
+    public var activity: ActivityLevel
+    public var goal: DietGoal
+    public var pattern: DietPattern
+    public var cuisines: [String]
+    public var trainingLoad: TrainingLoad?
+    public var bodyFatPercent: Double?
+    public var screening: DietScreening
+    public var pace: AdaptationPace?
+
+    public init(
+        sex: EquationSex = .female,
+        birthYear: Int = 1995,
+        heightCm: Double = 170,
+        activity: ActivityLevel = .lowActive,
+        goal: DietGoal = .maintenance,
+        pattern: DietPattern = .omnivore,
+        cuisines: [String] = [],
+        trainingLoad: TrainingLoad? = nil,
+        bodyFatPercent: Double? = nil,
+        screening: DietScreening = DietScreening(),
+        pace: AdaptationPace? = nil
+    ) {
+        self.sex = sex
+        self.birthYear = birthYear
+        self.heightCm = heightCm
+        self.activity = activity
+        self.goal = goal
+        self.pattern = pattern
+        self.cuisines = cuisines
+        self.trainingLoad = trainingLoad
+        self.bodyFatPercent = bodyFatPercent
+        self.screening = screening
+        self.pace = pace
+    }
+}
+
+/// One body-weight measurement, typed by the athlete (``manual``) or read from Apple Health (``appleHealth``). ``utcOffsetSeconds`` is the local offset when it was taken, so the core can keep one reading per local day.
+public struct WeighIn: Codable, Equatable, Identifiable {
+    public var id: UUID
+    public var kg: Double
+    public var measuredAt: Date
+    public var source: String
+    public var timeZone: String
+    public var utcOffsetSeconds: Int
+
+    public init(
+        id: UUID = UUID(),
+        kg: Double,
+        measuredAt: Date,
+        source: String = "manual",
+        timeZone: String = TimeZone.current.identifier,
+        utcOffsetSeconds: Int = TimeZone.current.secondsFromGMT()
+    ) {
+        self.id = id
+        self.kg = kg
+        self.measuredAt = measuredAt
+        self.source = source
+        self.timeZone = timeZone
+        self.utcOffsetSeconds = utcOffsetSeconds
+    }
+}
+
+/// Daily targets the athlete accepted. ``basis`` says why: setup, profileChange or adjustment.
+public struct DietTargets: Codable, Equatable {
+    public var energyKcal: Int
+    public var proteinG: Int
+    public var carbohydrateG: Int
+    public var fatG: Int
+    public var fibreG: Int
+    public var policyVersion: String
+    public var basis: String
+    public var setAt: Date
+
+    public init(
+        energyKcal: Int,
+        proteinG: Int,
+        carbohydrateG: Int,
+        fatG: Int,
+        fibreG: Int,
+        policyVersion: String,
+        basis: String,
+        setAt: Date
+    ) {
+        self.energyKcal = energyKcal
+        self.proteinG = proteinG
+        self.carbohydrateG = carbohydrateG
+        self.fatG = fatG
+        self.fibreG = fibreG
+        self.policyVersion = policyVersion
+        self.basis = basis
+        self.setAt = setAt
+    }
+}
+
+/// An accepted or rejected diet suggestion, kept as history.
+public struct DietDecision: Codable, Equatable, Identifiable {
+    public var id: UUID
+    public var kind: String
+    public var targets: DietTargets
+    public var reason: String
+    public var decidedAt: Date
+    public var status: RecommendationStatus
+
+    public init(
+        id: UUID,
+        kind: String,
+        targets: DietTargets,
+        reason: String,
+        decidedAt: Date,
+        status: RecommendationStatus
+    ) {
+        self.id = id
+        self.kind = kind
+        self.targets = targets
+        self.reason = reason
+        self.decidedAt = decidedAt
+        self.status = status
+    }
+}
+
 /// Everything the app persists. One file, one athlete.
 public struct AthleteState: Codable, Equatable {
     public var schemaVersion: Int
@@ -681,9 +854,14 @@ public struct AthleteState: Codable, Equatable {
     public var meals: [Meal]
     public var mealAudits: [MealAudit]
     public var recipes: [Recipe]
+    public var dietProfile: DietProfile?
+    public var weighIns: [WeighIn]
+    public var dietTargets: DietTargets?
+    public var dietDecisions: [DietDecision]
+    public var excludedWeighIns: [Date]
 
     public init(
-        schemaVersion: Int = 2,
+        schemaVersion: Int = 3,
         athleteID: UUID = UUID(),
         revision: Int = 0,
         contextRevision: Int = 0,
@@ -700,7 +878,12 @@ public struct AthleteState: Codable, Equatable {
         events: [AnalyticsEvent] = [],
         meals: [Meal] = [],
         mealAudits: [MealAudit] = [],
-        recipes: [Recipe] = []
+        recipes: [Recipe] = [],
+        dietProfile: DietProfile? = nil,
+        weighIns: [WeighIn] = [],
+        dietTargets: DietTargets? = nil,
+        dietDecisions: [DietDecision] = [],
+        excludedWeighIns: [Date] = []
     ) {
         self.schemaVersion = schemaVersion
         self.athleteID = athleteID
@@ -720,10 +903,15 @@ public struct AthleteState: Codable, Equatable {
         self.meals = meals
         self.mealAudits = mealAudits
         self.recipes = recipes
+        self.dietProfile = dietProfile
+        self.weighIns = weighIns
+        self.dietTargets = dietTargets
+        self.dietDecisions = dietDecisions
+        self.excludedWeighIns = excludedWeighIns
     }
 }
 
-/// Descriptive record from free-exercise-db. Never a governed Exercise.
+/// Descriptive record from free-exercise-db. Never a governed Exercise. ``evidence`` is added by ``scripts/annotate_catalog.py`` and absent when no reviewed research covers the exercise.
 public struct CatalogExercise: Codable, Equatable, Identifiable {
     public var id: String
     public var name: String
@@ -736,6 +924,7 @@ public struct CatalogExercise: Codable, Equatable, Identifiable {
     public var instructions: [String]
     public var category: String
     public var images: [String]
+    public var evidence: [CatalogEvidence]?
 
     public init(
         id: String,
@@ -748,7 +937,8 @@ public struct CatalogExercise: Codable, Equatable, Identifiable {
         secondaryMuscles: [String],
         instructions: [String],
         category: String,
-        images: [String]
+        images: [String],
+        evidence: [CatalogEvidence]? = nil
     ) {
         self.id = id
         self.name = name
@@ -761,6 +951,51 @@ public struct CatalogExercise: Codable, Equatable, Identifiable {
         self.instructions = instructions
         self.category = category
         self.images = images
+        self.evidence = evidence
+    }
+}
+
+/// What one cited study found about a catalog exercise. Descriptive only: never feeds progression.
+public struct CatalogEvidence: Codable, Equatable {
+    public var findingID: String
+    public var outcome: String
+    public var muscles: [String]
+    public var result: String
+    public var finding: String
+    public var certainty: String
+    public var design: String
+    public var citation: String
+    public var locator: String
+    public var fullTextRead: Bool
+    public var doi: String?
+    public var pmid: String?
+
+    public init(
+        findingID: String,
+        outcome: String,
+        muscles: [String],
+        result: String,
+        finding: String,
+        certainty: String,
+        design: String,
+        citation: String,
+        locator: String,
+        fullTextRead: Bool,
+        doi: String? = nil,
+        pmid: String? = nil
+    ) {
+        self.findingID = findingID
+        self.outcome = outcome
+        self.muscles = muscles
+        self.result = result
+        self.finding = finding
+        self.certainty = certainty
+        self.design = design
+        self.citation = citation
+        self.locator = locator
+        self.fullTextRead = fullTextRead
+        self.doi = doi
+        self.pmid = pmid
     }
 }
 
@@ -873,17 +1108,260 @@ public struct ExerciseProgress: Codable, Equatable {
     }
 }
 
+/// The least-squares weight trend over the policy window. Absent until enough weigh-ins exist.
+public struct WeightTrend: Codable, Equatable {
+    public var latestKg: Double
+    public var weeklyChangeKg: Double
+    public var weeklyChangeFraction: Double
+    public var weighIns: Int
+    public var windowDays: Int
+
+    public init(
+        latestKg: Double,
+        weeklyChangeKg: Double,
+        weeklyChangeFraction: Double,
+        weighIns: Int,
+        windowDays: Int
+    ) {
+        self.latestKg = latestKg
+        self.weeklyChangeKg = weeklyChangeKg
+        self.weeklyChangeFraction = weeklyChangeFraction
+        self.weighIns = weighIns
+        self.windowDays = windowDays
+    }
+}
+
+/// A suggested change to the daily targets. Inert until the athlete accepts it.
+public struct DietAdjustment: Codable, Equatable {
+    public var targets: DietTargets
+    public var reason: String
+    public var title: String
+    public var body: String
+
+    public init(
+        targets: DietTargets,
+        reason: String,
+        title: String,
+        body: String
+    ) {
+        self.targets = targets
+        self.reason = reason
+        self.title = title
+        self.body = body
+    }
+}
+
+/// A household portion from USDA FoodData Central.
+public struct FoodPortion: Codable, Equatable {
+    public var label: String
+    public var grams: Double
+
+    public init(
+        label: String,
+        grams: Double
+    ) {
+        self.label = label
+        self.grams = grams
+    }
+}
+
+/// A food that fits what is left of today's targets.
+public struct FoodSuggestion: Codable, Equatable {
+    public var foodID: Int
+    public var name: String
+    public var portion: FoodPortion
+    public var nutrients: Nutrients
+    public var reason: String
+
+    public init(
+        foodID: Int,
+        name: String,
+        portion: FoodPortion,
+        nutrients: Nutrients,
+        reason: String
+    ) {
+        self.foodID = foodID
+        self.name = name
+        self.portion = portion
+        self.nutrients = nutrients
+        self.reason = reason
+    }
+}
+
+/// Why a target is what it is: the value and the research behind it.
+public struct DietCitation: Codable, Equatable {
+    public var parameter: String
+    public var value: String
+    public var citation: String
+    public var locator: String
+    public var certainty: String
+
+    public init(
+        parameter: String,
+        value: String,
+        citation: String,
+        locator: String,
+        certainty: String
+    ) {
+        self.parameter = parameter
+        self.value = value
+        self.citation = citation
+        self.locator = locator
+        self.certainty = certainty
+    }
+}
+
+/// Read-only Diet tab model. In a preview, ``targets`` is what accepting the profile would set.
+public struct DietView: Codable, Equatable {
+    public var status: DietStatus
+    public var reason: String
+    public var message: String
+    public var targets: DietTargets?
+    public var eaten: Nutrients
+    public var remaining: Nutrients?
+    public var trend: WeightTrend?
+    public var adjustment: DietAdjustment?
+    public var suggestions: [FoodSuggestion]
+    public var notes: [String]
+    public var citations: [DietCitation]
+    public var policyVersion: String
+
+    public init(
+        status: DietStatus = .needsInput,
+        reason: String = "NO_DIET_PROFILE",
+        message: String = "",
+        targets: DietTargets? = nil,
+        eaten: Nutrients = Nutrients(),
+        remaining: Nutrients? = nil,
+        trend: WeightTrend? = nil,
+        adjustment: DietAdjustment? = nil,
+        suggestions: [FoodSuggestion] = [],
+        notes: [String] = [],
+        citations: [DietCitation] = [],
+        policyVersion: String = ""
+    ) {
+        self.status = status
+        self.reason = reason
+        self.message = message
+        self.targets = targets
+        self.eaten = eaten
+        self.remaining = remaining
+        self.trend = trend
+        self.adjustment = adjustment
+        self.suggestions = suggestions
+        self.notes = notes
+        self.citations = citations
+        self.policyVersion = policyVersion
+    }
+}
+
 /// Everything the tab screens derive from state, computed in one pass after each change.
 public struct CoreViews: Codable, Equatable {
     public var today: TodayStatus
     public var progress: [ExerciseProgress]
+    public var diet: DietView
 
     public init(
         today: TodayStatus = TodayStatus(),
-        progress: [ExerciseProgress] = []
+        progress: [ExerciseProgress] = [],
+        diet: DietView = DietView()
     ) {
         self.today = today
         self.progress = progress
+        self.diet = diet
+    }
+}
+
+/// One USDA FoodData Central food for logging (public domain, CC0).
+public struct FoodItem: Codable, Equatable, Identifiable {
+    public var id: Int
+    public var name: String
+    public var category: String
+    public var per100g: Nutrients
+    public var fibre: Double?
+    public var portions: [FoodPortion]
+    public var patterns: [DietPattern]
+
+    public init(
+        id: Int,
+        name: String,
+        category: String,
+        per100g: Nutrients,
+        fibre: Double? = nil,
+        portions: [FoodPortion],
+        patterns: [DietPattern]
+    ) {
+        self.id = id
+        self.name = name
+        self.category = category
+        self.per100g = per100g
+        self.fibre = fibre
+        self.portions = portions
+        self.patterns = patterns
+    }
+}
+
+/// One selectable option the setup screen shows.
+public struct ChoiceOption: Codable, Equatable, Identifiable {
+    public var id: String
+    public var title: String
+    public var detail: String
+
+    public init(
+        id: String,
+        title: String,
+        detail: String
+    ) {
+        self.id = id
+        self.title = title
+        self.detail = detail
+    }
+}
+
+/// What the diet setup screen offers, taken from the active diet policy.
+public struct DietOptions: Codable, Equatable {
+    public var activityLevels: [ChoiceOption]
+    public var goals: [ChoiceOption]
+    public var patterns: [ChoiceOption]
+    public var cuisines: [ChoiceOption]
+    public var trainingLoads: [ChoiceOption]
+    public var exclusions: [ChoiceOption]
+    public var scoffQuestions: [String]
+    public var minimumAgeYears: Int
+    public var paces: [ChoiceOption]
+    public var defaultPace: AdaptationPace
+    public var paceQuestion: String
+    public var paceNote: String
+    public var policyVersion: String
+
+    public init(
+        activityLevels: [ChoiceOption],
+        goals: [ChoiceOption],
+        patterns: [ChoiceOption],
+        cuisines: [ChoiceOption],
+        trainingLoads: [ChoiceOption],
+        exclusions: [ChoiceOption],
+        scoffQuestions: [String],
+        minimumAgeYears: Int,
+        paces: [ChoiceOption],
+        defaultPace: AdaptationPace,
+        paceQuestion: String,
+        paceNote: String,
+        policyVersion: String
+    ) {
+        self.activityLevels = activityLevels
+        self.goals = goals
+        self.patterns = patterns
+        self.cuisines = cuisines
+        self.trainingLoads = trainingLoads
+        self.exclusions = exclusions
+        self.scoffQuestions = scoffQuestions
+        self.minimumAgeYears = minimumAgeYears
+        self.paces = paces
+        self.defaultPace = defaultPace
+        self.paceQuestion = paceQuestion
+        self.paceNote = paceNote
+        self.policyVersion = policyVersion
     }
 }
 

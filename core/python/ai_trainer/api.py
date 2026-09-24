@@ -17,8 +17,10 @@ from typing import Any
 from . import contracts
 from .commands import reduce_state
 from .content import load_library, public_library
+from .diet_view import diet_options, diet_preview, diet_view
 from .equipment import load_steps
 from .errors import DomainError
+from .foods import search as search_foods
 from .migrations import migrate_state
 from .nutrition import scale_nutrients
 from .progress import progress_summary
@@ -92,9 +94,19 @@ def dispatch(envelope: JSON) -> Any:
     if operation == "views":
         library = load_library(payload["permitsFixtures"])
         state, now = payload["state"], payload["now"]
-        return {"today": today_status(state, library, now), "progress": progress_summary(state, library, now)}
+        return {
+            "today": today_status(state, library, now),
+            "progress": progress_summary(state, library, now),
+            "diet": diet_view(state, now, payload.get("dayStart")),
+        }
     if operation == "loadSteps":
         return load_steps(payload["base"], payload["step"])
+    if operation == "dietOptions":
+        return diet_options()
+    if operation == "dietPreview":
+        return diet_preview(payload["state"], payload["profile"], payload["now"])
+    if operation == "foods":
+        return search_foods(payload["query"], payload.get("pattern"), payload["limit"])
     if operation == "readSet":
         library = load_library(payload["permitsFixtures"])
         return read_set(payload["state"], payload["text"], payload["draft"], library)

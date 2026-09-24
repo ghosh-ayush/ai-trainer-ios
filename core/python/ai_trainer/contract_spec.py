@@ -51,6 +51,13 @@ ENUMS: dict[str, list[str]] = {
     "Outcome": ["keepPlan", "proposeChange", "needsInput", "unassessed", "withholdGuidance"],
     "RecommendationStatus": ["proposed", "applied", "rejected", "expired"],
     "Omission": ["time", "equipment", "userChoice", "pain", "interruption", "unspecified"],
+    "DietGoal": ["fatLoss", "muscleGain", "maintenance", "endurance"],
+    "DietPattern": ["omnivore", "vegetarian", "vegan"],
+    "ActivityLevel": ["inactive", "lowActive", "active", "veryActive"],
+    "EquationSex": ["female", "male"],
+    "TrainingLoad": ["light", "moderate", "high", "veryHigh"],
+    "DietStatus": ["ready", "needsInput", "withheld"],
+    "AdaptationPace": ["slower", "standard"],
 }
 
 # --------------------------------------------------------------------------- #
@@ -200,18 +207,58 @@ MODELS: list[ModelSpec] = [
     _model("MealAudit", "id:UUID previous:Meal correctedAt:Date"),
     _model("Recipe", "id:UUID name:String perServing:Nutrients source:String", "An immutable saved portion."),
     _model(
+        "DietScreening",
+        "pregnant:Bool lactating:Bool conditions:[String] scoffAnswers:[Bool]",
+        "The athlete's own safety answers. ``conditions`` names diet-policy exclusion ids; ``scoffAnswers`` "
+        "holds one answer per SCOFF question, so reopening setup shows what was answered.",
+    ),
+    _model(
+        "DietProfile",
+        "sex:EquationSex birthYear:Int heightCm:Number activity:ActivityLevel goal:DietGoal pattern:DietPattern "
+        "cuisines:[String] trainingLoad?:TrainingLoad bodyFatPercent?:Number screening:DietScreening "
+        "pace?:AdaptationPace",
+        "What the diet engine needs. ``sex`` selects the published equation; body fat is optional and never "
+        "estimated; ``pace`` is how quickly targets follow the weight trend (the policy default when absent).",
+    ),
+    _model(
+        "WeighIn",
+        "id:UUID kg:Number measuredAt:Date source:String timeZone:String utcOffsetSeconds:Int",
+        "One body-weight measurement, typed by the athlete (``manual``) or read from Apple Health (``appleHealth``). "
+        "``utcOffsetSeconds`` is the local offset when it was taken, so the core can keep one reading per local day.",
+    ),
+    _model(
+        "DietTargets",
+        "energyKcal:Int proteinG:Int carbohydrateG:Int fatG:Int fibreG:Int policyVersion:String basis:String "
+        "setAt:Date",
+        "Daily targets the athlete accepted. ``basis`` says why: setup, profileChange or adjustment.",
+    ),
+    _model(
+        "DietDecision",
+        "id:UUID kind:String targets:DietTargets reason:String decidedAt:Date status:RecommendationStatus",
+        "An accepted or rejected diet suggestion, kept as history.",
+    ),
+    _model(
         "State",
         "schemaVersion:Int athleteID:UUID revision:Int contextRevision:Int profile?:Profile program?:Program "
         "nextPlanOverride?:Plan previousPrograms:[Program] sessions:[Session] recommendations:[Recommendation] "
         "painExclusions:[String] audits:[Audit] conflicts:[Conflict] operations:[UUID] events:[Event] meals:[Meal] "
-        "mealAudits:[MealAudit] recipes:[Recipe]",
+        "mealAudits:[MealAudit] recipes:[Recipe] dietProfile?:DietProfile weighIns:[WeighIn] "
+        "dietTargets?:DietTargets dietDecisions:[DietDecision] excludedWeighIns:[Date]",
         "Everything the app persists. One file, one athlete.",
     ),
     _model(
         "CatalogExercise",
         "id:String name:String force?:String level:String mechanic?:String equipment?:String "
-        "primaryMuscles:[String] secondaryMuscles:[String] instructions:[String] category:String images:[String]",
-        "Descriptive record from free-exercise-db. Never a governed Exercise.",
+        "primaryMuscles:[String] secondaryMuscles:[String] instructions:[String] category:String images:[String] "
+        "evidence?:[CatalogEvidence]",
+        "Descriptive record from free-exercise-db. Never a governed Exercise. ``evidence`` is added by "
+        "``scripts/annotate_catalog.py`` and absent when no reviewed research covers the exercise.",
+    ),
+    _model(
+        "CatalogEvidence",
+        "findingID:String outcome:String muscles:[String] result:String finding:String certainty:String "
+        "design:String citation:String locator:String fullTextRead:Bool doi?:String pmid?:String",
+        "What one cited study found about a catalog exercise. Descriptive only: never feeds progression.",
     ),
     _model(
         "SlotStatus",
@@ -235,9 +282,51 @@ MODELS: list[ModelSpec] = [
         "Recorded values for one exercise, newest first. Nothing is estimated or projected.",
     ),
     _model(
+        "WeightTrend",
+        "latestKg:Number weeklyChangeKg:Number weeklyChangeFraction:Number weighIns:Int windowDays:Int",
+        "The least-squares weight trend over the policy window. Absent until enough weigh-ins exist.",
+    ),
+    _model(
+        "DietAdjustment",
+        "targets:DietTargets reason:String title:String body:String",
+        "A suggested change to the daily targets. Inert until the athlete accepts it.",
+    ),
+    _model("FoodPortion", "label:String grams:Number", "A household portion from USDA FoodData Central."),
+    _model(
+        "FoodSuggestion",
+        "foodID:Int name:String portion:FoodPortion nutrients:Nutrients reason:String",
+        "A food that fits what is left of today's targets.",
+    ),
+    _model(
+        "DietCitation",
+        "parameter:String value:String citation:String locator:String certainty:String",
+        "Why a target is what it is: the value and the research behind it.",
+    ),
+    _model(
+        "DietView",
+        "status:DietStatus reason:String message:String targets?:DietTargets eaten:Nutrients remaining?:Nutrients "
+        "trend?:WeightTrend adjustment?:DietAdjustment suggestions:[FoodSuggestion] notes:[String] "
+        "citations:[DietCitation] policyVersion:String",
+        "Read-only Diet tab model. In a preview, ``targets`` is what accepting the profile would set.",
+    ),
+    _model(
         "Views",
-        "today:TodayStatus progress:[ExerciseProgress]",
+        "today:TodayStatus progress:[ExerciseProgress] diet:DietView",
         "Everything the tab screens derive from state, computed in one pass after each change.",
+    ),
+    _model(
+        "FoodItem",
+        "id:Int name:String category:String per100g:Nutrients fibre?:Number portions:[FoodPortion] "
+        "patterns:[DietPattern]",
+        "One USDA FoodData Central food for logging (public domain, CC0).",
+    ),
+    _model("ChoiceOption", "id:String title:String detail:String", "One selectable option the setup screen shows."),
+    _model(
+        "DietOptions",
+        "activityLevels:[ChoiceOption] goals:[ChoiceOption] patterns:[ChoiceOption] cuisines:[ChoiceOption] "
+        "trainingLoads:[ChoiceOption] exclusions:[ChoiceOption] scoffQuestions:[String] minimumAgeYears:Int "
+        "paces:[ChoiceOption] defaultPace:AdaptationPace paceQuestion:String paceNote:String policyVersion:String",
+        "What the diet setup screen offers, taken from the active diet policy.",
     ),
     _model(
         "RecoveryObservation",
@@ -269,7 +358,7 @@ INTEGER_BOUNDS: list[tuple[str, str, int, int]] = [
     ("Slot", "workingSets", 1, 1000),
     ("Policy", "requiredExposures", 1, 1000),
 ]
-STATE_SCHEMA_VERSION = 2  # migrations.py upgrades older saved files
+STATE_SCHEMA_VERSION = 3  # migrations.py upgrades older saved files
 
 # Training request variants: kind -> ordered (field, type) pairs.
 REQUEST_KINDS: dict[str, list[tuple[str, str]]] = {
@@ -301,8 +390,11 @@ OPERATIONS: list[tuple[str, str]] = [
     ("migrateState", "state:Object"),
     ("nutrients", "nutrients:Nutrients servings:Number"),
     ("recovery", "observations:[RecoveryObservation]"),
-    ("views", "state:State permitsFixtures:Bool now:Date"),
+    ("views", "state:State permitsFixtures:Bool now:Date dayStart?:Date"),
     ("loadSteps", "base:Number step:Number"),
+    ("dietOptions", "now:Date"),
+    ("dietPreview", "state:State profile:DietProfile now:Date"),
+    ("foods", "query:String pattern?:DietPattern limit:Int"),
     ("readSet", "state:State text:String draft:SpokenSet permitsFixtures:Bool"),
 ]
 
@@ -327,6 +419,14 @@ COMMANDS: dict[str, str] = {
     "requestChange": "request:Request",
     "acceptRecommendation": "id:UUID",
     "rejectRecommendation": "id:UUID reason?:String",
+    "setDietTargets": "profile:DietProfile expected:DietTargets",
+    "saveDietProfile": "profile:DietProfile",
+    "logWeighIn": "weighIn:WeighIn",
+    "importWeighIns": "weighIns:[WeighIn]",
+    "deleteWeighIn": "id:UUID",
+    "acceptDietAdjustment": "expected:DietTargets",
+    "rejectDietAdjustment": "expected:DietTargets",
+    "saveFoodMeal": "id:UUID foodID:Int grams:Number occurredAt:Date timeZone:String",
 }
 MIN_IDS = {"initialProgram": 6, "stateCommand": 10}
 
@@ -345,6 +445,9 @@ RESULT_TYPES: dict[str, str] = {
     "recovery": "RecoveryResult",
     "views": "Views",
     "loadSteps": "[Number]",
+    "dietOptions": "DietOptions",
+    "dietPreview": "DietView",
+    "foods": "[FoodItem]",
     "readSet": "SetReading",
 }
 
@@ -380,6 +483,13 @@ SWIFT_ENUMS: dict[str, tuple[str, bool]] = {  # schema enum -> (Swift name, Case
     "Outcome": ("DecisionOutcome", False),
     "RecommendationStatus": ("RecommendationStatus", False),
     "Omission": ("OmissionReason", True),
+    "DietGoal": ("DietGoal", True),
+    "DietPattern": ("DietPattern", True),
+    "ActivityLevel": ("ActivityLevel", True),
+    "EquationSex": ("EquationSex", True),
+    "TrainingLoad": ("TrainingLoad", True),
+    "DietStatus": ("DietStatus", False),
+    "AdaptationPace": ("AdaptationPace", True),
 }
 
 SWIFT_TYPE_NAMES: dict[str, str] = {
@@ -489,7 +599,7 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "State": SwiftModel(
         "AthleteState",
         defaults={
-            "schemaVersion": "2",
+            "schemaVersion": "3",
             "athleteID": "UUID()",
             "revision": "0",
             "contextRevision": "0",
@@ -507,16 +617,78 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
             "meals": "[]",
             "mealAudits": "[]",
             "recipes": "[]",
+            "dietProfile": "nil",
+            "weighIns": "[]",
+            "dietTargets": "nil",
+            "dietDecisions": "[]",
+            "excludedWeighIns": "[]",
         },
         sets=frozenset({"painExclusions", "operations"}),
     ),
-    "CatalogExercise": SwiftModel("CatalogExercise", identifiable=True),
+    "DietScreening": SwiftModel(
+        "DietScreening", defaults={"pregnant": "false", "lactating": "false", "conditions": "[]", "scoffAnswers": "[]"}
+    ),
+    "DietProfile": SwiftModel(
+        "DietProfile",
+        defaults={
+            "sex": ".female",
+            "birthYear": "1995",
+            "heightCm": "170",
+            "activity": ".lowActive",
+            "goal": ".maintenance",
+            "pattern": ".omnivore",
+            "cuisines": "[]",
+            "trainingLoad": "nil",
+            "bodyFatPercent": "nil",
+            "screening": "DietScreening()",
+            "pace": "nil",
+        },
+    ),
+    "WeighIn": SwiftModel(
+        "WeighIn",
+        defaults={
+            "id": "UUID()",
+            "source": '"manual"',
+            "timeZone": "TimeZone.current.identifier",
+            "utcOffsetSeconds": "TimeZone.current.secondsFromGMT()",
+        },
+        identifiable=True,
+    ),
+    "DietTargets": SwiftModel("DietTargets"),
+    "DietDecision": SwiftModel("DietDecision", identifiable=True),
+    "WeightTrend": SwiftModel("WeightTrend"),
+    "DietAdjustment": SwiftModel("DietAdjustment"),
+    "FoodPortion": SwiftModel("FoodPortion"),
+    "FoodSuggestion": SwiftModel("FoodSuggestion"),
+    "DietCitation": SwiftModel("DietCitation"),
+    "DietView": SwiftModel(
+        "DietView",
+        defaults={
+            "status": ".needsInput",
+            "reason": '"NO_DIET_PROFILE"',
+            "message": '""',
+            "targets": "nil",
+            "eaten": "Nutrients()",
+            "remaining": "nil",
+            "trend": "nil",
+            "adjustment": "nil",
+            "suggestions": "[]",
+            "notes": "[]",
+            "citations": "[]",
+            "policyVersion": '""',
+        },
+    ),
+    "FoodItem": SwiftModel("FoodItem", defaults={"fibre": "nil"}, identifiable=True),
+    "ChoiceOption": SwiftModel("ChoiceOption", identifiable=True),
+    "DietOptions": SwiftModel("DietOptions"),
+    "CatalogExercise": SwiftModel("CatalogExercise", defaults={"evidence": "nil"}, identifiable=True),
+    "CatalogEvidence": SwiftModel("CatalogEvidence", defaults={"doi": "nil", "pmid": "nil"}),
     "SlotStatus": SwiftModel("SlotStatus", defaults={"action": "nil"}),
     "ProposalCard": SwiftModel("ProposalCard", defaults={"slotID": "nil"}),
     "TodayStatus": SwiftModel("TodayStatus", defaults={"slots": "[]", "proposals": "[]", "autoRequest": "nil"}),
     "ProgressEntry": SwiftModel("ProgressEntry"),
     "ExerciseProgress": SwiftModel("ExerciseProgress", defaults={"load": "nil"}),
-    "Views": SwiftModel("CoreViews", defaults={"today": "TodayStatus()", "progress": "[]"}),
+    "Views": SwiftModel("CoreViews", defaults={"today": "TodayStatus()", "progress": "[]", "diet": "DietView()"}),
     "SpokenSet": SwiftModel("SpokenSet", defaults={"exercise": "nil", "reps": "nil", "load": "nil", "rir": "nil"}),
     "SetPreview": SwiftModel("SetPreview", defaults={"load": "nil", "rir": "nil"}),
     "SetReading": SwiftModel("SetReading", defaults={"preview": "nil", "question": "nil", "ignored": "[]"}),

@@ -1,7 +1,8 @@
-"""Content bundles: citations are enforced, pending drafts never run, approved content wins."""
+"""Content bundles: citations and source quality are enforced, drafts never run, approved content wins."""
 
 import copy
 import json
+import os
 import shutil
 import tempfile
 import unittest
@@ -16,7 +17,7 @@ def cited(value, source="paper", locator="Table 1", certainty="moderate"):
     return {"value": value, "source": source, "locator": locator, "certainty": certainty}
 
 
-def evidence_bundle(review="pending"):
+def evidence_bundle(review="draft"):
     """A minimal, fully cited bundle built from the fixture's shape."""
     _, fixture = content.read_bundle(content.BUNDLES_DIR / content.FIXTURE_BUNDLE_ID)
     body = copy.deepcopy(fixture)
@@ -58,14 +59,17 @@ def evidence_bundle(review="pending"):
         "version": "evidence-1",
         "review": review,
         "evidenceBasis": "Test bundle.",
-        "sources": {"paper": {"citation": "Author A. Title. Journal. 2026.", "doi": "10.0000/test"}},
+        "sources": {
+            "paper": {
+                "citation": "Author A. Title. Journal. 2026.",
+                "doi": "10.0000/test",
+                "design": "metaAnalysis",
+                "fullTextRead": True,
+            }
+        },
     }
     if review == "approved":
-        manifest["approval"] = {
-            "approvedBy": "Owner",
-            "approvedOn": "2026-09-23",
-            "basis": "Published evidence (ADR-006).",
-        }
+        manifest["verification"] = {"method": "Automated evidence gate (ADR-014).", "verifiedOn": "2026-09-23"}
     return manifest, body
 
 
@@ -102,10 +106,59 @@ class BundleValidationTests(unittest.TestCase):
         self.assertIn("certainty must be one of", problems)
         self.assertIn("owner decision needs a rationale", problems)
 
-    def test_approval_needs_a_record(self):
+    def test_a_single_study_cannot_carry_moderate_certainty(self):
+        manifest, body = evidence_bundle()
+        manifest["sources"]["paper"]["design"] = "randomisedTrial"
+        problems = content.bundle_problems(manifest, body)
+        self.assertTrue(any("a randomisedTrial supports at most low certainty" in p for p in problems), problems)
+
+    def test_approved_needs_a_verification_record_not_a_person(self):
         manifest, body = evidence_bundle("approved")
-        del manifest["approval"]
-        self.assertTrue(any("approval.approvedBy" in p for p in content.bundle_problems(manifest, body)))
+        self.assertEqual(content.bundle_problems(manifest, body), [])
+        del manifest["verification"]
+        self.assertTrue(any("verification.method" in p for p in content.bundle_problems(manifest, body)))
+
+    def test_internet_content_is_never_a_source(self):
+        """AGENTS.md rule 1: only peer-reviewed research with a DOI or PMID qualifies."""
+        manifest, body = evidence_bundle()
+        manifest["sources"]["video"] = {"citation": "Best exercises ranked (YouTube).", "design": "video"}
+        manifest["sources"]["preprint"] = {
+            "citation": "Author B. Preprint. 2026.",
+            "doi": "10.51224/x",
+            "design": "preprint",
+            "fullTextRead": True,
+        }
+        problems = " | ".join(content.bundle_problems(manifest, body))
+        self.assertIn("manifest.sources.video needs a doi or a pmid", problems)
+        self.assertIn("manifest.sources.video.design must be one of", problems)
+        self.assertIn("manifest.sources.video.fullTextRead", problems)
+        self.assertIn("manifest.sources.preprint.design must be one of", problems)
+
+    def test_a_preprint_or_fake_identifier_never_passes_even_with_a_qualifying_design(self):
+        manifest, body = evidence_bundle()
+        manifest["sources"]["sneaky"] = {
+            "citation": "Doe J. Rest intervals. SportRxiv. 2025.",
+            "doi": "10.51224/SRXIV.999",
+            "design": "metaAnalysis",
+            "fullTextRead": True,
+        }
+        manifest["sources"]["video"] = {
+            "citation": "Best exercises (video).",
+            "doi": "youtube.com/watch?v=x",
+            "design": "randomisedTrial",
+            "fullTextRead": True,
+        }
+        problems = " | ".join(content.bundle_problems(manifest, body))
+        self.assertIn("manifest.sources.sneaky is a preprint", problems)
+        self.assertIn("manifest.sources.video.doi is not a DOI", problems)
+
+    def test_exercise_citations_need_a_published_locator(self):
+        manifest, body = evidence_bundle()
+        body["exercises"][0]["sources"] = [{"source": "paper"}]
+        body["exercises"][1]["sources"] = [{"source": "paper", "locator": "SportRxiv preprint v1, Table 3"}]
+        problems = " | ".join(content.bundle_problems(manifest, body))
+        self.assertIn("say where in the source", problems)
+        self.assertIn("not a preprint", problems)
 
     def test_resolve_leaves_only_plain_values(self):
         _, body = evidence_bundle()
@@ -119,6 +172,7 @@ class BundleSelectionTests(unittest.TestCase):
     """Runs against a temporary bundles directory so the shipped selection is untouched."""
 
     def setUp(self):
+        self.pinned = os.environ.pop(content.PINNED_BUNDLE_ENV, None)
         self.directory = Path(tempfile.mkdtemp())
         shutil.copytree(content.BUNDLES_DIR / content.FIXTURE_BUNDLE_ID, self.directory / content.FIXTURE_BUNDLE_ID)
         self.original = content.BUNDLES_DIR
@@ -126,6 +180,9 @@ class BundleSelectionTests(unittest.TestCase):
         content._active_bundle.cache_clear()
 
     def tearDown(self):
+        os.environ.pop(content.PINNED_BUNDLE_ENV, None)
+        if self.pinned is not None:
+            os.environ[content.PINNED_BUNDLE_ENV] = self.pinned
         content.BUNDLES_DIR = self.original
         content._active_bundle.cache_clear()
         shutil.rmtree(self.directory)
@@ -137,8 +194,8 @@ class BundleSelectionTests(unittest.TestCase):
         (target / "content.json").write_text(json.dumps(body))
         content._active_bundle.cache_clear()
 
-    def test_pending_bundle_never_runs(self):
-        self.write(*evidence_bundle("pending"))
+    def test_draft_bundle_never_runs(self):
+        self.write(*evidence_bundle("draft"))
         self.assertEqual(content.load_library(True)["policy"]["version"], "fixture-1")
 
     def test_approved_bundle_wins_even_in_debug_and_runs_in_release(self):
@@ -147,6 +204,21 @@ class BundleSelectionTests(unittest.TestCase):
             library = content.load_library(permits)
             self.assertEqual(library["policy"]["version"], "evidence-1")
             self.assertTrue(content.policy_is_enabled(library))
+
+    def test_a_pinned_fixture_wins_but_stays_debug_only(self):
+        self.write(*evidence_bundle("approved"))
+        os.environ[content.PINNED_BUNDLE_ENV] = content.FIXTURE_BUNDLE_ID
+        content._active_bundle.cache_clear()
+        self.assertEqual(content.load_library(True)["policy"]["version"], "fixture-1")
+        self.assertFalse(content.policy_is_enabled(content.load_library(False)))
+
+    def test_a_draft_cannot_be_pinned(self):
+        manifest, body = evidence_bundle("draft")
+        self.write(manifest, body)
+        os.environ[content.PINNED_BUNDLE_ENV] = manifest["id"]
+        content._active_bundle.cache_clear()
+        with self.assertRaises(ValueError):
+            content.load_library(True)
 
     def test_malformed_approved_bundle_is_ignored(self):
         manifest, body = evidence_bundle("approved")
@@ -169,14 +241,11 @@ class BundleSelectionTests(unittest.TestCase):
         slot = result("initialProgram", payload)["plans"][0]["slots"][0]
         self.assertEqual((slot["lowerReps"], slot["upperReps"]), (8, 10))
 
-    def test_evidence_draft_runs_once_approved(self):
-        """The shipped pending draft, approved in a scratch copy: it builds programs and honours the contract."""
+    def test_shipped_evidence_bundle_runs_without_anyone_approving_it(self):
+        """ADR-014: the approved evidence bundle builds programs in release and honours the contract."""
         manifest, body = content.read_bundle(self.original / "evidence-1")
-        self.assertEqual(manifest["review"], "pending")
-        manifest["review"] = body["policy"]["review"] = "approved"
-        manifest["approval"] = {"approvedBy": "Test", "approvedOn": "2026-09-23", "basis": "Scratch copy."}
-        for exercise in body["exercises"]:
-            exercise["review"] = "approved"
+        self.assertEqual(manifest["review"], "approved")
+        self.assertNotIn("approval", manifest)
         self.write(manifest, body)
 
         library = result("library", {"permitsFixtures": False})

@@ -29,8 +29,11 @@ SOFTWARE.
 
 free-exercise-db: https://github.com/yuhonas/free-exercise-db
 Snapshot: a859101d633a01c4a1a920d6a8ce41dabba0705f
-Imported dist/exercises.json unchanged. Image paths are metadata only; image files
-are not bundled or fetched. License follows verbatim.
+Imported dist/exercises.json with every upstream field unchanged. This project adds
+one optional field per record, "evidence": citations to published research, written
+by scripts/annotate_catalog.py from docs/research/exercise-evidence.json. Image
+paths are metadata only; image files are not bundled or fetched. License follows
+verbatim.
 
 This is free and unencumbered software released into the public domain.
 
@@ -660,3 +663,21 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
+
+
+USDA FoodData Central: https://fdc.nal.usda.gov
+Datasets: Foundation Foods (2025-12-18), SR Legacy (2018-04), FNDDS Survey Foods (2024-10-31).
+A compact extract (energy, protein, carbohydrate, fat and fibre per 100 g, household
+portions, food category) is bundled as core/python/ai_trainer/data/foods.json by
+scripts/build_food_data.py. Dietary-pattern and cuisine tags are derived by this project.
+USDA FoodData Central data are in the public domain and published under CC0 1.0
+Universal (https://creativecommons.org/publicdomain/zero/1.0/). Source: U.S. Department
+of Agriculture, Agricultural Research Service, FoodData Central.
+
+
+Wikidata: https://www.wikidata.org
+Dish-to-cuisine links (P2012 cuisine, P495 country of origin) were used to propose cuisine
+tags for USDA dishes; only tags confirmed by two reviewers are bundled
+(docs/research/cuisine-tags.json). Wikidata's structured data is released under CC0 1.0
+Universal (https://creativecommons.org/publicdomain/zero/1.0/). No Wikidata nutrition or
+text is bundled.
