@@ -20,6 +20,8 @@ src = ["."]
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
 ignore = ["RUF012"]
+# User-facing copy uses these typographic characters on purpose ("20 kg × 8", "RIR 1–2").
+allowed-confusables = ["×", "–"]
 
 [tool.mypy]
 python_version = "3.10"

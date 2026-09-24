@@ -47,9 +47,11 @@ lifecycle; `content.py` loads the bundled exercises, policy and program template
 ## Contracts and deterministic state
 
 `core/python/ai_trainer/{request,response}.schema.json` (generated from `contract_spec.py`)
-define version **1.0**. There are seven operations: `stateCommand` (every mutation),
-`decide` (read-only preview), `initialProgram`, `library`, `migrateState`, `nutrients` and
-`recovery`. Requests
+define version **1.0**. There are ten operations: `stateCommand` (every mutation),
+`decide` (read-only preview), `initialProgram`, `library`, `migrateState`, `nutrients`,
+`recovery`, and three read-only view models for the P1 screens — `todayStatus` (slot
+needs-states, proposal titles, the one slot to auto-request), `progress` (recorded values per
+exercise) and `loadSteps` (available loads around a confirmed load). Requests
 have `schemaVersion`, `operation` and a typed operation payload. Responses contain
 that version and either a result or `{code,message}` error. The core validates its
 bounded schema subset without third-party runtime dependencies. CI regenerates the

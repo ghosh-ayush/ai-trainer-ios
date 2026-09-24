@@ -94,3 +94,18 @@ Swift decodes them. Unused operations (`progression`, `performance`, `workingLog
 the duplicate `shared/schemas` copy are gone. Rule tests live in Python; Swift tests cover transport,
 persistence, migration wiring, perception and one end-to-end flow. Contract version stays 1.0.
 Status: accepted.
+
+## ADR-013 · 2026-09-23 · P1 UX simplification ships with the Stitch kit and three OFL fonts
+Why: owner request to implement the Figma "Proposed P1 flow — simplified" (3 tabs, no check-in,
+one-tap set logging, proposals and needs-states on the slot card). The design's type system uses
+Space Grotesk, Inter and JetBrains Mono, all SIL OFL-1.1, which rule 5 did not allow; the owner
+chose to bundle them rather than substitute SF Pro / SF Mono.
+Consequences: AGENTS.md rule 5 now permits OFL-1.1 fonts bundled unmodified; the five font files
+live in the package resources with their licenses in ThirdPartyNotices.txt and are registered at
+launch. The Stitch components live in `AITrainerCore/Stitch.swift` (package files need no Xcode
+project edit). Tabs are Today · Progress · You; Coach folds into Today, Labs moves to You ▸
+Developer (Debug only). New read-only core operations `todayStatus`, `progress` and `loadSteps`
+keep the screens' logic in Python; no engine rule changed. Today auto-requests at most one
+progression proposal, never re-proposes one the athlete rejected in the same context, and still
+applies nothing without Accept.
+Status: accepted.

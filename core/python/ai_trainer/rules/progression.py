@@ -114,16 +114,15 @@ def _propose_one_more_rep(latest_logs: list[JSON], slot: JSON, proposed_slot: JS
     return decision("NEXT_TARGET_REP", proposed_plan, evidence_from(latest_logs))
 
 
-def _consecutive_qualifying_logs(
+def qualifying_streak(
     history: list[JSON], slot: JSON, policy: JSON, baseline_load: float, now: float
-) -> list[JSON] | None:
-    """Working logs from the most recent ``requiredExposures`` consecutive qualifying sessions.
+) -> tuple[int, list[JSON]]:
+    """How many of the most recent comparable sessions qualify in a row, and their working logs.
 
-    Returns ``None`` when the streak is broken before the requirement is met.
-    A session breaks the streak if it was modified, is outside the history
-    window, follows a gap longer than ``maximumGapDays``, is incomplete, or any
-    set is conflicted, at a different load, below the top of the range, or
-    below the required RIR.
+    Counting stops at ``requiredExposures``. A session breaks the streak if it
+    was modified, is outside the history window, follows a gap longer than
+    ``maximumGapDays``, is incomplete, or any set is conflicted, at a different
+    load, below the top of the range, or below the required RIR.
     """
     qualifying: list[JSON] = []
     previous_start = now
@@ -151,9 +150,15 @@ def _consecutive_qualifying_logs(
         previous_start = session["startedAt"]
         if count >= policy["requiredExposures"]:
             break
-    if count < policy["requiredExposures"]:
-        return None
-    return qualifying
+    return count, qualifying
+
+
+def _consecutive_qualifying_logs(
+    history: list[JSON], slot: JSON, policy: JSON, baseline_load: float, now: float
+) -> list[JSON] | None:
+    """Working logs of the qualifying streak, or ``None`` when it is shorter than required."""
+    count, logs = qualifying_streak(history, slot, policy, baseline_load, now)
+    return logs if count >= policy["requiredExposures"] else None
 
 
 def _next_available_load(slot: JSON, baseline_load: float) -> float | None:

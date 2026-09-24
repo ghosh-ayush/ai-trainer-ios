@@ -21,8 +21,8 @@ Architecture: `docs/LOCAL_PYTHON_ARCHITECTURE.md`. Decisions: `docs/DECISIONS.md
 4. **Sensors never write evidence.** Camera, HealthKit, catalog and nutrition data must not feed
    progression or become `SetLog` records.
 5. **Licenses.** Only MIT / BSD / Apache-2.0 / Unlicense / public-domain / CC0 code and data.
-   No AGPL, GPL, LGPL, SSPL, PolyForm, CC-BY-SA data, or unlicensed datasets — not even as a
-   reference implementation to copy from. Add every new dependency or dataset to
+   Fonts may also be SIL OFL-1.1, bundled unmodified (ADR-013). No AGPL, GPL, LGPL, SSPL,
+   PolyForm, CC-BY-SA data, or unlicensed datasets — not even as a reference implementation. Add every new dependency or dataset to
    `apps/ios/Sources/AITrainerCore/Resources/ThirdPartyNotices.txt`.
 6. **Python first.** New logic goes in `core/python` unless it is UI, per-frame perception,
    platform I/O (files, CloudKit, HealthKit, camera) or a Codable DTO. Swift is a thin client.
@@ -78,6 +78,10 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
 - Release builds cannot activate a plan (no approved content yet).
 - Recovery observations always return `unassessed` (no reviewed readiness policy).
 - Curl counter reps are never saved as sets.
+- Today requests a slot's progression proposal automatically when the core's `todayStatus` names
+  it (`autoRequest`). It is still only a proposal: nothing changes until the athlete taps Accept.
+- A one-tap "Done as planned" set records the planned reps and load with RIR unknown; effort is
+  never assumed. "4+" RIR is recorded as 4.
 - Dates cross the bridge as binary64 seconds since 2001-01-01 (Foundation reference epoch).
 - Swift has no validators of its own: set and nutrient rules run in Python when a command is
   saved, so a malformed set is rejected by `saveSet`, not by a Swift `validate()`.

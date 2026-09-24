@@ -100,6 +100,23 @@ public final class TrainerService {
         try command("rejectRecommendation", Arguments(reason: reason, id: id), now: now)
     }
 
+    // MARK: Read-only views computed by the core
+
+    private struct StatePayload: Encodable { let state: AthleteState; let permitsFixtures: Bool; let now: Date }
+    /// Today's slot cards, pending proposal titles and the one slot (if any) to auto-request.
+    public func todayStatus(now: Date = Date()) throws -> TodayStatus {
+        try core.call("todayStatus", StatePayload(state: repository.snapshot, permitsFixtures: library.permitsFixtures, now: now))
+    }
+    /// Recorded values per exercise in the next plan, newest first.
+    public func progress(now: Date = Date()) throws -> [ExerciseProgress] {
+        try core.call("progress", StatePayload(state: repository.snapshot, permitsFixtures: library.permitsFixtures, now: now))
+    }
+    /// Available loads around a confirmed working load, in the athlete's own equipment step.
+    public func loadSteps(base: Double, step: Double) throws -> [Double] {
+        struct Steps: Encodable { let base: Double; let step: Double }
+        return try core.call("loadSteps", Steps(base: base, step: step))
+    }
+
     // MARK: Nutrition
     public func saveMeal(_ meal: Meal, asRecipe: Bool = false) throws {
         try command("saveMeal", Arguments(meal: meal, asRecipe: asRecipe))

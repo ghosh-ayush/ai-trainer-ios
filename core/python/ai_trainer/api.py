@@ -17,11 +17,14 @@ from typing import Any
 from . import contracts
 from .commands import reduce_state
 from .content import load_library, public_library
+from .equipment import load_steps
 from .errors import DomainError
 from .migrations import migrate_state
 from .nutrition import scale_nutrients
+from .progress import progress_summary
 from .rules.eligibility import decide
 from .rules.program import initial_program
+from .today import today_status
 
 JSON = dict[str, Any]
 
@@ -65,6 +68,12 @@ def dispatch(envelope: JSON) -> Any:
         return scale_nutrients(payload["nutrients"], payload.get("servings", 1))
     if operation == "recovery":
         return _assess_recovery(payload["observations"])
+    if operation == "todayStatus":
+        return today_status(payload["state"], load_library(payload["permitsFixtures"]), payload["now"])
+    if operation == "progress":
+        return progress_summary(payload["state"], load_library(payload["permitsFixtures"]), payload["now"])
+    if operation == "loadSteps":
+        return load_steps(payload["base"], payload["step"])
     raise DomainError("unsupported", "Unknown operation.")
 
 
