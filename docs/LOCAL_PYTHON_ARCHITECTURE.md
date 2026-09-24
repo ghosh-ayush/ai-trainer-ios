@@ -14,6 +14,7 @@ SwiftUI features -> TrainerService (native persistence facade)
 
 Camera -> AVFoundation/Vision -> RepCounterSDK -> native observation UI
 HealthKit -> native read-only provenance DTOs -> unassessed recovery response
+Athlete's words -> FoundationModels (on device) -> SpokenSet draft -> readSet preview -> Save -> saveSet
 ```
 
 CPython 3.13.11, packaged by BeeWare `3.13-b13`, runs in the app process. The
@@ -47,11 +48,12 @@ lifecycle; `content.py` loads the bundled exercises, policy and program template
 ## Contracts and deterministic state
 
 `core/python/ai_trainer/{request,response}.schema.json` (generated from `contract_spec.py`)
-define version **1.0**. There are nine operations: `stateCommand` (every mutation),
+define version **1.0**. There are ten operations: `stateCommand` (every mutation),
 `decide` (read-only preview), `initialProgram`, `library`, `migrateState`, `nutrients`,
 `recovery`, and two read-only view models for the P1 screens — `views` (Today's slot
 needs-states, proposal titles and the one slot to auto-request, plus Progress's recorded
-values per exercise, in one pass) and `loadSteps` (available loads around a confirmed load). Requests
+values per exercise, in one pass) and `loadSteps` (available loads around a confirmed load) — and
+`readSet`, which checks the on-device model's draft of a set against the athlete's words (ADR-015). Requests
 have `schemaVersion`, `operation` and a typed operation payload. Responses contain
 that version and either a result or `{code,message}` error. The core validates its
 bounded schema subset without third-party runtime dependencies. CI regenerates the

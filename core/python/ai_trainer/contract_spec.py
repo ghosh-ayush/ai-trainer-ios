@@ -333,6 +333,24 @@ MODELS: list[ModelSpec] = [
         "id:UUID title:String value:String date:Date source:String",
         "A read-only HealthKit sample with provenance. Never a readiness score.",
     ),
+    _model(
+        "SpokenSet",
+        "exercise?:String reps?:Int load?:Number rir?:Int",
+        "What the on-device language model read from the athlete's words. Only a draft: "
+        "``readSet`` keeps a number only if the athlete said it.",
+    ),
+    _model(
+        "SetPreview",
+        "sessionID:UUID slotID:UUID exerciseID:String name:String index:Int kind:SetKind reps:Int "
+        "load?:Number unit:Unit rir?:Int",
+        "A set ready for the athlete to confirm. Saved only through ``saveSet`` after the athlete taps Save.",
+    ),
+    _model(
+        "SetReading",
+        "preview?:SetPreview question?:String ignored:[String]",
+        "A ``preview`` when the set is complete, otherwise a ``question``. ``ignored`` names draft "
+        "fields dropped because the athlete never said them.",
+    ),
 ]
 
 # Constraints the schema generator applies after building the models above.
@@ -377,6 +395,7 @@ OPERATIONS: list[tuple[str, str]] = [
     ("dietOptions", "now:Date"),
     ("dietPreview", "state:State profile:DietProfile now:Date"),
     ("foods", "query:String pattern?:DietPattern limit:Int"),
+    ("readSet", "state:State text:String draft:SpokenSet permitsFixtures:Bool"),
 ]
 
 # State commands: name -> arguments spec. Order matters for the generated union.
@@ -429,6 +448,7 @@ RESULT_TYPES: dict[str, str] = {
     "dietOptions": "DietOptions",
     "dietPreview": "DietView",
     "foods": "[FoodItem]",
+    "readSet": "SetReading",
 }
 
 # --------------------------------------------------------------------------- #
@@ -669,4 +689,7 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "ProgressEntry": SwiftModel("ProgressEntry"),
     "ExerciseProgress": SwiftModel("ExerciseProgress", defaults={"load": "nil"}),
     "Views": SwiftModel("CoreViews", defaults={"today": "TodayStatus()", "progress": "[]", "diet": "DietView()"}),
+    "SpokenSet": SwiftModel("SpokenSet", defaults={"exercise": "nil", "reps": "nil", "load": "nil", "rir": "nil"}),
+    "SetPreview": SwiftModel("SetPreview", defaults={"load": "nil", "rir": "nil"}),
+    "SetReading": SwiftModel("SetReading", defaults={"preview": "nil", "question": "nil", "ignored": "[]"}),
 }

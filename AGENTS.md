@@ -121,6 +121,8 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
   it (`autoRequest`). It is still only a proposal: nothing changes until the athlete taps Accept.
 - A one-tap "Done as planned" set records the planned reps and load with RIR unknown; effort is
   never assumed. "4+" RIR is recorded as 4.
+- "Log a set in words" appears only where Apple's on-device model runs. `readSet` drops any
+  number the athlete did not say, even one the model returned, and nothing saves until Save (ADR-015).
 - Dates cross the bridge as binary64 seconds since 2001-01-01 (Foundation reference epoch).
 - Swift has no validators of its own: set and nutrient rules run in Python when a command is
   saved, so a malformed set is rejected by `saveSet`, not by a Swift `validate()`.

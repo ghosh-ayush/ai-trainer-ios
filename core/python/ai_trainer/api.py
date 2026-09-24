@@ -26,6 +26,7 @@ from .nutrition import scale_nutrients
 from .progress import progress_summary
 from .rules.eligibility import decide
 from .rules.program import initial_program
+from .spoken_sets import read_set
 from .today import today_status
 
 JSON = dict[str, Any]
@@ -106,6 +107,9 @@ def dispatch(envelope: JSON) -> Any:
         return diet_preview(payload["state"], payload["profile"], payload["now"])
     if operation == "foods":
         return search_foods(payload["query"], payload.get("pattern"), payload["limit"])
+    if operation == "readSet":
+        library = load_library(payload["permitsFixtures"])
+        return read_set(payload["state"], payload["text"], payload["draft"], library)
     raise DomainError("unsupported", "Unknown operation.")
 
 

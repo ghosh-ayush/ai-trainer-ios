@@ -2211,6 +2211,148 @@
       ],
       "additionalProperties": false
     },
+    "SpokenSet": {
+      "type": "object",
+      "properties": {
+        "exercise": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reps": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "load": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rir": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "SetPreview": {
+      "type": "object",
+      "properties": {
+        "sessionID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "slotID": {
+          "$ref": "#/$defs/UUID"
+        },
+        "exerciseID": {
+          "$ref": "#/$defs/String"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "index": {
+          "$ref": "#/$defs/Int"
+        },
+        "kind": {
+          "$ref": "#/$defs/SetKind"
+        },
+        "reps": {
+          "$ref": "#/$defs/Int"
+        },
+        "load": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "$ref": "#/$defs/Unit"
+        },
+        "rir": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "sessionID",
+        "slotID",
+        "exerciseID",
+        "name",
+        "index",
+        "kind",
+        "reps",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "SetReading": {
+      "type": "object",
+      "properties": {
+        "preview": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SetPreview"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "question": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ignored": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        }
+      },
+      "required": [
+        "ignored"
+      ],
+      "additionalProperties": false
+    },
     "decidePayload": {
       "type": "object",
       "properties": {
@@ -2419,6 +2561,30 @@
       "required": [
         "query",
         "limit"
+      ],
+      "additionalProperties": false
+    },
+    "readSetPayload": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "text": {
+          "$ref": "#/$defs/String"
+        },
+        "draft": {
+          "$ref": "#/$defs/SpokenSet"
+        },
+        "permitsFixtures": {
+          "$ref": "#/$defs/Bool"
+        }
+      },
+      "required": [
+        "state",
+        "text",
+        "draft",
+        "permitsFixtures"
       ],
       "additionalProperties": false
     },
@@ -3886,6 +4052,9 @@
               "items": {
                 "$ref": "#/$defs/FoodItem"
               }
+            },
+            {
+              "$ref": "#/$defs/SetReading"
             }
           ]
         }

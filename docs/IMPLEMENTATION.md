@@ -37,7 +37,7 @@ The `StatePersistence` interface isolates storage. Before a multi-device product
 | TB-09 preference | Rejection reason recorded without inferred dislike. Automatic learning is not implemented. |
 | TB-10 review | Domain supports replacing an accepted program while retaining prior versions; full goal-change/review UX is deferred |
 | Recommendation lifecycle | Preview, re-evaluate on accept, atomically apply once; reject/expire supported |
-| AI boundary | Structured local Coach actions only. No LLM can write records because no LLM adapter is connected. |
+| AI boundary | Apple's on-device model reads one intent, `log_performance` ("Log a set in words"). Python keeps only numbers the athlete said and the athlete saves the preview; no model writes records (ADR-015). |
 
 ### Important narrower coverage
 
