@@ -1,7 +1,8 @@
 """Typed domain errors that cross the Swift boundary as ``{code, message}``.
 
-Codes map one-to-one onto Swift ``TrainerError`` cases:
-``invalid``, ``notFound``, ``conflict``, ``staleProposal``, ``unsupported``.
+Codes map onto Swift ``TrainerError`` cases: ``invalid``, ``notFound``, ``conflict``,
+``staleProposal``, ``unsupported``. ``internal`` (an unexpected exception, raised by
+``api.dispatch_json`` only) arrives in Swift as ``invalid`` with its message.
 """
 
 from __future__ import annotations

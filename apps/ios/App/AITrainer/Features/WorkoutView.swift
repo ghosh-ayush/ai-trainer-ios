@@ -183,10 +183,8 @@ struct SetSheet: View {
     private func save() {
         let setKind: SetKind = kind == .working ? .working : kind == .warmUp ? .warmUp : .extra
         let index = setKind == .working ? workingIndex : (store.state.activeSession?.logs.count ?? 0)
-        if store.perform({ try $0.saveSet(sessionID: sessionID, slotID: slot.id, index: index, kind: setKind, load: load,
-                                          reps: reps, rir: rir, logID: logID, operationID: operationID) }) {
-            dismiss()
-        }
+        store.perform({ try $0.saveSet(sessionID: sessionID, slotID: slot.id, index: index, kind: setKind, load: load,
+                                       reps: reps, rir: rir, logID: logID, operationID: operationID) }) { _ in dismiss() }
     }
 }
 
@@ -211,7 +209,7 @@ struct FinishSheet: View {
                 .stitch(.body15).foregroundStyle(Stitch.textSecondary)
             Button("Save session") {
                 guard let id = store.state.activeSession?.id else { return }
-                if store.perform({ try $0.finish(reason: reason) }) { onFinished(id) }
+                store.perform({ try $0.finish(reason: reason) }) { _ in onFinished(id) }
             }
             .buttonStyle(.stitch())
         }

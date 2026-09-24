@@ -47,11 +47,11 @@ lifecycle; `content.py` loads the bundled exercises, policy and program template
 ## Contracts and deterministic state
 
 `core/python/ai_trainer/{request,response}.schema.json` (generated from `contract_spec.py`)
-define version **1.0**. There are ten operations: `stateCommand` (every mutation),
+define version **1.0**. There are nine operations: `stateCommand` (every mutation),
 `decide` (read-only preview), `initialProgram`, `library`, `migrateState`, `nutrients`,
-`recovery`, and three read-only view models for the P1 screens — `todayStatus` (slot
-needs-states, proposal titles, the one slot to auto-request), `progress` (recorded values per
-exercise) and `loadSteps` (available loads around a confirmed load). Requests
+`recovery`, and two read-only view models for the P1 screens — `views` (Today's slot
+needs-states, proposal titles and the one slot to auto-request, plus Progress's recorded
+values per exercise, in one pass) and `loadSteps` (available loads around a confirmed load). Requests
 have `schemaVersion`, `operation` and a typed operation payload. Responses contain
 that version and either a result or `{code,message}` error. The core validates its
 bounded schema subset without third-party runtime dependencies. CI regenerates the
@@ -66,13 +66,26 @@ sets cross as arrays; absent or null optional observations remain unknown. Train
 requests use explicit `kind`/named fields everywhere, including inside stored recommendations.
 
 Time and generated IDs are supplied by the native host. The core has no clock,
-randomness, persistence, network or sensor dependency. It deep-copies state before
-mutating, returning a candidate. `StateRepository` retains its serialized transaction,
+randomness, persistence, network or sensor dependency. Each call owns the payload it just
+parsed, so a command mutates that state in place and returns it as the candidate — nothing
+the host holds is touched. `StateRepository` retains its serialized transaction,
 atomic file save, data protection and publish-after-save behavior. Only a durable
 host commit increments the state revision, and an unchanged candidate is not rewritten.
 On launch the saved file's bytes go to `migrateState` untouched; Python upgrades older
 state versions (v1 stored requests in Swift's enum shape) and validates the result before
 Swift decodes it. A file that cannot be upgraded is left on disk unchanged.
+
+### Cost per tap
+
+Every call still carries the whole state, so cost grows with history. Measured on a Mac
+(`core/python`, CPython 3.11) with a synthetic history of 12 working sets per session:
+a command costs ~2 ms at 10 sessions, ~19 ms at 150 (about a year, 1.3 MB) and ~58 ms at 450;
+most of that is JSON parsing and serialising, which runs in the C accelerator. The schema
+validator is compiled once per schema, NaN and overflowing literals are rejected while parsing,
+and Today/Progress share one `views` call, so a tap costs one command plus one view pass.
+`AppStore.perform` runs both on a serial background queue and publishes on the main actor;
+taps that arrive while a change is in flight are ignored. Bounding history itself (retention of
+events, audits and old recommendations) needs the privacy/security decision the spec requires.
 
 Recommendations remain proposals. Acceptance checks context/plan/policy versions,
 active-session status, and re-evaluates the **stored request** against current

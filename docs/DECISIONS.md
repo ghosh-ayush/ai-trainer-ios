@@ -104,7 +104,7 @@ Consequences: AGENTS.md rule 5 now permits OFL-1.1 fonts bundled unmodified; the
 live in the package resources with their licenses in ThirdPartyNotices.txt and are registered at
 launch. The Stitch components live in `AITrainerCore/Stitch.swift` (package files need no Xcode
 project edit). Tabs are Today · Progress · You; Coach folds into Today, Labs moves to You ▸
-Developer (Debug only). New read-only core operations `todayStatus`, `progress` and `loadSteps`
+Developer (Debug only). New read-only core operations `views` (Today + Progress) and `loadSteps`
 keep the screens' logic in Python; no engine rule changed. Today auto-requests at most one
 progression proposal, never re-proposes one the athlete rejected in the same context, and still
 applies nothing without Accept.

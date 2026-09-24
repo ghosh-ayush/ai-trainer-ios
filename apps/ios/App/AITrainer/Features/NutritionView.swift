@@ -79,7 +79,7 @@ struct MealEditor: View {
         .confirmationDialog("Delete this meal estimate?", isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete", role: .destructive) {
                 guard let existing else { return }
-                if store.perform({ try $0.deleteMeal(id: existing.id) }) { dismiss() }
+                store.perform({ try $0.deleteMeal(id: existing.id) }) { _ in dismiss() }
             }
         }
         .onAppear {
@@ -97,7 +97,7 @@ struct MealEditor: View {
         .padding(.horizontal, 16).padding(.vertical, 14).glass(radius: 8)
     }
     private func save() {
-        let didSave = store.perform { service in
+        store.perform({ service in
             guard let energy = try parseOptionalNumber(calories), let p = try parseOptionalNumber(protein),
                   let c = try parseOptionalNumber(carbs), let f = try parseOptionalNumber(fat) else {
                 throw TrainerError.invalid("Enter each nutrient estimate explicitly, including known zero values.")
@@ -105,8 +105,7 @@ struct MealEditor: View {
             var meal = existing ?? Meal(name: name, nutrients: Nutrients())
             meal.name = name; meal.nutrients = Nutrients(calories: energy, protein: p, carbs: c, fat: f); meal.occurredAt = date
             try service.saveMeal(meal, asRecipe: saveRecipe)
-        }
-        if didSave { dismiss() }
+        }) { _ in dismiss() }
     }
 }
 
@@ -124,10 +123,9 @@ struct RecipePortionView: View {
             }
             StitchStat("Estimated energy", value: number(recipe.perServing.calories * servings), unit: "kcal")
             Button("Confirm portion and log") {
-                let didSave = store.perform { service in
+                store.perform({ service in
                     try service.saveMeal(Meal(name: recipe.name, nutrients: try service.scaleNutrients(recipe.perServing, servings: servings)))
-                }
-                if didSave { dismiss() }
+                }) { _ in dismiss() }
             }
             .buttonStyle(.stitch())
         }

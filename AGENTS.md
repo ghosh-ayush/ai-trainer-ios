@@ -78,7 +78,7 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
 - Release builds cannot activate a plan (no approved content yet).
 - Recovery observations always return `unassessed` (no reviewed readiness policy).
 - Curl counter reps are never saved as sets.
-- Today requests a slot's progression proposal automatically when the core's `todayStatus` names
+- Today requests a slot's progression proposal automatically when the core's `views` names
   it (`autoRequest`). It is still only a proposal: nothing changes until the athlete taps Accept.
 - A one-tap "Done as planned" set records the planned reps and load with RIR unknown; effort is
   never assumed. "4+" RIR is recorded as 4.

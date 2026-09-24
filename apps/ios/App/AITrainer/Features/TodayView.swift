@@ -76,7 +76,7 @@ struct TodayView: View {
         return Group {
             StitchCard("\(planTitle(plan)) · \(plan.slots.count) exercises · ~\(plan.estimatedMinutes) min", body: detail, tone: .accent)
             Button(store.justFinishedSessionID == nil ? "Start" : "Start next session") {
-                if store.perform({ try $0.start() }) { store.justFinishedSessionID = nil; openWorkout = true }
+                store.perform({ try $0.start() }) { _ in store.justFinishedSessionID = nil; openWorkout = true }
             }
             .buttonStyle(.stitch())
             HStack(spacing: 8) {
@@ -329,7 +329,7 @@ struct LoadSheet: View {
         generated = (try? service.loadSteps(base: base, step: step)) ?? []
     }
     private func confirm() {
-        let didSave = store.perform { service in
+        store.perform({ service in
             let load = try parseOptionalNumber(loadText)
             let options: [Double]
             if editList {
@@ -341,8 +341,7 @@ struct LoadSheet: View {
                 options = generated
             }
             try service.configureLoad(slotID: slot.id, load: load, options: options)
-        }
-        if didSave { dismiss() }
+        }) { _ in dismiss() }
     }
 }
 
@@ -419,7 +418,7 @@ struct PainSheet: View {
             let slots = (store.state.activeSession?.plan ?? store.state.nextPlan)?.slots ?? []
             ForEach(Array(slots.enumerated()), id: \.element.id) { index, slot in
                 Button {
-                    if store.perform({ try $0.reportPain(exerciseID: slot.exerciseID) }) { dismiss() }
+                    store.perform({ try $0.reportPain(exerciseID: slot.exerciseID) }) { _ in dismiss() }
                 } label: {
                     let role = store.service?.library.exercise(slot.exerciseID)?.role ?? "exercise"
                     StitchListRow(store.name(slot.exerciseID), subtitle: String(format: "Slot %02d · %@", index + 1, role), symbol: "bandage")

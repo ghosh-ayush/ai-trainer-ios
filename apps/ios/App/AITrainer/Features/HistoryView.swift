@@ -71,7 +71,7 @@ struct SessionDetailView: View {
         .sheet(item: $selected) { CorrectionSheet(sessionID: sessionID, original: $0) }
         .confirmationDialog("Delete this session and dependent evidence?", isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete session", role: .destructive) {
-                if store.perform({ try $0.deleteSession(id: sessionID) }) { dismiss() }
+                store.perform({ try $0.deleteSession(id: sessionID) }) { _ in dismiss() }
             }
         }
     }
@@ -144,12 +144,14 @@ struct CorrectionSheet: View {
         }
     }
     private func save() {
-        let didSave = store.perform { service in
+        let (reps, load, rir) = (reps, load, rir)
+        store.perform({ service in
             guard let count = Int(reps), rir.isEmpty || Int(rir) != nil else { throw TrainerError.invalid("Check the reps and effort values.") }
-            let applied = try service.correctSet(sessionID: sessionID, logID: original.id, expectedRevision: original.revision,
-                                                 load: try parseOptionalNumber(load), reps: count, rir: rir.isEmpty ? nil : Int(rir))
+            return try service.correctSet(sessionID: sessionID, logID: original.id, expectedRevision: original.revision,
+                                          load: try parseOptionalNumber(load), reps: count, rir: rir.isEmpty ? nil : Int(rir))
+        }) { applied in
             if !applied { store.errorMessage = "Another edit exists. Review both versions in the session details." }
+            dismiss()
         }
-        if didSave { dismiss() }
     }
 }

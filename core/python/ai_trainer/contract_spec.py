@@ -235,6 +235,11 @@ MODELS: list[ModelSpec] = [
         "Recorded values for one exercise, newest first. Nothing is estimated or projected.",
     ),
     _model(
+        "Views",
+        "today:TodayStatus progress:[ExerciseProgress]",
+        "Everything the tab screens derive from state, computed in one pass after each change.",
+    ),
+    _model(
         "RecoveryObservation",
         "id:UUID title:String value:String date:Date source:String",
         "A read-only HealthKit sample with provenance. Never a readiness score.",
@@ -278,8 +283,7 @@ OPERATIONS: list[tuple[str, str]] = [
     ("migrateState", "state:Object"),
     ("nutrients", "nutrients:Nutrients servings:Number"),
     ("recovery", "observations:[RecoveryObservation]"),
-    ("todayStatus", "state:State permitsFixtures:Bool now:Date"),
-    ("progress", "state:State permitsFixtures:Bool now:Date"),
+    ("views", "state:State permitsFixtures:Bool now:Date"),
     ("loadSteps", "base:Number step:Number"),
 ]
 
@@ -320,8 +324,7 @@ RESULT_TYPES: dict[str, str] = {
     "nutrients": "Nutrients",
     "stateCommand": "StateResult",
     "recovery": "RecoveryResult",
-    "todayStatus": "TodayStatus",
-    "progress": "[ExerciseProgress]",
+    "views": "Views",
     "loadSteps": "[Number]",
 }
 
@@ -493,4 +496,5 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "TodayStatus": SwiftModel("TodayStatus", defaults={"slots": "[]", "proposals": "[]", "autoRequest": "nil"}),
     "ProgressEntry": SwiftModel("ProgressEntry"),
     "ExerciseProgress": SwiftModel("ExerciseProgress", defaults={"load": "nil"}),
+    "Views": SwiftModel("CoreViews", defaults={"today": "TodayStatus()", "progress": "[]"}),
 }

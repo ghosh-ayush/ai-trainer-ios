@@ -82,12 +82,16 @@ final class AppStore: ObservableObject {
     @Published var errorMessage: String?
     @Published var experimentalToolsEnabled = false
     @Published var showPreviewInfo = false
+    /// True while a change runs on the core queue; further taps are ignored until it lands.
+    @Published private(set) var isWorking = false
     /// Whether the state file participates in iCloud/computer backups of this device (B.1).
     @Published private(set) var includeInDeviceBackup: Bool
     let service: TrainerService?
     let startupFailure: StartupFailure?
     private let persistence: FilePersistence?
     private static let includeInDeviceBackupKey = "includeInDeviceBackup"
+    /// Every core call made on behalf of the UI runs here, one at a time, off the main thread.
+    private let coreQueue = DispatchQueue(label: "ai.trainer.core", qos: .userInitiated)
     static var isDevelopment: Bool {
         #if DEBUG
         return true
@@ -115,37 +119,57 @@ final class AppStore: ObservableObject {
             persistence = filePersistence
             startupFailure = nil
             state = repository.snapshot
-            refreshViews()
+            perform { _ in }  // computes Today and Progress off the main thread
         } catch {
             service = nil; persistence = nil; startupFailure = .savedData(error.localizedDescription)
         }
     }
-    @discardableResult func perform(_ action: (TrainerService) throws -> Void) -> Bool {
-        guard let service else { return false }
-        defer { state = service.repository.snapshot; refreshViews() }
-        do { try action(service); return true }
-        catch { errorMessage = error.localizedDescription; return false }
+    /// Runs `action` on the core queue, then refreshes Today and Progress there too, and publishes
+    /// the result on the main actor. A failure shows the alert; `then` runs only after success.
+    /// Taps that arrive while a change is still in flight are ignored, so a button that has not yet
+    /// updated cannot submit the same thing twice.
+    func perform<Value>(_ action: @escaping (TrainerService) throws -> Value, then: @escaping (Value) -> Void = { _ in }) {
+        guard let service, !isWorking else { return }
+        isWorking = true
+        let job = CoreJob(value: (service: service, action: action, then: then))
+        coreQueue.async {
+            let outcome = Result { try job.value.action(job.value.service) }
+            let delivery = CoreJob(value: (outcome: outcome, refreshed: Self.refreshed(job.value.service)))
+            Task { @MainActor in
+                let (outcome, refreshed) = delivery.value
+                self.state = refreshed.state
+                if let views = refreshed.views { self.today = views.today; self.progress = views.progress }
+                self.isWorking = false
+                switch outcome {
+                case .success(let value):
+                    job.value.then(value)
+                    if let error = refreshed.error { self.errorMessage = error.localizedDescription }
+                case .failure(let error):
+                    self.errorMessage = error.localizedDescription
+                }
+            }
+        }
     }
     /// Asks for a change the athlete chose (less time, move day, swap). A non-proposal answer is shown.
     func request(_ request: TrainingRequest) {
-        perform { service in
-            let result = try service.request(request)
-            if result.outcome != .proposeChange { errorMessage = result.explanation }
+        perform({ try $0.request(request) }) { decision in
+            if decision.outcome != .proposeChange { self.errorMessage = decision.explanation }
         }
     }
-    /// Recomputes Today and Progress in the core. When the core names a slot to auto-request,
-    /// its progression proposal is requested once — so proposals appear without a review step.
-    private func refreshViews() {
-        guard let service, state.profile != nil else { return }
+    /// Today and Progress from the core, computed on the core queue. When the core names a slot to
+    /// auto-request, its progression proposal is requested once — so proposals appear without a review step.
+    nonisolated private static func refreshed(_ service: TrainerService) -> (state: AthleteState, views: CoreViews?, error: Error?) {
+        guard service.repository.snapshot.profile != nil else { return (service.repository.snapshot, nil, nil) }
         do {
-            today = try service.todayStatus()
-            if let slotID = today.autoRequest {
+            var views = try service.views()
+            if let slotID = views.today.autoRequest {
                 try service.request(.progression(slotID))
-                state = service.repository.snapshot
-                today = try service.todayStatus()
+                views = try service.views()
             }
-            progress = try service.progress()
-        } catch { errorMessage = error.localizedDescription }
+            return (service.repository.snapshot, views, nil)
+        } catch {
+            return (service.repository.snapshot, nil, error)
+        }
     }
     func name(_ id: String) -> String { service?.library.exercise(id)?.name ?? id }
     /// "PREVIEW FIXTURE · fixture-1" while fixture content drives guidance; nothing otherwise.
@@ -162,6 +186,11 @@ final class AppStore: ObservableObject {
         UserDefaults.standard.set(include, forKey: Self.includeInDeviceBackupKey)
     }
 }
+
+/// Carries a core call and its result between the main actor and the core queue. Unchecked because
+/// the queue is serial and `TrainerService` keeps all mutable state behind `StateRepository`'s lock
+/// and the transport's interpreter lock; closures from views only read values they captured.
+private struct CoreJob<Wrapped>: @unchecked Sendable { let value: Wrapped }
 
 enum AppTab: Hashable { case today, progress, you }
 
@@ -312,8 +341,7 @@ private enum CoreSmokeTest {
                   let rec = repository.snapshot.recommendations.last else { throw TrainerError.invalid("Progression smoke failed: " + decision.reason) }
             try service.acceptRecommendation(id: rec.id, now: now)
             guard repository.snapshot.nextPlan?.slots.first?.load == 105 else { throw TrainerError.invalid("Acceptance smoke failed") }
-            _ = try service.todayStatus(now: now)
-            guard try service.progress(now: now).first?.entries.count == 2 else { throw TrainerError.invalid("Progress smoke failed") }
+            guard try service.views(now: now).progress.first?.entries.count == 2 else { throw TrainerError.invalid("Progress smoke failed") }
             let nutrients = try service.scaleNutrients(Nutrients(calories: 200, protein: 10), servings: 2)
             let catalog = try ExerciseCatalog.bundled()
             guard nutrients.calories == 400, catalog.exercises.count == 876 else { throw TrainerError.invalid("Content smoke failed") }

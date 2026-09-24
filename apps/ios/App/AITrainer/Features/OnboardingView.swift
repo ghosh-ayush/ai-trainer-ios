@@ -85,7 +85,7 @@ private struct ProgramPreviewSheet: View {
                            body: "Fixture: \(slot.workingSets) sets, \(slot.lowerReps)-\(slot.upperReps) reps. Working load remains unknown.")
             }
             Button("Accept sample plan") {
-                if store.perform({ try $0.acceptInitialPlan(profile: profile) }) { onClose() }
+                store.perform({ try $0.acceptInitialPlan(profile: profile) }) { _ in onClose() }
             }
             .buttonStyle(.stitch())
         }

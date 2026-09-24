@@ -1406,6 +1406,25 @@
       ],
       "additionalProperties": false
     },
+    "Views": {
+      "type": "object",
+      "properties": {
+        "today": {
+          "$ref": "#/$defs/TodayStatus"
+        },
+        "progress": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExerciseProgress"
+          }
+        }
+      },
+      "required": [
+        "today",
+        "progress"
+      ],
+      "additionalProperties": false
+    },
     "RecoveryObservation": {
       "type": "object",
       "properties": {
@@ -1541,27 +1560,7 @@
       ],
       "additionalProperties": false
     },
-    "todayStatusPayload": {
-      "type": "object",
-      "properties": {
-        "state": {
-          "$ref": "#/$defs/State"
-        },
-        "permitsFixtures": {
-          "$ref": "#/$defs/Bool"
-        },
-        "now": {
-          "$ref": "#/$defs/Date"
-        }
-      },
-      "required": [
-        "state",
-        "permitsFixtures",
-        "now"
-      ],
-      "additionalProperties": false
-    },
-    "progressPayload": {
+    "viewsPayload": {
       "type": "object",
       "properties": {
         "state": {
@@ -2635,13 +2634,7 @@
               "$ref": "#/$defs/RecoveryResult"
             },
             {
-              "$ref": "#/$defs/TodayStatus"
-            },
-            {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/ExerciseProgress"
-              }
+              "$ref": "#/$defs/Views"
             },
             {
               "type": "array",
