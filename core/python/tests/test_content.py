@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from support import NOW, golden_request, result, uid
+from support import NOW, call, golden_request, result, uid
 
 from ai_trainer import content
 
@@ -168,6 +168,30 @@ class BundleSelectionTests(unittest.TestCase):
         profile["goal"] = "Hypertrophy"
         slot = result("initialProgram", payload)["plans"][0]["slots"][0]
         self.assertEqual((slot["lowerReps"], slot["upperReps"]), (8, 10))
+
+    def test_evidence_draft_runs_once_approved(self):
+        """The shipped pending draft, approved in a scratch copy: it builds programs and honours the contract."""
+        manifest, body = content.read_bundle(self.original / "evidence-1")
+        self.assertEqual(manifest["review"], "pending")
+        manifest["review"] = body["policy"]["review"] = "approved"
+        manifest["approval"] = {"approvedBy": "Test", "approvedOn": "2026-09-23", "basis": "Scratch copy."}
+        for exercise in body["exercises"]:
+            exercise["review"] = "approved"
+        self.write(manifest, body)
+
+        library = result("library", {"permitsFixtures": False})
+        self.assertEqual(library["policy"]["version"], "evidence-1")
+        self.assertTrue(all("sources" not in exercise for exercise in library["exercises"]))
+
+        profile = copy.deepcopy(golden_request()["payload"]["state"]["profile"])
+        payload = {"profile": profile, "permitsFixtures": False, "now": NOW, "ids": [uid(n) for n in range(10, 16)]}
+        for goal, rest in (("Hypertrophy", 90), ("Strength", 120)):
+            profile["goal"] = goal
+            plan = result("initialProgram", payload)["plans"][0]
+            self.assertEqual(len(plan["slots"]), 4, goal)  # three required roles and the accessory at 60 minutes
+            self.assertEqual({slot["restSeconds"] for slot in plan["slots"]}, {rest}, goal)
+        profile["daysPerWeek"] = 4
+        self.assertEqual(call("initialProgram", payload)["error"]["code"], "invalid")
 
 
 if __name__ == "__main__":

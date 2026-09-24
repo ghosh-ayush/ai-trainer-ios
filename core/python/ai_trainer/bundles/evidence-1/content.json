@@ -1,0 +1,273 @@
+{
+  "exercises": [
+    {
+      "id": "db_floor_press",
+      "name": "Dumbbell floor press",
+      "role": "press",
+      "equipmentKind": "dumbbell",
+      "basis": "perHand",
+      "alternatives": ["machine_press", "bench"],
+      "review": "pending",
+      "contentVersion": "evidence-1",
+      "sources": [
+        {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body push region)"},
+        {"source": "IVERSEN21", "locator": "Abstract (at least one upper-body push)"}
+      ]
+    },
+    {
+      "id": "bench",
+      "name": "Barbell bench press",
+      "role": "press",
+      "equipmentKind": "barbell",
+      "basis": "total",
+      "alternatives": ["machine_press", "db_floor_press"],
+      "review": "pending",
+      "contentVersion": "evidence-1",
+      "sources": [
+        {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body push region)"},
+        {"source": "IVERSEN21", "locator": "Abstract (at least one upper-body push)"}
+      ]
+    },
+    {
+      "id": "machine_press",
+      "name": "Chest press machine",
+      "role": "press",
+      "equipmentKind": "machine",
+      "basis": "machineSetting",
+      "alternatives": ["db_floor_press"],
+      "review": "pending",
+      "contentVersion": "evidence-1",
+      "sources": [
+        {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body push region)"},
+        {"source": "HAUGEN23", "locator": "Abstract; Discussion (machines and free weights give similar gains)"}
+      ]
+    },
+    {
+      "id": "db_row",
+      "name": "Two-dumbbell row",
+      "role": "pull",
+      "equipmentKind": "dumbbell",
+      "basis": "perHand",
+      "alternatives": ["cable_row"],
+      "review": "pending",
+      "contentVersion": "evidence-1",
+      "sources": [
+        {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body pull region)"},
+        {"source": "IVERSEN21", "locator": "Abstract (at least one upper-body pull)"}
+      ]
+    },
+    {
+      "id": "cable_row",
+      "name": "Seated cable row",
+      "role": "pull",
+      "equipmentKind": "machine",
+      "basis": "machineSetting",
+      "alternatives": ["db_row"],
+      "review": "pending",
+      "contentVersion": "evidence-1",
+      "sources": [
+        {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body pull region)"},
+        {"source": "HAUGEN23", "locator": "Abstract; Discussion (machines and free weights give similar gains)"}
+      ]
+    },
+    {
+      "id": "goblet_squat",
+      "name": "Goblet squat",
+      "role": "squat",
+      "equipmentKind": "dumbbell",
+      "basis": "total",
+      "alternatives": ["leg_press"],
+      "review": "pending",
+      "contentVersion": "evidence-1",
+      "sources": [
+        {"source": "ACSM26", "locator": "Discussion, limitations paragraph (lower-body push region)"},
+        {"source": "IVERSEN21", "locator": "Abstract (one leg-press or squat pattern)"}
+      ]
+    },
+    {
+      "id": "leg_press",
+      "name": "Leg press",
+      "role": "squat",
+      "equipmentKind": "machine",
+      "basis": "machineSetting",
+      "alternatives": ["goblet_squat"],
+      "review": "pending",
+      "contentVersion": "evidence-1",
+      "sources": [
+        {"source": "IVERSEN21", "locator": "Abstract (one leg-press or squat pattern)"},
+        {"source": "HAUGEN23", "locator": "Abstract; Discussion (machines and free weights give similar gains)"}
+      ]
+    },
+    {
+      "id": "db_curl",
+      "name": "Bilateral dumbbell curl",
+      "role": "accessory",
+      "equipmentKind": "dumbbell",
+      "basis": "perHand",
+      "alternatives": [],
+      "review": "pending",
+      "contentVersion": "evidence-1",
+      "sources": [
+        {"source": "ACSM09", "locator": "Table 2, p. 700 (include single- and multi-joint exercises; Evidence A)"}
+      ]
+    }
+  ],
+  "policy": {
+    "id": "DP_EVIDENCE_01",
+    "version": "evidence-1",
+    "review": "pending",
+    "requiredExposures": {
+      "value": 2,
+      "source": "ACSM09",
+      "locator": "Strength 'Loading', p. 690; Table 2, p. 700 (Evidence B)",
+      "certainty": "low",
+      "note": "Add load after exceeding the target on two consecutive sessions. The only source; ACSM26 gives no session count."
+    },
+    "minimumRIR": {
+      "value": 2,
+      "source": "owner",
+      "rationale": "No source defines a reps-in-reserve gate for progression. ACSM09 (p. 690; Table 2) adds load once the lifter can do 1-2 reps beyond the target; ACSM26 (Discussion, effort paragraph) proposes 2-3 RIR as sufficient effort. A top-of-range set with 2 or more reps in reserve satisfies both readings."
+    },
+    "maximumIncreaseFraction": {
+      "value": 0.1,
+      "source": "ACSM09",
+      "locator": "Strength 'Loading', p. 690; Table 2, p. 700 (Evidence B)",
+      "certainty": "low",
+      "note": "Top of the 2-10% range, which ACSM09 reserves for large-muscle-mass exercises. It asks for less on small-muscle-mass exercises but gives no number, and this one cap applies to every exercise, including the curl. Cited only to a narrative review."
+    },
+    "historyDays": {
+      "value": 21,
+      "source": "owner",
+      "rationale": "No source says how long a performance record stays valid for prescription (research section 7). The detraining evidence measures lost adaptation instead: IVERSEN21 (detraining section; low certainty, underlying sources unverified) says gains are preserved only briefly, under about 3 weeks. Records older than 21 days are treated as stale."
+    },
+    "maximumGapDays": {
+      "value": 7,
+      "source": "owner",
+      "rationale": "No source addresses it. At the template's minimum of 2 sessions a week (ACSM26), comparable sessions are at most 4-5 days apart; 7 days lets a streak survive one missed session but not a missed week."
+    }
+  },
+  "template": {
+    "id": "FULL_BODY_EVIDENCE_01",
+    "name": "Full body",
+    "supportedGoals": {
+      "value": ["Hypertrophy", "Strength"],
+      "source": "ACSM26",
+      "locator": "Title and Abstract; Table 6 (strength and hypertrophy columns)",
+      "certainty": "moderate"
+    },
+    "minDaysPerWeek": {
+      "value": 2,
+      "source": "ACSM26",
+      "locator": "Discussion, first paragraph (primary recommendation)",
+      "certainty": "moderate",
+      "note": "ACSM09 agrees for novices: whole body 2-3 days a week (Evidence A)."
+    },
+    "maxDaysPerWeek": {
+      "value": 3,
+      "source": "ACSM09",
+      "locator": "Strength 'Frequency', p. 693; hypertrophy 'Frequency', p. 695; Table 2, p. 700 (Evidence A)",
+      "certainty": "moderate",
+      "note": "Novice whole-body training 2-3 days a week. ACSM09 places 4 days with intermediates, and for hypertrophy with an upper/lower split, which this one repeating session is not. ACSM26 sets no upper limit."
+    },
+    "minSessionMinutes": {
+      "value": 34,
+      "source": "owner",
+      "rationale": "Warm-up plus the three required slots at the longer (strength) estimate: 4 + 3 x 10 = 34 minutes."
+    },
+    "warmUpMinutes": {
+      "value": 4,
+      "source": "owner",
+      "rationale": "Sources favour a few exercise-specific warm-up sets over a general warm-up (IVERSEN21, 'Warm-up' section; MCCRARY15) and give no minutes. Two light sets of the first exercise, 2 x (8 reps x 4 s + 60 s) = about 3 minutes, plus 1 minute of set-up."
+    },
+    "requiredRoles": {
+      "value": ["press", "pull", "squat"],
+      "source": "IVERSEN21",
+      "locator": "Abstract; Practical Applications",
+      "certainty": "low",
+      "note": "At minimum one squat or leg-press pattern, one upper-body pull and one upper-body push. ACSM26 (Discussion, limitations paragraph) also lists a lower-body pull; adding it needs a fourth required slot."
+    },
+    "accessory": {
+      "exerciseID": "db_curl",
+      "equipmentKind": "dumbbell",
+      "minSessionMinutes": {
+        "value": 44,
+        "source": "owner",
+        "rationale": "The minimum session plus one more slot at the longer estimate: 34 + 10 = 44 minutes."
+      }
+    },
+    "slotByGoal": {
+      "Hypertrophy": {
+        "protocolID": "DP_EVIDENCE_01",
+        "workingSets": {
+          "value": 3,
+          "source": "ACSM09",
+          "locator": "Hypertrophy 'Loading and Volume', p. 694; Table 2, p. 700 (1-3 sets; Evidence A)",
+          "certainty": "moderate",
+          "note": "ACSM26 (Discussion, volume paragraph) advises at least 2 sets per exercise and cannot set an optimum; KRIEGER10 finds 2-3 sets beat 1. The weekly 10+ sets per muscle in ACSM26 is not reached by one exercise per region at 2-3 days a week."
+        },
+        "lowerReps": {
+          "value": 8,
+          "source": "ACSM09",
+          "locator": "Hypertrophy 'Loading and Volume', p. 694; Table 2, p. 700 (Evidence A)",
+          "certainty": "low",
+          "note": "8-12 is a sourced convention, not an optimum: ACSM26 (Table 4, load) and LOPEZ21 find similar hypertrophy across loads when sets end near failure."
+        },
+        "upperReps": {
+          "value": 12,
+          "source": "ACSM09",
+          "locator": "Hypertrophy 'Loading and Volume', p. 694; Table 2, p. 700 (Evidence A)",
+          "certainty": "low",
+          "note": "See lowerReps."
+        },
+        "restSeconds": {
+          "value": 90,
+          "source": "SINGER24",
+          "locator": "Abstract; Conclusion",
+          "certainty": "low",
+          "note": "A small hypertrophy benefit above 60 s and no appreciable further benefit beyond 90 s. ACSM09: 1-2 minutes (Evidence C)."
+        },
+        "estimatedMinutes": {
+          "value": 8,
+          "source": "owner",
+          "rationale": "No source gives time per exercise. 3 sets x (12 reps x 4 s tempo, the slow end of ACSM09's 1-2 s up and 1-2 s down, + 90 s rest) = about 7 minutes, plus 1 minute of set-up."
+        }
+      },
+      "Strength": {
+        "protocolID": "DP_EVIDENCE_01",
+        "workingSets": {
+          "value": 3,
+          "source": "ACSM26",
+          "locator": "Abstract; Table 6 (strength column)",
+          "certainty": "moderate",
+          "note": "Strength was enhanced by 2-3 sets. KRIEGER09: 4-6 sets were not better than 2-3."
+        },
+        "lowerReps": {
+          "value": 8,
+          "source": "ACSM09",
+          "locator": "Summary, p. 687; strength 'Loading', p. 690; Table 2, p. 700 (Evidence A)",
+          "certainty": "moderate",
+          "note": "Novice strength: 8-12 RM at 60-70% 1RM. For intermediates ACSM26 (Table 6) favours loads of 80% 1RM or more, about 9 reps or fewer on a bench press (NUZZO24). This template does not vary by experience."
+        },
+        "upperReps": {
+          "value": 12,
+          "source": "ACSM09",
+          "locator": "Summary, p. 687; strength 'Loading', p. 690; Table 2, p. 700 (Evidence A)",
+          "certainty": "moderate",
+          "note": "See lowerReps."
+        },
+        "restSeconds": {
+          "value": 120,
+          "source": "GRGIC18R",
+          "locator": "Abstract",
+          "certainty": "low",
+          "note": "Untrained: 60-120 s is enough; trained: more than 2 minutes. ACSM09 (p. 692, Evidence B) asks 2-3 minutes or more for heavy core lifts; ACSM26 found no effect of rest on strength."
+        },
+        "estimatedMinutes": {
+          "value": 10,
+          "source": "owner",
+          "rationale": "No source gives time per exercise. 3 sets x (12 reps x 4 s tempo + 120 s rest) = about 8.4 minutes, rounded up to 9, plus 1 minute of set-up."
+        }
+      }
+    }
+  }
+}

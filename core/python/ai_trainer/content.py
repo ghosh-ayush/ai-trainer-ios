@@ -158,6 +158,10 @@ def _active_bundle() -> JSON:
     ]
     _, body = approved[-1] if approved else bundles[FIXTURE_BUNDLE_ID]
     resolved: JSON = resolve(body)
+    # Citations are for review; the contract's Exercise record carries no ``sources``.
+    resolved["exercises"] = [
+        {key: value for key, value in exercise.items() if key != "sources"} for exercise in resolved["exercises"]
+    ]
     return resolved
 
 
