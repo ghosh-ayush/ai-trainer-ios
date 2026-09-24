@@ -172,11 +172,22 @@ final class AppStore: ObservableObject {
         }
     }
     func name(_ id: String) -> String { service?.library.exercise(id)?.name ?? id }
-    /// "PREVIEW FIXTURE · fixture-1" while fixture content drives guidance; nothing otherwise.
+    /// True when the bundled content is approved evidence-based content (ADR-006), not a fixture.
+    var contentIsApproved: Bool { service?.library.policy.review == .approved }
+    /// Whether a plan can be activated in this build: approved content always, fixtures only in Debug.
+    var canActivatePlan: Bool {
+        guard let library = service?.library else { return false }
+        return library.policy.review == .approved || (library.policy.review == .fixture && library.permitsFixtures)
+    }
+    /// The header pill: "PREVIEW FIXTURE · fixture-1" for test content, "EVIDENCE-BASED · <version>" for
+    /// approved content (it must say so — ADR-006), nothing when content is disabled.
     var previewPill: String? {
-        guard let library = service?.library, library.permitsFixtures, library.policy.review == .fixture else { return nil }
+        guard let library = service?.library else { return nil }
+        if library.policy.review == .approved { return "Evidence-based · \(library.policy.version)" }
+        guard library.permitsFixtures, library.policy.review == .fixture else { return nil }
         return "Preview fixture · \(library.policy.version)"
     }
+    var previewPillTone: StitchPill.Tone { contentIsApproved ? .lavender : .amber }
     /// Flips the backup attribute on the state directory first; the preference is only recorded
     /// once the file system accepted the change, so the toggle never lies about what is backed up.
     func setIncludeInDeviceBackup(_ include: Bool) {
@@ -255,14 +266,20 @@ struct PreviewInfoSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         Group {
-            StitchNotice("Development preview · policy \(store.service?.library.policy.version ?? "unknown")",
-                         body: "Sample programs and test policies. They are not approved training prescriptions. Release builds refuse this content.",
-                         tone: .warn)
+            let version = store.service?.library.policy.version ?? "unknown"
+            if store.contentIsApproved {
+                StitchNotice("Evidence-based content · \(version)",
+                             body: "Sets, reps, rest and progression rules come from published research, cited in the content manifest. They were not reviewed by a clinician or coach.")
+            } else {
+                StitchNotice("Development preview · policy \(version)",
+                             body: "Sample programs and test policies. They are not approved training prescriptions. Release builds refuse this content.",
+                             tone: .warn)
+            }
             Text("What the app never does: estimate your strength, fill unknown effort, change your plan without your acceptance, or let camera, sleep or meals write training evidence. No account, no network, no language model in the decision path.")
                 .stitch(.body15).foregroundStyle(Stitch.textSecondary)
             Button("Got it") { dismiss() }.buttonStyle(.stitch())
         }
-        .stitchSheet("Preview build") { dismiss() }
+        .stitchSheet(store.contentIsApproved ? "About this content" : "Preview build") { dismiss() }
     }
 }
 
@@ -276,7 +293,7 @@ struct TabRoot<Content: View>: View {
         content
             .stitchScrollColumn()
             .safeAreaInset(edge: .top, spacing: 0) {
-                StitchRootHeader(title, pill: store.previewPill) { store.showPreviewInfo = true }
+                StitchRootHeader(title, pill: store.previewPill, pillTone: store.previewPillTone) { store.showPreviewInfo = true }
             }
             .toolbar(.hidden, for: .navigationBar)
     }
@@ -296,7 +313,7 @@ struct DetailScreen<Content: View>: View {
             .toolbar {
                 if let pill = store.previewPill {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button { store.showPreviewInfo = true } label: { StitchPill(pill.components(separatedBy: " · ").first ?? pill) }
+                        Button { store.showPreviewInfo = true } label: { StitchPill(pill.components(separatedBy: " · ").first ?? pill, tone: store.previewPillTone) }
                             .buttonStyle(.plain)
                     }
                 }

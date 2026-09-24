@@ -19,7 +19,7 @@ struct OnboardingView: View {
             TabRoot("Onboarding") {
                 Text("Build a training history.\nMake the next session count.").stitch(.displayH2).foregroundStyle(Stitch.textPrimary)
                 StitchSectionLabel("Consent", meta: "1 required")
-                StitchField("Consent", value: "I'm 18+, exploring general resistance training (not clinical or rehab), and I understand this is a development preview") {
+                StitchField("Consent", value: consentText) {
                     Toggle("Consent", isOn: $consent).labelsHidden().tint(Stitch.accentPrimary)
                 }
                 StitchSectionLabel("Your preferences", meta: "\(profile.minutes) min · \(profile.preferredUnit.rawValue) by default")
@@ -33,16 +33,21 @@ struct OnboardingView: View {
                 equipmentToggle("Dumbbells", id: "dumbbell")
                 equipmentToggle("Barbell and rack", id: "barbell")
                 equipmentToggle("Machines and cables", id: "machine")
-                if AppStore.isDevelopment {
-                    Button("Preview sample program") { previewProgram() }.buttonStyle(.stitch()).disabled(!consent)
-                } else {
-                    Button("Preview sample program") {}.buttonStyle(.stitch()).disabled(true)
+                Button(store.contentIsApproved ? "Preview my program" : "Preview sample program") { previewProgram() }
+                    .buttonStyle(.stitch()).disabled(!consent || !store.canActivatePlan)
+                if !store.canActivatePlan {
                     StitchNotice("Release build", body: "Release builds cannot activate fixture content. A reviewed content bundle is required.", tone: .warn)
                 }
                 StitchFootnote("No date of birth, sex, body weight or estimated strength. Minutes and unit can be changed later. Your data stays on this device.")
             }
         }
         .sheet(item: $preview) { ProgramPreviewSheet(program: $0, profile: acceptedProfile) { preview = nil } }
+    }
+    private var consentText: String {
+        let scope = "I'm 18+, exploring general resistance training (not clinical or rehab)"
+        return store.contentIsApproved
+            ? scope + ", and I understand the guidance is evidence-based, not clinician-reviewed"
+            : scope + ", and I understand this is a development preview"
     }
     /// The single consent toggle covers the adult and scope confirmations the core requires.
     private var acceptedProfile: Profile {
@@ -82,9 +87,9 @@ private struct ProgramPreviewSheet: View {
             StitchNotice("One repeating full-body session", body: "This is not yet a reviewed multi-day split.")
             ForEach(program.plans.flatMap(\.slots)) { slot in
                 StitchCard(store.name(slot.exerciseID) + (slot.optional ? " · optional" : ""),
-                           body: "Fixture: \(slot.workingSets) sets, \(slot.lowerReps)-\(slot.upperReps) reps. Working load remains unknown.")
+                           body: "\(store.contentIsApproved ? "" : "Fixture: ")\(slot.workingSets) sets, \(slot.lowerReps)-\(slot.upperReps) reps. Working load remains unknown.")
             }
-            Button("Accept sample plan") {
+            Button(store.contentIsApproved ? "Accept plan" : "Accept sample plan") {
                 store.perform({ try $0.acceptInitialPlan(profile: profile) }) { _ in onClose() }
             }
             .buttonStyle(.stitch())
