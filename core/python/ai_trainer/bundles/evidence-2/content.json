@@ -1064,6 +1064,23 @@
       "source": "owner",
       "rationale": "Everyone aims at least at the cited weekly floor of 10 sets per muscle (ACSM26 Table 6). Intermediates aiming at hypertrophy aim a little higher because weekly volume shows a graded dose-response with diminishing returns (SCHOENFELD17V; BAZVALLE22 up to about 20). Strength gains rise less with volume beyond 2-3 sets per exercise (KRIEGER09; ACSM26 Discussion), so strength stays at the floor and relies on at least two sessions a week."
     },
+    "adaptation": {
+      "windowDays": {
+        "value": 28,
+        "source": "owner",
+        "rationale": "No source sets how long to watch attendance before changing a plan. Four weeks averages out one busy week yet acts before a long gap; how quickly adaptations fade after stopping is reported inconsistently (IVERSEN21, detraining section). Only logged sessions count."
+      },
+      "minimumPlanAgeDays": {
+        "value": 14,
+        "source": "owner",
+        "rationale": "A new week is judged only after two full weeks of it, so the first adjustment reflects the plan rather than the first days of learning it."
+      },
+      "missedSessionsPerWeek": {
+        "value": 1,
+        "source": "owner",
+        "rationale": "A week fitted to attendance is proposed once the athlete completes, on average, at least one session a week fewer than planned. At equal weekly volume, fewer sessions give similar hypertrophy (ACSM26, Results 'Improving hypertrophy'), so fitting the week to real attendance keeps the weekly work instead of losing it to missed days. It is a proposal the athlete may reject; a rejected one is not repeated for the same plan."
+      }
+    },
     "structures": {
       "majorMuscles": {
         "value": [

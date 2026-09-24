@@ -252,3 +252,27 @@ Consequences:
   - Not yet: re-planning from adherence history. The first plan uses no history, so preview and
     accept stay identical. The on-device model choosing among options is also still to come.
 Status: accepted by the owner ("AI chooses, research bounds", 2026-09-24).
+
+## ADR-018 · 2026-09-24 · The week adapts to the sessions the athlete actually completes
+Why: owner request, 2026-09-24: "the plan doesn't change itself from your training history yet,
+for example if you keep skipping days. Do this."
+Consequences:
+- A new request kind, `replan` (`rules/adaptation.py`), compares completed sessions a week with the
+  week's planned sessions. Completed and ended-early sessions count; skipped sessions and days with
+  nothing logged do not. It reads only logged records: no sensor, calendar or HealthKit data
+  (rule 4).
+- When the athlete completes, on average, at least one session a week fewer than planned over the
+  window, and the week is old enough to judge, the same planner (ADR-017) proposes a week capped at
+  the sessions they have been completing (at least one). The ranking is told that history.
+- The thresholds are `evidence-2` `planner.adaptation` owner decisions with rationales: a 28-day
+  window, a 14-day minimum plan age, and 1 missed session a week (rule 1). The rationale rests on
+  ACSM26: at equal weekly volume, fewer sessions give similar hypertrophy.
+- It is a Recommendation (rule 3). Today offers it once through `autoReplan`, and a rejected
+  replan is not re-proposed for the same plan. The decision holds the proposed week without ids,
+  and acceptance rebuilds that week into a new program, keeping the old one in
+  `previousPrograms`. The attendance window is anchored to whole days, so a proposal stays
+  acceptable for the rest of the day.
+- Not yet: adapting the other way (more sessions for an athlete who keeps adding extra days),
+  adapting session length from sessions ended early for time, and using the weekdays the athlete
+  actually trains on.
+Status: accepted (owner request, 2026-09-24).

@@ -467,26 +467,29 @@ public struct Evidence: Codable, Equatable, Identifiable {
     }
 }
 
-/// The Training Brain's answer. ``after`` is the proposed plan for ``proposeChange`` outcomes.
+/// The Training Brain's answer. ``after`` is the proposed plan for ``proposeChange`` outcomes; ``week`` is the proposed week for a ``replan`` (ADR-018), built into a program only when accepted.
 public struct Decision: Codable, Equatable {
     public var outcome: DecisionOutcome
     public var reason: String
     public var explanation: String
     public var after: SessionPlan?
     public var evidence: [Evidence]
+    public var week: WeekOption?
 
     public init(
         outcome: DecisionOutcome,
         reason: String,
         explanation: String,
         after: SessionPlan? = nil,
-        evidence: [Evidence] = []
+        evidence: [Evidence] = [],
+        week: WeekOption? = nil
     ) {
         self.outcome = outcome
         self.reason = reason
         self.explanation = explanation
         self.after = after
         self.evidence = evidence
+        self.week = week
     }
 }
 
@@ -1057,20 +1060,23 @@ public struct ProposalCard: Codable, Equatable {
     }
 }
 
-/// Read-only Today view model. ``autoRequest`` names one slot whose progression the host may request.
+/// Read-only Today view model. ``autoRequest`` names one slot whose progression the host may request; ``autoReplan`` says the host may request a week that fits recent attendance (ADR-018).
 public struct TodayStatus: Codable, Equatable {
     public var slots: [SlotStatus]
     public var proposals: [ProposalCard]
     public var autoRequest: UUID?
+    public var autoReplan: Bool?
 
     public init(
         slots: [SlotStatus] = [],
         proposals: [ProposalCard] = [],
-        autoRequest: UUID? = nil
+        autoRequest: UUID? = nil,
+        autoReplan: Bool? = nil
     ) {
         self.slots = slots
         self.proposals = proposals
         self.autoRequest = autoRequest
+        self.autoReplan = autoReplan
     }
 }
 

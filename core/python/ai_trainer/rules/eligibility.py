@@ -17,6 +17,7 @@ from ..athlete_state import has_active_session, next_plan
 from ..content import exercises_by_id, is_enabled, policy_is_enabled
 from ..errors import DomainError
 from ..messages import Decision, decision
+from .adaptation import propose_replan
 from .adjustments import build_substitution, propose_reschedule, propose_shorter_session, propose_substitution
 from .progression import propose_progression
 
@@ -61,6 +62,9 @@ def decide(state: JSON, request: JSON, library: JSON, now: float) -> Decision:
 
     if kind == "reschedule":
         return propose_reschedule(plan, request["date"], now)
+
+    if kind == "replan":
+        return propose_replan(state, library, now)
 
     raise DomainError("unsupported")
 

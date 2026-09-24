@@ -124,6 +124,8 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
 - Weekly plans (ADR-017) never guess weekdays: onboarding starts with no free day selected, and a
   migrated profile keeps `freeDays` absent. Seven free days give at most six sessions (no qualifying
   7-day trial); the cap is a cited owner decision in the bundle, not code.
+- A week that fits recent attendance (ADR-018) is proposed only after the week has run 14 days, from
+  logged sessions only (a skipped session or an empty day is a miss), and never applied without Accept.
 - `evidence-1` is `disabled`, superseded by `evidence-2` (the weekly planner); only one bundle may
   be `approved` at a time.
 - Dates cross the bridge as binary64 seconds since 2001-01-01 (Foundation reference epoch).

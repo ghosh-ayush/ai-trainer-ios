@@ -116,7 +116,7 @@ struct TodayView: View {
     }
 
     private var heroProposals: [ProposalCard] {
-        store.today.proposals.filter { $0.kind == "shorten" || $0.kind == "reschedule" }
+        store.today.proposals.filter { $0.kind == "shorten" || $0.kind == "reschedule" || $0.kind == "replan" }
     }
 
     private func planTitle(_ plan: SessionPlan) -> String {

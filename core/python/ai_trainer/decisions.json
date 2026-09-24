@@ -126,5 +126,25 @@
   "QUALIFYING_EXPOSURES_COMPLETE": [
     "proposeChange",
     "Both qualifying exposures met the rep and reported-effort criteria. Review the next available load; sets do not increase."
+  ],
+  "ADHERENCE_REPLAN": [
+    "proposeChange",
+    "You have been completing fewer sessions than this week plans. A week that fits what you have been doing keeps your weekly work."
+  ],
+  "FOLLOWING_THE_PLAN": [
+    "keepPlan",
+    "You are completing the planned sessions. The week stays as it is."
+  ],
+  "REPLAN_NEEDS_HISTORY": [
+    "keepPlan",
+    "This week is too new to judge. It is reviewed after two full weeks of training."
+  ],
+  "NO_BETTER_WEEK": [
+    "keepPlan",
+    "No week fits your recent sessions better than the current one."
+  ],
+  "REPLAN_UNAVAILABLE": [
+    "withholdGuidance",
+    "This content has no weekly planner, so the week cannot be adapted."
   ]
 }

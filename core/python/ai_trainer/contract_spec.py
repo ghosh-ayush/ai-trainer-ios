@@ -184,8 +184,9 @@ MODELS: list[ModelSpec] = [
     _model("Evidence", "id:UUID revision:Int", "A set log id/revision a decision relied on."),
     _model(
         "Decision",
-        "outcome:Outcome reason:String explanation:String after?:Plan evidence:[Evidence]",
-        "The Training Brain's answer. ``after`` is the proposed plan for ``proposeChange`` outcomes.",
+        "outcome:Outcome reason:String explanation:String after?:Plan evidence:[Evidence] week?:WeekOption",
+        "The Training Brain's answer. ``after`` is the proposed plan for ``proposeChange`` outcomes; ``week`` is "
+        "the proposed week for a ``replan`` (ADR-018), built into a program only when accepted.",
     ),
     # -> Request (a tagged union over REQUEST_KINDS) is inserted here by the schema generator.
     _model(
@@ -276,8 +277,9 @@ MODELS: list[ModelSpec] = [
     ),
     _model(
         "TodayStatus",
-        "slots:[SlotStatus] proposals:[ProposalCard] autoRequest?:UUID",
-        "Read-only Today view model. ``autoRequest`` names one slot whose progression the host may request.",
+        "slots:[SlotStatus] proposals:[ProposalCard] autoRequest?:UUID autoReplan?:Bool",
+        "Read-only Today view model. ``autoRequest`` names one slot whose progression the host may request; "
+        "``autoReplan`` says the host may request a week that fits recent attendance (ADR-018).",
     ),
     _model("ProgressEntry", "sessionID:UUID date:Date summary:String", "One recorded session as logged."),
     _model(
@@ -364,6 +366,7 @@ REQUEST_KINDS: dict[str, list[tuple[str, str]]] = {
     "shorten": [("minutes", "Int")],
     "substitute": [("slotID", "UUID"), ("alternativeID", "String")],
     "reschedule": [("date", "Date")],
+    "replan": [],
 }
 
 
@@ -582,7 +585,7 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
         identifiable=True,
     ),
     "Evidence": SwiftModel("Evidence", identifiable=True),
-    "Decision": SwiftModel("Decision", defaults={"after": "nil", "evidence": "[]"}),
+    "Decision": SwiftModel("Decision", defaults={"after": "nil", "evidence": "[]", "week": "nil"}),
     "Recommendation": SwiftModel(
         "Recommendation", defaults={"id": "UUID()", "status": ".proposed", "rejectionReason": "nil"}, identifiable=True
     ),
@@ -692,7 +695,9 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "CatalogEvidence": SwiftModel("CatalogEvidence", defaults={"doi": "nil", "pmid": "nil"}),
     "SlotStatus": SwiftModel("SlotStatus", defaults={"action": "nil"}),
     "ProposalCard": SwiftModel("ProposalCard", defaults={"slotID": "nil"}),
-    "TodayStatus": SwiftModel("TodayStatus", defaults={"slots": "[]", "proposals": "[]", "autoRequest": "nil"}),
+    "TodayStatus": SwiftModel(
+        "TodayStatus", defaults={"slots": "[]", "proposals": "[]", "autoRequest": "nil", "autoReplan": "nil"}
+    ),
     "ProgressEntry": SwiftModel("ProgressEntry"),
     "ExerciseProgress": SwiftModel("ExerciseProgress", defaults={"load": "nil"}),
     "WeekSession": SwiftModel("WeekSession"),

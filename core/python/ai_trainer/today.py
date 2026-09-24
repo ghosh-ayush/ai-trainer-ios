@@ -15,6 +15,7 @@ from typing import Any
 from .athlete_state import next_plan
 from .content import exercises_by_id
 from .queries import comparable_sessions
+from .rules.adaptation import replan_due
 from .rules.eligibility import decide
 from .rules.progression import qualifying_streak
 
@@ -146,7 +147,19 @@ def today_status(state: JSON, library: JSON, now: float) -> JSON:
         if status is not None:
             slots.append(status)
     proposals = [_proposal(rec, plan, exercises) for rec in pending]
-    return {"slots": slots, "proposals": proposals, "autoRequest": auto_request}
+    today: JSON = {"slots": slots, "proposals": proposals, "autoRequest": auto_request}
+    if auto_request is None and not pending and _replan_to_offer(state, plan, library, now):
+        today["autoReplan"] = True
+    return today
+
+
+def _replan_to_offer(state: JSON, plan: JSON, library: JSON, now: float) -> bool:
+    """ADR-018: a replan is due, would propose a different week, and was not already rejected."""
+    request = {"kind": "replan"}
+    if not replan_due(state, library, now) or _already_answered(state, plan, request):
+        return False
+    outcome: str = decide(state, request, library, now)["outcome"]
+    return outcome == "proposeChange"
 
 
 def _status_for(state: JSON, slot: JSON, decision: JSON, library: JSON, now: float) -> JSON | None:
@@ -223,6 +236,10 @@ def _proposal(recommendation: JSON, plan: JSON, exercises: dict[str, JSON]) -> J
         title = f"Proposed · {len(after['slots'])} exercises · ~{_minutes(after)} min"
     elif request["kind"] == "reschedule":
         title = "Proposed · move this session"
+    elif request["kind"] == "replan" and decision.get("week"):
+        week = decision["week"]
+        days = week["sessionsPerWeek"]
+        title = f"Proposed · {week['name']} · {days} day{'s' if days != 1 else ''} a week"
     proposal: JSON = {
         "recommendationID": recommendation["id"],
         "kind": request["kind"],

@@ -13,7 +13,7 @@ ai_trainer/
 ├── contracts.py           bounded JSON-Schema validator + bundled request/response schemas
 ├── errors.py              DomainError(code, message) + require()
 ├── messages.py            decision(reason, …) builder; reason → outcome/explanation table
-├── decisions.json         the 32 reason codes and their user-facing explanations
+├── decisions.json         the reason codes and their user-facing explanations
 ├── athlete_state.py       read-only accessors: next_plan, active_session, comparison_key, …
 ├── events.py              record_event, expire_proposals, store_plan
 ├── content.py             loads the content bundle; ReviewStatus gating: is_enabled, exercises_by_id

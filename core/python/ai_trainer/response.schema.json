@@ -799,6 +799,16 @@
           "items": {
             "$ref": "#/$defs/Evidence"
           }
+        },
+        "week": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WeekOption"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -876,6 +886,18 @@
           "required": [
             "kind",
             "date"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "replan"
+            }
+          },
+          "required": [
+            "kind"
           ],
           "additionalProperties": false
         }
@@ -1757,6 +1779,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "autoReplan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Bool"
             },
             {
               "type": "null"

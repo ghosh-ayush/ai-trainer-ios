@@ -115,8 +115,9 @@ public final class TrainerService {
         }
         return decision
     }
+    /// A replan (ADR-018) builds a new weekly program on acceptance, so it gets the program's id budget.
     public func acceptRecommendation(id: UUID, now: Date = Date()) throws {
-        try command("acceptRecommendation", Arguments(id: id), now: now)
+        try command("acceptRecommendation", Arguments(id: id), now: now, idCount: Self.programIDCount)
     }
     public func rejectRecommendation(id: UUID, reason: String? = nil, now: Date = Date()) throws {
         try command("rejectRecommendation", Arguments(reason: reason, id: id), now: now)

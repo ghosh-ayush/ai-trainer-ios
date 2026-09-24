@@ -24,6 +24,8 @@ extension TrainingRequest {
         .init(kind: "substitute", slotID: slotID, alternativeID: alternativeID)
     }
     public static func reschedule(_ date: Date) -> TrainingRequest { .init(kind: "reschedule", date: date) }
+    /// ADR-018: a week fitted to the sessions the athlete has actually been completing.
+    public static var replan: TrainingRequest { .init(kind: "replan") }
 }
 
 extension ContentLibrary {

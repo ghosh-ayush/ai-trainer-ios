@@ -184,6 +184,10 @@ final class AppStore: ObservableObject {
             if let slotID = views.today.autoRequest {
                 try service.request(.progression(slotID))
                 views = try service.views()
+            } else if views.today.autoReplan == true {
+                // ADR-018: fewer sessions completed than planned; propose a week that fits. Accept still decides.
+                try service.request(.replan)
+                views = try service.views()
             }
             return (service.repository.snapshot, views, nil)
         } catch {

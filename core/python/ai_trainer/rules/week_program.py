@@ -29,13 +29,25 @@ from .week_plans import DAYS_PER_WEEK, week_candidates
 JSON = dict[str, Any]
 
 
-def week_options(profile: JSON, library: JSON) -> list[JSON]:
-    """The distinct weeks to show this athlete, best first (at most the bundle's ``optionsShown``)."""
+def week_options(
+    profile: JSON,
+    library: JSON,
+    session_cap: int | None = None,
+    recent_sessions_per_week: float | None = None,
+) -> list[JSON]:
+    """The distinct weeks to show this athlete, best first (at most the bundle's ``optionsShown``).
+
+    ``session_cap`` limits sessions further (a replan fitted to attendance, ADR-018) and
+    ``recent_sessions_per_week`` feeds the ranking's adherence feature; both are absent for a
+    first plan, so a preview and its acceptance stay identical.
+    """
     planner = library["planner"]
     weekly = _weekly_for_goal(planner["weekly"], profile["goal"])
     structures = planner["structures"]
     target = _target(planner, profile)
     days, max_sessions = _free_days(profile)
+    if session_cap is not None:
+        max_sessions = min(max_sessions or session_cap, session_cap)
     candidates = week_candidates(
         days,
         _minutes_by_day(profile, days),
@@ -45,7 +57,7 @@ def week_options(profile: JSON, library: JSON) -> list[JSON]:
         available_roles(profile, library),
         max_sessions,
     )
-    athlete = {"goal": profile["goal"], "target": target}
+    athlete = {"goal": profile["goal"], "target": target, "recentSessionsPerWeek": recent_sessions_per_week}
     ranked = rank_weeks(candidates, athlete, weekly, structures, planner["ranking"])
     return distinct_options(ranked, planner["ranking"]["optionsShown"])
 
@@ -89,7 +101,13 @@ def week_program(profile: JSON, library: JSON, now: float, ids: Iterable[str], o
     option that no longer fits is refused rather than applied (rule 3). ``ids`` are consumed
     lazily, one for the program and one per plan and slot, so a command keeps the rest.
     """
-    options = week_options(profile, library)
+    return program_from_options(week_options(profile, library), option_id, profile, library, now, ids)
+
+
+def program_from_options(
+    options: list[JSON], option_id: str | None, profile: JSON, library: JSON, now: float, ids: Iterable[str]
+) -> JSON:
+    """The Program for the option named ``option_id`` among ``options`` (the first when ``None``)."""
     require(bool(options), "invalid", "No week fits these days and minutes. Add a free day or more time.")
     if option_id is None:
         chosen = options[0]

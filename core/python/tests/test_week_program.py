@@ -63,6 +63,7 @@ def planner_library():
             "Hypertrophy": {"Beginner": 10, "Intermediate": 12},
             "Strength": {"Beginner": 10, "Intermediate": 10},
         },
+        "adaptation": {"windowDays": 28, "minimumPlanAgeDays": 14, "missedSessionsPerWeek": 1},
     }
     return library
 

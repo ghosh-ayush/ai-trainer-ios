@@ -56,6 +56,15 @@ final class AppFlowTests: XCTestCase {
         XCTAssertNil(saved.rir)
         XCTAssertEqual(service.repository.snapshot.activeSession?.restEndsAt, now.addingTimeInterval(120))
     }
+    /// ADR-018: a replan request (kind only, no fields) crosses the contract. The pinned fixture has no
+    /// weekly planner, so the core says so and nothing is stored.
+    func testReplanRequestIsUnderstoodAndNeedsAWeeklyPlanner() throws {
+        let service = try trainedService()
+        let decision = try service.request(.replan, now: now)
+        XCTAssertEqual(decision.reason, "REPLAN_UNAVAILABLE")
+        XCTAssertNil(decision.week)
+        XCTAssertTrue(service.repository.snapshot.recommendations.allSatisfy { $0.request.kind != "replan" })
+    }
     func testDomainErrorsArriveAsTypedSwiftErrors() throws {
         let service = try trainedService()
         XCTAssertThrowsError(try service.acceptRecommendation(id: UUID())) { XCTAssertEqual($0 as? TrainerError, .notFound) }
