@@ -16,6 +16,7 @@ struct WorkoutView: View {
     @State private var entry: SetEntry?
     @State private var showFinish = false
     @State private var showPain = false
+    @State private var showWords = false
     var body: some View {
         Group {
             if let session = store.state.activeSession {
@@ -36,6 +37,7 @@ struct WorkoutView: View {
         }
         .sheet(item: $entry) { SetSheet(sessionID: $0.sessionID, slot: $0.slot, workingIndex: $0.index) }
         .sheet(isPresented: $showPain) { PainSheet() }
+        .sheet(isPresented: $showWords) { SpokenSetSheet() }
         .sheet(isPresented: $showFinish) {
             FinishSheet { finishedID in
                 store.justFinishedSessionID = finishedID
@@ -50,6 +52,10 @@ struct WorkoutView: View {
         timer(session)
         StitchSectionLabel("Status: \(paused ? "paused" : "in progress")",
                            meta: "\(session.completeWorkingSets) working set\(session.completeWorkingSets == 1 ? "" : "s") recorded")
+        // Offered only where Apple's on-device model runs; every other path works without it (ADR-015).
+        if OnDeviceSetReader.isAvailable {
+            Button("Log a set in words") { showWords = true }.buttonStyle(.stitch(.secondary)).disabled(paused)
+        }
         ForEach(session.plan.slots) { slot in
             StitchSectionLabel(store.name(slot.exerciseID), meta: "Target \(slot.load.map(number) ?? "unknown") \(slot.equipment.unit.rawValue) · \(slot.equipment.basis.label)")
             ForEach(0..<slot.workingSets, id: \.self) { index in
@@ -185,6 +191,86 @@ struct SetSheet: View {
         let index = setKind == .working ? workingIndex : (store.state.activeSession?.logs.count ?? 0)
         store.perform({ try $0.saveSet(sessionID: sessionID, slotID: slot.id, index: index, kind: setKind, load: load,
                                        reps: reps, rir: rir, logID: logID, operationID: operationID) }) { _ in dismiss() }
+    }
+}
+
+/// ADR-015: describe a set in words ("bench 80 for 8, one left"). Apple's on-device model drafts it,
+/// Python keeps only the numbers the athlete said, and nothing is saved until the athlete taps Save.
+struct SpokenSetSheet: View {
+    @EnvironmentObject private var store: AppStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var text = ""
+    @State private var reading: SetReading?
+    @State private var isReading = false
+    @State private var failure: String?
+    @State private var logID = UUID()
+    @State private var operationID = UUID()
+    var body: some View {
+        Group {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("What did you do?").stitch(.monoLabel).textCase(.uppercase).foregroundStyle(Stitch.textMuted)
+                TextField("8 reps at 20, two left", text: $text, axis: .vertical)
+                    .stitch(.monoBody).foregroundStyle(Stitch.textPrimary)
+                    .onChange(of: text) {
+                        reading = nil
+                        failure = nil
+                    }
+            }
+            .padding(.horizontal, 16).padding(.vertical, 14).glass(radius: 8)
+            Button(isReading ? "Reading…" : "Read") { read() }
+                .buttonStyle(.stitch(.secondary))
+                .disabled(isReading || text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            if let failure {
+                StitchNotice("Couldn't read that", body: failure, tone: .warn)
+            }
+            if let preview = reading?.preview {
+                StitchCard(preview.name, body: Self.summary(preview), tone: .accent)
+                Button("Save set") { save(preview) }.buttonStyle(.stitch())
+            } else if let question = reading?.question {
+                StitchNotice("Say a bit more", body: question, tone: .warn)
+            }
+            if let ignored = reading?.ignored, !ignored.isEmpty {
+                StitchFootnote("Not recorded because you didn't say it: \(ignored.map(Self.label).joined(separator: ", ")).")
+            }
+            StitchFootnote("Read on this iPhone by Apple's on-device model. Only numbers you said are kept, so unknown load or effort stays unknown. Nothing is saved until you tap Save.")
+        }
+        .stitchSheet("Log in words") { dismiss() }
+    }
+    /// The model drafts the set on device, then the core checks the draft against the athlete's words.
+    private func read() {
+        guard let session = store.state.activeSession else { return }
+        let words = text
+        let names = session.plan.slots.map { store.name($0.exerciseID) }
+        isReading = true
+        failure = nil
+        Task { @MainActor in
+            do {
+                let draft = try await OnDeviceSetReader.draft(from: words, exerciseNames: names)
+                isReading = false
+                store.perform({ try $0.readSet(text: words, draft: draft) }) { reading = $0 }
+            } catch {
+                // Shown in the sheet: the app-wide alert would close it. Every other way to log still works.
+                isReading = false
+                failure = "The on-device model is unavailable right now. Log this set with the buttons instead."
+            }
+        }
+    }
+    private func save(_ preview: SetPreview) {
+        store.perform({ try $0.saveSet(sessionID: preview.sessionID, slotID: preview.slotID, index: preview.index,
+                                       kind: preview.kind, load: preview.load, reps: preview.reps, rir: preview.rir,
+                                       logID: logID, operationID: operationID) }) { _ in dismiss() }
+    }
+    static func summary(_ preview: SetPreview) -> String {
+        let set = preview.kind == .working ? "Set \(preview.index + 1)" : preview.kind == .warmUp ? "Warm-up" : "Extra set"
+        let load = preview.load.map { "\(number($0)) \(preview.unit.rawValue)" } ?? "unknown load"
+        return "\(set) · \(preview.reps) reps @ \(load) · \(preview.rir.map { "RIR \($0)" } ?? "RIR —")"
+    }
+    static func label(_ field: String) -> String {
+        switch field {
+        case "rir": return "reps in reserve"
+        case "exercise": return "the exercise it guessed"
+        default: return field
+        }
     }
 }
 

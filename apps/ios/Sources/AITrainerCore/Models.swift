@@ -1443,3 +1443,78 @@ public struct WeekOption: Codable, Equatable, Identifiable {
         self.reasons = reasons
     }
 }
+
+/// What the on-device language model read from the athlete's words. Only a draft: ``readSet`` keeps a number only if the athlete said it.
+public struct SpokenSet: Codable, Equatable {
+    public var exercise: String?
+    public var reps: Int?
+    public var load: Double?
+    public var rir: Int?
+
+    public init(
+        exercise: String? = nil,
+        reps: Int? = nil,
+        load: Double? = nil,
+        rir: Int? = nil
+    ) {
+        self.exercise = exercise
+        self.reps = reps
+        self.load = load
+        self.rir = rir
+    }
+}
+
+/// A set ready for the athlete to confirm. Saved only through ``saveSet`` after the athlete taps Save.
+public struct SetPreview: Codable, Equatable {
+    public var sessionID: UUID
+    public var slotID: UUID
+    public var exerciseID: String
+    public var name: String
+    public var index: Int
+    public var kind: SetKind
+    public var reps: Int
+    public var load: Double?
+    public var unit: MassUnit
+    public var rir: Int?
+
+    public init(
+        sessionID: UUID,
+        slotID: UUID,
+        exerciseID: String,
+        name: String,
+        index: Int,
+        kind: SetKind,
+        reps: Int,
+        load: Double? = nil,
+        unit: MassUnit,
+        rir: Int? = nil
+    ) {
+        self.sessionID = sessionID
+        self.slotID = slotID
+        self.exerciseID = exerciseID
+        self.name = name
+        self.index = index
+        self.kind = kind
+        self.reps = reps
+        self.load = load
+        self.unit = unit
+        self.rir = rir
+    }
+}
+
+/// A ``preview`` when the set is complete, otherwise a ``question``. ``ignored`` names draft fields dropped because the athlete never said them.
+public struct SetReading: Codable, Equatable {
+    public var preview: SetPreview?
+    public var question: String?
+    public var ignored: [String]
+
+    public init(
+        preview: SetPreview? = nil,
+        question: String? = nil,
+        ignored: [String] = []
+    ) {
+        self.preview = preview
+        self.question = question
+        self.ignored = ignored
+    }
+}

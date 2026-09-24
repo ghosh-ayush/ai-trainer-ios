@@ -21,6 +21,7 @@ ai_trainer/
 ├── migrations.py          upgrades saved state files to the current state schema version
 ├── queries.py             comparable_sessions, working_logs, evidence_from
 ├── nutrition.py           validate_nutrients, scale_nutrients
+├── spoken_sets.py         read_set: the on-device model's draft of a set, checked against the athlete's words
 ├── rules/
 │   ├── eligibility.py     decide(): spec §5.2 gate order, then routes to a rule
 │   ├── progression.py     TB-04 double progression on comparable evidence

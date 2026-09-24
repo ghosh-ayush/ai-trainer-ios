@@ -146,6 +146,18 @@ public final class TrainerService {
         struct Steps: Encodable { let base: Double; let step: Double }
         return try core.call("loadSteps", Steps(base: base, step: step))
     }
+    /// Checks the on-device model's `draft` of a set against the athlete's own `text`: a number
+    /// survives only if the athlete said it. Read-only; the athlete saves the preview with `saveSet`.
+    public func readSet(text: String, draft: SpokenSet) throws -> SetReading {
+        struct Reading: Encodable {
+            let state: AthleteState
+            let text: String
+            let draft: SpokenSet
+            let permitsFixtures: Bool
+        }
+        return try core.call("readSet", Reading(state: repository.snapshot, text: text, draft: draft,
+                                                permitsFixtures: library.permitsFixtures))
+    }
 
     // MARK: Nutrition
     public func saveMeal(_ meal: Meal, asRecipe: Bool = false) throws {

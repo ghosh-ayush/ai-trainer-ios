@@ -143,6 +143,34 @@ Consequences:
 - Scope stays healthy adults; the "evidence-based, not clinician-reviewed" disclosure (ADR-010) stays.
 Status: accepted. Supersedes the owner-approval step of ADR-006.
 
+## ADR-015 · 2026-09-23 · A language model reads the athlete's words; it never decides
+Why: owner asked for a small language model to make the app easier to talk to. Research on
+2026-09-23: Apple's Foundation Models framework (iOS 26+; iPhone 15 Pro and every iPhone 16 or
+later) runs a ~3B model on the phone with structured output, no network, no bundled weights and
+no licence to review. No provider lets a third-party app run on a user's consumer subscription:
+Anthropic's Claude Code legal page forbids offering Claude.ai login in other apps, "Sign in with
+ChatGPT" shares only name, email and picture, and Google's Gemini CLI and Antigravity terms forbid
+reusing their login. In-app subscription login is therefore rejected.
+Consequences:
+- The model turns the athlete's words into one allowlisted intent (spec §5.3) and nothing more.
+  First intent: `log_performance`, as "Log a set in words" on the Workout screen.
+- Python's read-only `readSet` decides what the draft may say: a number survives only if the
+  athlete said it, each spoken number backs one field, unit and set kind come from the words
+  alone, and an exercise outside the session is a question. The preview is saved only by the
+  normal `saveSet`, after the athlete taps Save. No chat text is stored.
+- Measured on macOS 27 on 2026-09-23: without explicit nulls the model filled unsaid fields with 0
+  ("did 10 reps" gave load 0, RIR 0); with `representNilExplicitlyInGeneratedContent` (iOS 26.4+)
+  it returned null. It still reused one number for two fields ("maybe 6" gave 6 reps at 6), which
+  the one-number-one-field rule drops.
+- The entry is hidden before iOS 26, on ineligible devices and with Apple Intelligence off; every
+  other way to log is unchanged. "No network at runtime, no LLM in the decision path" still holds.
+- The iOS 26.2 simulator on a macOS 27 host cannot run the model (`promptTemplateNotFound`); test
+  on a device or an iOS 27 simulator. The Swift real-model test skips where the model is unavailable.
+- Not adopted now: Apple's Private Cloud Compute model (iOS 27, needs network: its own ADR), a
+  Shortcuts handoff to the Claude or ChatGPT apps, and bundled open-weight models. Keeping the
+  evidence base current stays a development-time job under rule 1, never an on-device model.
+Status: proposed. Prototype on `claude/on-device-set-reader`.
+
 ## ADR-016 · 2026-09-24 · Adaptive diet targets and food suggestions from cited research
 Why: owner request (2026-09-23): the app should suggest the best diet automatically and adapt it
 to the athlete's lifestyle over time, on the same research-only basis as training (ADR-014). The

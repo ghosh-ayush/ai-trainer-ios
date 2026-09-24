@@ -121,6 +121,8 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
   it (`autoRequest`). It is still only a proposal: nothing changes until the athlete taps Accept.
 - A one-tap "Done as planned" set records the planned reps and load with RIR unknown; effort is
   never assumed. "4+" RIR is recorded as 4.
+- "Log a set in words" appears only where Apple's on-device model runs. `readSet` drops any
+  number the athlete did not say, even one the model returned, and nothing saves until Save (ADR-015).
 - Weekly plans (ADR-017) never guess weekdays: onboarding starts with no free day selected, and a
   migrated profile keeps `freeDays` absent. Seven free days give at most six sessions (no qualifying
   7-day trial); the cap is a cited owner decision in the bundle, not code.
