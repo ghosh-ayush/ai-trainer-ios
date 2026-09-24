@@ -113,3 +113,49 @@ keep the screens' logic in Python; no engine rule changed. Today auto-requests a
 progression proposal, never re-proposes one the athlete rejected in the same context, and still
 applies nothing without Accept.
 Status: accepted.
+
+## ADR-017 · 2026-09-24 · Weekly plans for 1–7 free days: research sets the bounds, the AI chooses
+Why: owner decisions on 2026-09-24. Plans must work for anyone free 1 to 7 days a week. There must
+be no fixed "N days → split" table: "the AI should suggest different combinations based on all
+other information about the user". The owner chose "AI chooses, research bounds" over "AI decides
+freely". The research is in `docs/research/training-frequency-evidence.md` (37 sources, four
+retracted papers excluded). A second agent re-checked all 46 cited sources against the papers on
+2026-09-24: 22 confirmed, 23 corrected, 1 only partly checkable (ACSM09's body text is paywalled).
+Its log is at the end of that file. The tested consecutive-day dose was about 2–3 direct sets per
+muscle (one verified Monday–Friday trial), so the consecutive-day cap starts at 3, not 4.
+Consequences:
+- `rules/week_plans.py` builds every week the guardrails allow on the athlete's free weekdays and
+  per-day minutes. The guardrails:
+  - weekly sets per major muscle between a floor and a ceiling, with a lower time-limited floor
+  - a per-session cap per muscle
+  - a lower cap on the later of two consecutive days that train the same muscle
+  - minimum and maximum sets per exercise
+  - minutes per set and warm-up
+  - a maximum number of sessions a week
+
+  Every value ships in the content bundle, cited or recorded as an owner decision with a cited
+  rationale, and none lives in code. Splits (full body, upper/lower, push/pull/legs and hybrids)
+  are cycles of session types; a candidate is any cycle placed on any subset of the free days.
+- `rules/plan_ranking.py` orders the valid weeks for one athlete using weekly volume against
+  their target, strength exposures, recovery spacing, variety, recent adherence and stated
+  likes or dislikes. The ranking weights are bundle owner decisions. Unknown history or
+  preferences are neutral, never assumed.
+- The on-device model (ADR-015) may pick among the top candidates using what the athlete said in
+  words, and explain the choice. It cannot create a week, a number or an exercise outside the
+  candidates, and Python re-validates its pick. Without the model, the ranking alone decides.
+  This relaxes "no LLM in the decision path" to "no LLM outside the evidence bounds".
+- The chosen week becomes a Program with one plan per session, and is still a proposal the
+  athlete accepts (rule 3). As adherence, progress and stated preferences change, the app
+  proposes a different week, never a silent change.
+- No qualifying trial tested conventional training on 7 days a week (§7 of the research), so the
+  bundle's session maximum starts at 6 as an owner decision: 7 free days are a valid input and
+  the plan uses up to 6 of them. Flipping it is a bundle edit with its own rationale.
+- Needs, after the evidence-bundle work (ADR-014/016) is on master:
+  - new governed roles and exercises (horizontal and vertical press and pull, hinge, single-leg,
+    elbow flexion and extension, knee flexion, calves), drawn from
+    `docs/research/exercise-evidence.json`
+  - Profile fields for free weekdays and per-day minutes, with a state migration where unknown
+    weekdays stay unknown
+  - an operation that returns distinct top options with reasons
+  - the onboarding weekday picker
+Status: proposed. Planner core on `claude/frequency-1-7`; integration waits for the bundle merge.
