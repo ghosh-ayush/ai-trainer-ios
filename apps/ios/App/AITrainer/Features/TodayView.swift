@@ -39,6 +39,7 @@ struct TodayView: View {
                         }
                     }
                 }
+                DietSummaryCard()
                 WhatCouldChangeSection()
             }
             .scrollToNewProposal(store.state.recommendations, proxy: proxy)
@@ -427,5 +428,20 @@ struct PainSheet: View {
             }
         }
         .stitchSheet("I'm in pain") { dismiss() }
+    }
+}
+
+/// A compact line about today's diet that opens the Diet tab. Hidden until diet targets exist.
+private struct DietSummaryCard: View {
+    @EnvironmentObject private var store: AppStore
+    var body: some View {
+        if store.diet.status == .ready, let targets = store.diet.targets {
+            let left = store.diet.remaining
+            Button { store.tab = .diet } label: {
+                StitchListRow("Diet today", subtitle: "\(number(left?.calories ?? Double(targets.energyKcal))) kcal · \(number(left?.protein ?? Double(targets.proteinG))) g protein left"
+                              + (store.diet.adjustment == nil ? "" : " · suggested change"), symbol: "fork.knife")
+            }
+            .buttonStyle(.plain)
+        }
     }
 }

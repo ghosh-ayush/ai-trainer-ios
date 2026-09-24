@@ -5,10 +5,16 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 from pathlib import Path
 from typing import Any
 
+from ai_trainer import content
 from ai_trainer.api import dispatch_json
+
+# Rule tests run against the fixture, not whatever research content currently ships.
+os.environ[content.PINNED_BUNDLE_ENV] = content.FIXTURE_BUNDLE_ID
+content._active_bundle.cache_clear()
 
 JSON = dict[str, Any]
 

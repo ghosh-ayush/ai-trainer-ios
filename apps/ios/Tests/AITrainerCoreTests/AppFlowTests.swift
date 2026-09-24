@@ -118,9 +118,12 @@ final class AppFlowTests: XCTestCase {
         recommendations[0]["request"] = ["progression": ["_0": slot.id.uuidString]]
         object["recommendations"] = recommendations
         object["schemaVersion"] = 1
+        object["weighIns"] = nil
+        object["dietDecisions"] = nil
         storage.data = try JSONSerialization.data(withJSONObject: object)
         let migrated = try StateRepository(persistence: storage, core: core).snapshot
-        XCTAssertEqual(migrated.schemaVersion, 2)
+        XCTAssertEqual(migrated.schemaVersion, 3)
+        XCTAssertEqual(migrated.weighIns, [])
         XCTAssertEqual(migrated.recommendations.first?.request, .progression(slot.id))
     }
     func testCorruptStoreIsNotOverwritten() {
@@ -158,8 +161,33 @@ final class AppFlowTests: XCTestCase {
         XCTAssertEqual(Meal.total([Meal(name: "Fixture", nutrients: nutrients, occurredAt: now)], on: now).protein, 15)
         XCTAssertThrowsError(try service.scaleNutrients(nutrients, servings: -1))
     }
+    func testDietTargetsFlowThroughTheCore() throws {
+        let service = try trainedService()
+        var profile = DietProfile()
+        profile.sex = .male; profile.birthYear = 1996; profile.heightCm = 180; profile.goal = .fatLoss
+        profile.screening.scoffAnswers = Array(repeating: false, count: try service.dietOptions(now: now).scoffQuestions.count)
+        XCTAssertEqual(try service.dietPreview(profile: profile, now: now).status, .needsInput)
+        try service.logWeighIn(WeighIn(kg: 80, measuredAt: now.addingTimeInterval(-3600)), now: now)
+        let preview = try service.dietPreview(profile: profile, now: now)
+        let targets = try XCTUnwrap(preview.targets)
+        XCTAssertFalse(preview.citations.isEmpty)
+        var stale = targets; stale.energyKcal += 10
+        XCTAssertThrowsError(try service.setDietTargets(profile: profile, expected: stale, now: now)) {
+            XCTAssertEqual($0 as? TrainerError, .staleProposal)
+        }
+        try service.setDietTargets(profile: profile, expected: targets, now: now)
+        let lentils = try XCTUnwrap(service.searchFoods("lentils", pattern: .vegan).first)
+        try service.saveFoodMeal(foodID: lentils.id, grams: 200, occurredAt: now)
+        let diet = try service.views(now: now).diet
+        XCTAssertEqual(diet.status, .ready)
+        XCTAssertEqual(try XCTUnwrap(diet.remaining).calories, Double(targets.energyKcal) - lentils.per100g.calories * 2, accuracy: 0.2)
+    }
     func testBundledResourcesLoad() throws {
-        XCTAssertEqual(try ExerciseCatalog.bundled().exercises.count, 876)
+        let catalog = try ExerciseCatalog.bundled()
+        XCTAssertEqual(catalog.exercises.count, 876)
+        let annotated = catalog.exercises.filter { !($0.evidence ?? []).isEmpty }
+        XCTAssertFalse(annotated.isEmpty, "research annotations decode from the bundled catalog")
+        XCTAssertTrue(annotated.allSatisfy { $0.evidence!.allSatisfy { $0.doi != nil || $0.pmid != nil } })
         XCTAssertTrue(try ThirdPartyNotices.text().contains("Copyright (c) 2026 Nazar Kozak"))
         XCTAssertTrue(try ThirdPartyNotices.text().contains("SIL OPEN FONT LICENSE"))
     }
