@@ -14,9 +14,11 @@ performance or prescriptions automatically.
 
 ## Exercise descriptions
 
-- `ExerciseCatalog` decodes all 876 records from the unchanged `dist/exercises.json`
-  snapshot of [free-exercise-db](https://github.com/yuhonas/free-exercise-db), revision
-  `a859101d633a01c4a1a920d6a8ce41dabba0705f`.
+- `ExerciseCatalog` decodes all 876 records from the `dist/exercises.json` snapshot of
+  [free-exercise-db](https://github.com/yuhonas/free-exercise-db), revision
+  `a859101d633a01c4a1a920d6a8ce41dabba0705f`. Upstream fields are unchanged; records the
+  research covers gain an `evidence` array (cited findings) from
+  `docs/research/exercise-evidence.json` via `scripts/annotate_catalog.py` (ADR-014).
 - It is a bundled SwiftPM resource, available offline through Settings. Malformed
   data and duplicate IDs fail loading rather than silently generating content.
 - `CatalogExercise` is a separate descriptive type. No fields overwrite governed

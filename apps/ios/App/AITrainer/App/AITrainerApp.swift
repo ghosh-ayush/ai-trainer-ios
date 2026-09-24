@@ -77,6 +77,10 @@ final class AppStore: ObservableObject {
     @Published private(set) var today = TodayStatus()
     /// Recorded values per exercise for the Progress tab.
     @Published private(set) var progress: [ExerciseProgress] = []
+    /// The Diet tab: targets, what is left today, the weight trend, a suggested adjustment and food ideas.
+    @Published private(set) var diet = DietView()
+    /// The selected tab, so a card on one tab can open another.
+    @Published var tab: AppTab = .today
     /// The session just finished, shown as a summary card on Today until the next start.
     @Published var justFinishedSessionID: UUID?
     @Published var errorMessage: String?
@@ -138,7 +142,7 @@ final class AppStore: ObservableObject {
             Task { @MainActor in
                 let (outcome, refreshed) = delivery.value
                 self.state = refreshed.state
-                if let views = refreshed.views { self.today = views.today; self.progress = views.progress }
+                if let views = refreshed.views { self.today = views.today; self.progress = views.progress; self.diet = views.diet }
                 self.isWorking = false
                 switch outcome {
                 case .success(let value):
@@ -146,6 +150,21 @@ final class AppStore: ObservableObject {
                     if let error = refreshed.error { self.errorMessage = error.localizedDescription }
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription
+                }
+            }
+        }
+    }
+    /// Runs a read-only core call (food search, diet preview) on the core queue without the refresh
+    /// and tap-gating of `perform`; `then` receives the answer on the main actor, errors show the alert.
+    func read<Value>(_ query: @escaping (TrainerService) throws -> Value, then: @escaping (Value) -> Void) {
+        guard let service else { return }
+        let job = CoreJob(value: (service: service, query: query, then: then))
+        coreQueue.async {
+            let outcome = CoreJob(value: Result { try job.value.query(job.value.service) })
+            Task { @MainActor in
+                switch outcome.value {
+                case .success(let value): job.value.then(value)
+                case .failure(let error): self.errorMessage = error.localizedDescription
                 }
             }
         }
@@ -172,7 +191,7 @@ final class AppStore: ObservableObject {
         }
     }
     func name(_ id: String) -> String { service?.library.exercise(id)?.name ?? id }
-    /// True when the bundled content is approved evidence-based content (ADR-006), not a fixture.
+    /// True when the bundled content passed the automated evidence gate (ADR-014), not a fixture.
     var contentIsApproved: Bool { service?.library.policy.review == .approved }
     /// Whether a plan can be activated in this build: approved content always, fixtures only in Debug.
     var canActivatePlan: Bool {
@@ -203,11 +222,10 @@ final class AppStore: ObservableObject {
 /// and the transport's interpreter lock; closures from views only read values they captured.
 private struct CoreJob<Wrapped>: @unchecked Sendable { let value: Wrapped }
 
-enum AppTab: Hashable { case today, progress, you }
+enum AppTab: Hashable { case today, diet, progress, you }
 
 struct RootView: View {
     @EnvironmentObject private var store: AppStore
-    @State private var tab: AppTab = .today
     var body: some View {
         Group {
             if case .runtime(let error) = store.startupFailure {
@@ -219,9 +237,11 @@ struct RootView: View {
             } else if store.state.profile == nil {
                 OnboardingView()
             } else {
-                TabView(selection: $tab) {
+                TabView(selection: $store.tab) {
                     NavigationStack { TodayView() }
                         .tabItem { Label("TODAY", systemImage: "sun.max") }.tag(AppTab.today)
+                    NavigationStack { DietTabView() }
+                        .tabItem { Label("DIET", systemImage: "fork.knife") }.tag(AppTab.diet)
                     NavigationStack { ProgressTabView() }
                         .tabItem { Label("PROGRESS", systemImage: "chart.xyaxis.line") }.tag(AppTab.progress)
                     NavigationStack { YouView() }

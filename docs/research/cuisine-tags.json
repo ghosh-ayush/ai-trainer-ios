@@ -1,0 +1,3349 @@
+{
+ "version": "cuisine-tags-1",
+ "retrievedOn": "2026-09-24",
+ "method": "Candidates: USDA FNDDS dish names matched against (a) a documented dish-name keyword list and (b) Wikidata dish items (CC0) linked to a cuisine (P2012) or country of origin (P495), keeping only main English labels that map to exactly one of the app's eight cuisines and contain a word rare in USDA SR Legacy names (scripts/cuisine_candidates.py). Each (food, cuisine) pair was then checked by two independent reviewers; only pairs both kept are listed. Cuisine tags only rank food ideas; they never change a nutrient value.",
+ "licence": "Wikidata content is CC0 1.0; USDA FoodData Central names are public domain.",
+ "tags": [
+  {
+   "foodID": 2706392,
+   "food": "Beef with sweet and sour sauce",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706401,
+   "food": "Sweet and sour pork",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706435,
+   "food": "Sweet and sour chicken or turkey",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706436,
+   "food": "Sweet and sour chicken or turkey, without vegetables",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706456,
+   "food": "Sweet and sour shrimp",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706607,
+   "food": "Beef chow mein or chop suey with noodles",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706648,
+   "food": "Pork chow mein or chop suey with noodles",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706655,
+   "food": "Sweet and sour pork with rice",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706687,
+   "food": "Chicken or turkey chow mein or chop suey with noodles",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706712,
+   "food": "Shrimp chow mein or chop suey with noodles",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706722,
+   "food": "Chow mein or chop suey, NS as to type of meat, with noodles",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706724,
+   "food": "Chow mein or chop suey, various types of meat, with noodles",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706742,
+   "food": "Beef chow mein or chop suey, no noodles",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706743,
+   "food": "Kung Pao beef",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706763,
+   "food": "Kung Pao pork",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706764,
+   "food": "Moo Shu pork, without Chinese pancake",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706794,
+   "food": "General Tso chicken",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706796,
+   "food": "Kung pao chicken",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706798,
+   "food": "Chicken or turkey chow mein or chop suey, no noodles",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706827,
+   "food": "Shrimp chow mein or chop suey, no noodles",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706857,
+   "food": "Kung Pao shrimp",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706872,
+   "food": "Chow mein or chop suey, NS as to type of meat, no noodles",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708050,
+   "food": "Pastry, Chinese, made with rice flour",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708343,
+   "food": "Chinese pancake",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708418,
+   "food": "Congee",
+   "cuisine": "chinese",
+   "basis": [
+    "wikidata:congee"
+   ]
+  },
+  {
+   "foodID": 2708700,
+   "food": "Egg roll, meatless",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708701,
+   "food": "Egg roll, with shrimp",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708702,
+   "food": "Egg roll, with beef and/or pork",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708703,
+   "food": "Egg roll, with chicken or turkey",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708705,
+   "food": "Wonton, dumpling or pot sticker, fried",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708706,
+   "food": "Wonton, dumpling or pot sticker, fried, no meat",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708708,
+   "food": "Wonton, dumpling or pot sticker, steamed",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708798,
+   "food": "Lo mein, NFS",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708799,
+   "food": "Lo mein, meatless",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708800,
+   "food": "Lo mein, with shrimp",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708801,
+   "food": "Lo mein, with pork",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708802,
+   "food": "Lo mein, with beef",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708803,
+   "food": "Lo mein, with chicken",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708981,
+   "food": "Congee, with meat, poultry, and/or seafood",
+   "cuisine": "chinese",
+   "basis": [
+    "wikidata:congee"
+   ]
+  },
+  {
+   "foodID": 2708982,
+   "food": "Congee, with meat, poultry, and/or seafood, and vegetables",
+   "cuisine": "chinese",
+   "basis": [
+    "wikidata:congee"
+   ]
+  },
+  {
+   "foodID": 2708983,
+   "food": "Congee, with vegetables",
+   "cuisine": "chinese",
+   "basis": [
+    "wikidata:congee"
+   ]
+  },
+  {
+   "foodID": 2708984,
+   "food": "Congee, with egg",
+   "cuisine": "chinese",
+   "basis": [
+    "wikidata:congee"
+   ]
+  },
+  {
+   "foodID": 2709160,
+   "food": "Soup, wonton",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2710064,
+   "food": "Chow mein or chop suey, meatless, no noodles",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2710069,
+   "food": "Chow mein or chop suey, meatless, with noodles",
+   "cuisine": "chinese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2705740,
+   "food": "Cheese, paneer",
+   "cuisine": "indian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706437,
+   "food": "Chicken curry",
+   "cuisine": "indian",
+   "basis": [
+    "keyword",
+    "wikidata:curry"
+   ]
+  },
+  {
+   "foodID": 2706438,
+   "food": "Chicken curry with rice",
+   "cuisine": "indian",
+   "basis": [
+    "keyword",
+    "wikidata:curry"
+   ]
+  },
+  {
+   "foodID": 2706460,
+   "food": "Fish curry",
+   "cuisine": "indian",
+   "basis": [
+    "keyword",
+    "wikidata:curry"
+   ]
+  },
+  {
+   "foodID": 2706461,
+   "food": "Fish curry with rice",
+   "cuisine": "indian",
+   "basis": [
+    "keyword",
+    "wikidata:curry"
+   ]
+  },
+  {
+   "foodID": 2706490,
+   "food": "Biryani with meat",
+   "cuisine": "indian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706538,
+   "food": "Biryani with chicken",
+   "cuisine": "indian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707427,
+   "food": "Dal",
+   "cuisine": "indian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707429,
+   "food": "Papad, grilled or broiled",
+   "cuisine": "indian",
+   "basis": [
+    "wikidata:papad"
+   ]
+  },
+  {
+   "foodID": 2707431,
+   "food": "Lentil curry",
+   "cuisine": "indian",
+   "basis": [
+    "keyword",
+    "wikidata:curry"
+   ]
+  },
+  {
+   "foodID": 2707432,
+   "food": "Lentil curry with rice",
+   "cuisine": "indian",
+   "basis": [
+    "keyword",
+    "wikidata:curry"
+   ]
+  },
+  {
+   "foodID": 2707613,
+   "food": "Bread, naan",
+   "cuisine": "indian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707714,
+   "food": "Bread, puri",
+   "cuisine": "indian",
+   "basis": [
+    "wikidata:puri"
+   ]
+  },
+  {
+   "foodID": 2708346,
+   "food": "Idli",
+   "cuisine": "indian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708347,
+   "food": "Dosa, plain",
+   "cuisine": "indian",
+   "basis": [
+    "keyword",
+    "wikidata:dosa"
+   ]
+  },
+  {
+   "foodID": 2708730,
+   "food": "Samosa",
+   "cuisine": "indian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708985,
+   "food": "Biryani with vegetables",
+   "cuisine": "indian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709128,
+   "food": "Upma",
+   "cuisine": "indian",
+   "basis": [
+    "wikidata:upma"
+   ]
+  },
+  {
+   "foodID": 2709129,
+   "food": "Dosa, with filling",
+   "cuisine": "indian",
+   "basis": [
+    "keyword",
+    "wikidata:dosa"
+   ]
+  },
+  {
+   "foodID": 2709130,
+   "food": "Vada",
+   "cuisine": "indian",
+   "basis": [
+    "wikidata:vada"
+   ]
+  },
+  {
+   "foodID": 2709309,
+   "food": "Chutney",
+   "cuisine": "indian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709631,
+   "food": "Palak Paneer",
+   "cuisine": "indian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2710066,
+   "food": "Pakora",
+   "cuisine": "indian",
+   "basis": [
+    "wikidata:pakora"
+   ]
+  },
+  {
+   "foodID": 2710067,
+   "food": "Vegetable curry",
+   "cuisine": "indian",
+   "basis": [
+    "keyword",
+    "wikidata:curry"
+   ]
+  },
+  {
+   "foodID": 2710068,
+   "food": "Vegetable curry with rice",
+   "cuisine": "indian",
+   "basis": [
+    "keyword",
+    "wikidata:curry"
+   ]
+  },
+  {
+   "foodID": 2706417,
+   "food": "Veal parmigiana",
+   "cuisine": "italian",
+   "basis": [
+    "wikidata:parmigiana"
+   ]
+  },
+  {
+   "foodID": 2706421,
+   "food": "Chicken or turkey cacciatore",
+   "cuisine": "italian",
+   "basis": [
+    "wikidata:cacciatore"
+   ]
+  },
+  {
+   "foodID": 2706442,
+   "food": "Chicken or turkey parmigiana",
+   "cuisine": "italian",
+   "basis": [
+    "wikidata:parmigiana"
+   ]
+  },
+  {
+   "foodID": 2706453,
+   "food": "Spaghetti sauce with seafood",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706454,
+   "food": "Spaghetti sauce with seafood and added vegetables",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706470,
+   "food": "Spaghetti sauce with meat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706471,
+   "food": "Spaghetti sauce with meat and added vegetables",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707130,
+   "food": "Soup, Italian wedding",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707612,
+   "food": "Focaccia, Italian, plain",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708052,
+   "food": "Pastry, Italian, with cheese",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708612,
+   "food": "Pizza, cheese, from frozen, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708613,
+   "food": "Pizza, cheese, from frozen, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708614,
+   "food": "Pizza, cheese, from restaurant or fast food, NS as to type of crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708615,
+   "food": "Pizza, cheese, from restaurant or fast food, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708616,
+   "food": "Pizza, cheese, from restaurant or fast food, medium crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708617,
+   "food": "Pizza, cheese, from restaurant or fast food, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708622,
+   "food": "Pizza, extra cheese, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708623,
+   "food": "Pizza, extra cheese, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708624,
+   "food": "Pizza, cheese, with vegetables, from frozen, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708625,
+   "food": "Pizza, cheese with vegetables, from frozen, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708626,
+   "food": "Pizza, cheese, with vegetables, from restaurant or fast food, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708627,
+   "food": "Pizza, cheese, with vegetables, from restaurant or fast food, medium crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708628,
+   "food": "Pizza, cheese, with vegetables, from restaurant or fast food, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708629,
+   "food": "Pizza with cheese and extra vegetables, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708630,
+   "food": "Pizza with cheese and extra vegetables, medium crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708631,
+   "food": "Pizza with cheese and extra vegetables, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708635,
+   "food": "Pizza with pepperoni, from frozen, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708636,
+   "food": "Pizza with pepperoni, from frozen, medium crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708637,
+   "food": "Pizza with pepperoni, from frozen, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708638,
+   "food": "Pizza with pepperoni, from restaurant or fast food, NS as to type of crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708639,
+   "food": "Pizza with pepperoni, from restaurant or fast food, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708640,
+   "food": "Pizza with pepperoni, from restaurant or fast food,  medium crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708641,
+   "food": "Pizza with pepperoni, from restaurant or fast food, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708646,
+   "food": "Pizza with meat other than pepperoni, from frozen, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708647,
+   "food": "Pizza with meat other than pepperoni, from frozen, medium crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708648,
+   "food": "Pizza with meat other than pepperoni, from frozen, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708649,
+   "food": "Pizza with meat other than pepperoni, from restaurant or fast food, NS as to type of crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708650,
+   "food": "Pizza with meat other than pepperoni, from restaurant or fast food, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708651,
+   "food": "Pizza with meat other than pepperoni, from restaurant or fast food, medium crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708652,
+   "food": "Pizza with meat other than pepperoni, from restaurant or fast food, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708657,
+   "food": "Pizza with extra meat, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708658,
+   "food": "Pizza with extra meat, medium crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708659,
+   "food": "Pizza with extra meat, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708660,
+   "food": "Pizza with meat and vegetables, from frozen, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708661,
+   "food": "Pizza with meat and vegetables, from frozen, medium crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708662,
+   "food": "Pizza with meat and vegetables, from frozen, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708663,
+   "food": "Pizza with meat and vegetables, from restaurant or fast food, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708664,
+   "food": "Pizza with meat and vegetables, from restaurant or fast food, medium crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708665,
+   "food": "Pizza with meat and vegetables, from restaurant or fast food, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708666,
+   "food": "Pizza with extra meat and extra vegetables, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708667,
+   "food": "Pizza with extra meat and extra vegetables, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708668,
+   "food": "Pizza with extra meat and extra vegetables, medium crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708674,
+   "food": "Pizza, no cheese, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708675,
+   "food": "Pizza, no cheese, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708676,
+   "food": "White pizza, cheese, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708677,
+   "food": "White pizza, cheese, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708678,
+   "food": "White pizza, cheese, with vegetables, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708679,
+   "food": "White pizza, cheese, with vegetables, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708680,
+   "food": "White pizza, cheese, with meat, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708681,
+   "food": "White pizza, cheese, with meat, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708682,
+   "food": "White pizza, cheese, with meat and vegetables, thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708683,
+   "food": "White pizza, cheese, with meat and vegetables, thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708687,
+   "food": "Pizza, cheese, whole wheat thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708688,
+   "food": "Pizza, cheese, whole wheat thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708689,
+   "food": "Pizza, with meat, whole wheat thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708690,
+   "food": "Pizza, with meat, whole wheat thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708691,
+   "food": "Pizza, cheese and vegetables, whole wheat thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708692,
+   "food": "Pizza, cheese and vegetables, whole wheat thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708693,
+   "food": "Pizza, cheese, gluten-free thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708694,
+   "food": "Pizza, cheese, gluten-free thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708695,
+   "food": "Pizza, with meat, gluten-free thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708696,
+   "food": "Pizza, with meat, gluten-free thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708697,
+   "food": "Pizza, cheese and vegetables, gluten-free thin crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708698,
+   "food": "Pizza, cheese and vegetables, gluten-free thick crust",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708721,
+   "food": "Gnocchi, cheese",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708722,
+   "food": "Gnocchi, potato",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708750,
+   "food": "Lasagna with meat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708751,
+   "food": "Lasagna with meat, canned",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708752,
+   "food": "Lasagna with meat, from restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708753,
+   "food": "Lasagna with meat, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708754,
+   "food": "Lasagna with meat, frozen",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708755,
+   "food": "Lasagna with meat and spinach",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708756,
+   "food": "Lasagna with chicken or turkey",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708757,
+   "food": "Lasagna, with chicken or turkey, and spinach",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708758,
+   "food": "Lasagna, meatless",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708759,
+   "food": "Lasagna, meatless, with vegetables",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708760,
+   "food": "Ravioli, NS as to filling, no sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708761,
+   "food": "Ravioli, NS as to filling, with tomato sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708762,
+   "food": "Ravioli, NS as to filling, with cream sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708763,
+   "food": "Ravioli, meat-filled, no sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708764,
+   "food": "Ravioli, meat-filled, with tomato sauce or meat sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708765,
+   "food": "Ravioli, meat-filled, with tomato sauce or meat sauce, canned",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708766,
+   "food": "Ravioli, meat-filled, with cream sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708767,
+   "food": "Ravioli, cheese-filled, no sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708768,
+   "food": "Ravioli, cheese-filled, with tomato sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708769,
+   "food": "Ravioli, cheese-filled, with tomato sauce, canned",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708770,
+   "food": "Ravioli, cheese-filled, with meat sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708771,
+   "food": "Ravioli, cheese-filled, with cream sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708772,
+   "food": "Ravioli, cheese and spinach-filled, no sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708773,
+   "food": "Ravioli, cheese and spinach-filled, with cream sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708774,
+   "food": "Ravioli, cheese and spinach filled, with tomato sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708825,
+   "food": "Pasta with tomato-based sauce, cheese and meat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708826,
+   "food": "Pasta with tomato-based sauce and cheese",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708830,
+   "food": "Pasta with tomato-based sauce, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708831,
+   "food": "Pasta with tomato-based sauce, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708832,
+   "food": "Pasta with tomato-based sauce, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708833,
+   "food": "Pasta with tomato-based sauce, and added vegetables, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708834,
+   "food": "Pasta with tomato-based sauce, and added vegetables, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708835,
+   "food": "Pasta with tomato-based sauce, and added vegetables, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708837,
+   "food": "Pasta with tomato-based sauce and meat, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708838,
+   "food": "Pasta with tomato-based sauce and meat, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708839,
+   "food": "Pasta with tomato-based sauce and meat, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708840,
+   "food": "Pasta with tomato-based sauce, meat, and added vegetables, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708841,
+   "food": "Pasta with tomato-based sauce, meat, and added vegetables, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708842,
+   "food": "Pasta with tomato-based sauce, meat, and added vegetables, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708849,
+   "food": "Pasta with tomato-based sauce and seafood, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708850,
+   "food": "Pasta with tomato-based sauce and seafood, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708851,
+   "food": "Pasta with tomato-based sauce and seafood, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708852,
+   "food": "Pasta with tomato-based sauce, seafood, and added vegetables, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708853,
+   "food": "Pasta with tomato-based sauce, seafood, and added vegetables, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708854,
+   "food": "Pasta with tomato-based sauce, seafood, and added vegetables, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708855,
+   "food": "Pasta with cream sauce, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708856,
+   "food": "Pasta with cream sauce, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708857,
+   "food": "Pasta with cream sauce, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708858,
+   "food": "Pasta with cream sauce and added vegetables, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708861,
+   "food": "Pasta with cream sauce and meat, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708862,
+   "food": "Pasta with cream sauce and meat, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708863,
+   "food": "Pasta with cream sauce and meat, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708864,
+   "food": "Pasta with cream sauce, meat, and added vegetables, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708865,
+   "food": "Pasta with cream sauce, meat, and added vegetables, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708866,
+   "food": "Pasta with cream sauce, meat, and added vegetables, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708873,
+   "food": "Pasta with cream sauce and seafood, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708874,
+   "food": "Pasta with cream sauce and seafood, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708875,
+   "food": "Pasta with cream sauce and seafood, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708876,
+   "food": "Pasta with cream sauce, seafood, and added vegetables, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708877,
+   "food": "Pasta with cream sauce, seafood, and added vegetables, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708878,
+   "food": "Pasta with cream sauce, seafood, and added vegetables, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708879,
+   "food": "Pasta, whole grain, with tomato-based sauce, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708880,
+   "food": "Pasta, whole grain, with tomato-based sauce, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708881,
+   "food": "Pasta, whole grain, with tomato-based sauce, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708882,
+   "food": "Pasta, whole grain, with tomato-based sauce and added vegetables, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708883,
+   "food": "Pasta, whole grain, with tomato-based sauce and added vegetables, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708884,
+   "food": "Pasta, whole grain, with tomato-based sauce and added vegetables, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708885,
+   "food": "Pasta, whole grain, with tomato-based sauce and meat, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708886,
+   "food": "Pasta, whole grain, with tomato-based sauce and meat, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708887,
+   "food": "Pasta, whole grain, with tomato-based sauce and meat, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708888,
+   "food": "Pasta, whole grain, with tomato-based sauce, meat, and added vegetables, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708889,
+   "food": "Pasta, whole grain, with tomato-based sauce, meat, and added vegetables, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708890,
+   "food": "Pasta, whole grain, with tomato-based sauce, meat, and added vegetables, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708891,
+   "food": "Pasta, whole grain, with tomato-based sauce and poultry, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708892,
+   "food": "Pasta, whole grain, with tomato-based sauce and poultry, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708893,
+   "food": "Pasta, whole grain, with tomato-based sauce and poultry, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708894,
+   "food": "Pasta, whole grain, with tomato-based sauce, poultry, and added vegetables, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708895,
+   "food": "Pasta, whole grain, with tomato-based sauce, poultry, and added vegetables, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708896,
+   "food": "Pasta, whole grain, with tomato-based sauce, poultry, and added vegetables, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708897,
+   "food": "Pasta, whole grain, with tomato-based sauce and seafood, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708898,
+   "food": "Pasta, whole grain, with tomato-based sauce and seafood, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708899,
+   "food": "Pasta, whole grain, with tomato-based sauce and seafood, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708900,
+   "food": "Pasta, whole grain, with tomato-based sauce, seafood, and added vegetables, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708901,
+   "food": "Pasta, whole grain, with tomato-based sauce, seafood, and added vegetables, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708902,
+   "food": "Pasta, whole grain, with tomato-based sauce, seafood, and added vegetables, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708904,
+   "food": "Pasta, whole grain, with cream sauce, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708906,
+   "food": "Pasta, whole grain, with cream sauce, and added vegetables, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708907,
+   "food": "Pasta, whole grain, with cream sauce, and added vegetables, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708908,
+   "food": "Pasta, whole grain, with cream sauce, and added vegetables, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708909,
+   "food": "Pasta, whole grain, with cream sauce and meat, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708910,
+   "food": "Pasta, whole grain, with cream sauce and meat, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708911,
+   "food": "Pasta, whole grain, with cream sauce and meat, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708921,
+   "food": "Pasta, whole grain, with cream sauce and seafood, restaurant",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708922,
+   "food": "Pasta, whole grain, with cream sauce and seafood, home recipe",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708923,
+   "food": "Pasta, whole grain, with cream sauce and seafood, ready-to-heat",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708927,
+   "food": "Pasta with tomato-based sauce and beans or lentils",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709745,
+   "food": "Spaghetti sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709746,
+   "food": "Spaghetti sauce with added vegetables",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709747,
+   "food": "Spaghetti sauce, reduced sodium",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709748,
+   "food": "Spaghetti sauce, fat free",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2710114,
+   "food": "Soup, minestrone",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2710175,
+   "food": "Pesto sauce",
+   "cuisine": "italian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706433,
+   "food": "Chicken or turkey with teriyaki",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706462,
+   "food": "Shrimp teriyaki",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706844,
+   "food": "Fish, tofu, and vegetables, tempura",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword",
+    "wikidata:tempura"
+   ]
+  },
+  {
+   "foodID": 2707436,
+   "food": "Edamame, cooked",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword",
+    "wikidata:edamame"
+   ]
+  },
+  {
+   "foodID": 2707455,
+   "food": "Soup, miso or tofu",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708959,
+   "food": "Sushi, NFS",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708960,
+   "food": "Sushi roll, avocado",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708961,
+   "food": "Sushi roll, California",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708962,
+   "food": "Sushi roll, eel",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708963,
+   "food": "Sushi roll, salmon",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708964,
+   "food": "Sushi roll, shrimp",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708965,
+   "food": "Sushi roll tuna",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708966,
+   "food": "Sushi roll, vegetable",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708967,
+   "food": "Sushi, topped with crab",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708968,
+   "food": "Sushi, topped with eel",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708969,
+   "food": "Sushi, topped with salmon",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708970,
+   "food": "Sushi, topped with shrimp",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708971,
+   "food": "Sushi, topped with tuna",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708972,
+   "food": "Sushi, topped with egg",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709152,
+   "food": "Soup, ramen noodles, water added",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709153,
+   "food": "Ramen bowl, NFS",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709154,
+   "food": "Ramen bowl with beef",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709155,
+   "food": "Ramen bowl with chicken",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709156,
+   "food": "Ramen bowl with fish",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709157,
+   "food": "Ramen bowl, vegetarian",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709158,
+   "food": "Ramen bowl with meat and egg",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709159,
+   "food": "Ramen bowl, vegetarian with egg",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2710065,
+   "food": "Vegetable tempura",
+   "cuisine": "japanese",
+   "basis": [
+    "keyword",
+    "wikidata:tempura"
+   ]
+  },
+  {
+   "foodID": 2708950,
+   "food": "Bibimbap, Korean",
+   "cuisine": "korean",
+   "basis": [
+    "keyword",
+    "wikidata:bibimbap"
+   ]
+  },
+  {
+   "foodID": 2708957,
+   "food": "Dukboki or Tteokbokki, Korean",
+   "cuisine": "korean",
+   "basis": [
+    "keyword",
+    "wikidata:tteokbokki"
+   ]
+  },
+  {
+   "foodID": 2710077,
+   "food": "Kimchi",
+   "cuisine": "korean",
+   "basis": [
+    "keyword",
+    "wikidata:kimchi"
+   ]
+  },
+  {
+   "foodID": 2705448,
+   "food": "Tzatziki dip",
+   "cuisine": "mediterranean",
+   "basis": [
+    "wikidata:tzatziki"
+   ]
+  },
+  {
+   "foodID": 2706962,
+   "food": "Gyro sandwich",
+   "cuisine": "mediterranean",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707402,
+   "food": "Hummus, plain",
+   "cuisine": "mediterranean",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707403,
+   "food": "Hummus, flavored",
+   "cuisine": "mediterranean",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707408,
+   "food": "Falafel",
+   "cuisine": "mediterranean",
+   "basis": [
+    "keyword",
+    "wikidata:falafel"
+   ]
+  },
+  {
+   "foodID": 2707483,
+   "food": "Falafel sandwich",
+   "cuisine": "mediterranean",
+   "basis": [
+    "keyword",
+    "wikidata:falafel"
+   ]
+  },
+  {
+   "foodID": 2707616,
+   "food": "Bread, pita",
+   "cuisine": "mediterranean",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707730,
+   "food": "Bread, pita, whole wheat",
+   "cuisine": "mediterranean",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707731,
+   "food": "Bread, pita, wheat or cracked wheat",
+   "cuisine": "mediterranean",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708044,
+   "food": "Baklava",
+   "cuisine": "mediterranean",
+   "basis": [
+    "wikidata:baklava"
+   ]
+  },
+  {
+   "foodID": 2708045,
+   "food": "Basbousa",
+   "cuisine": "mediterranean",
+   "basis": [
+    "wikidata:basbousa"
+   ]
+  },
+  {
+   "foodID": 2709131,
+   "food": "Tabbouleh",
+   "cuisine": "mediterranean",
+   "basis": [
+    "keyword",
+    "wikidata:tabbouleh"
+   ]
+  },
+  {
+   "foodID": 2709830,
+   "food": "Greek Salad, no dressing",
+   "cuisine": "mediterranean",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706393,
+   "food": "Stewed seasoned ground beef, Mexican style",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706424,
+   "food": "Stewed chicken with tomato-based sauce, Mexican style",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706472,
+   "food": "Stewed, seasoned, ground beef and pork, Mexican style",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706479,
+   "food": "Stewed, seasoned, ground beef with potatoes, Mexican style",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706586,
+   "food": "Stewed, seasoned, ground beef and pork with potatoes, Mexican style",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2706750,
+   "food": "Beef taco filling: beef, cheese, tomato, taco sauce",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707129,
+   "food": "Soup, pozole",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword",
+    "wikidata:pozole"
+   ]
+  },
+  {
+   "foodID": 2707135,
+   "food": "Soup, sopa or caldo de pollo",
+   "cuisine": "mexican",
+   "basis": [
+    "wikidata:caldo de pollo"
+   ]
+  },
+  {
+   "foodID": 2707191,
+   "food": "Huevos rancheros",
+   "cuisine": "mexican",
+   "basis": [
+    "wikidata:huevos rancheros"
+   ]
+  },
+  {
+   "foodID": 2707396,
+   "food": "Refried beans",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707397,
+   "food": "Refried beans, from fast food / restaurant",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707398,
+   "food": "Refried beans with meat",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707399,
+   "food": "Refried beans, from canned, reduced sodium",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707664,
+   "food": "Roll, Mexican, bolillo",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2707818,
+   "food": "Gordita/sope shell, plain, no filling",
+   "cuisine": "mexican",
+   "basis": [
+    "wikidata:gordita"
+   ]
+  },
+  {
+   "foodID": 2707823,
+   "food": "Tortilla, corn",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708038,
+   "food": "Tamale, sweet",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708514,
+   "food": "Taco, NFS",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708515,
+   "food": "Taco, corn tortilla, beef, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708516,
+   "food": "Taco, corn tortilla, beef, with beans, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708517,
+   "food": "Taco, corn tortilla, pork, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708518,
+   "food": "Taco, corn tortilla, pork, with beans, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708519,
+   "food": "Taco, corn tortilla, chicken, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708520,
+   "food": "Taco, corn tortilla, chicken, with beans, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708521,
+   "food": "Taco, corn tortilla, with beans, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708522,
+   "food": "Taco, flour tortilla, beef, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708523,
+   "food": "Taco, flour tortilla, beef, with beans, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708524,
+   "food": "Taco, flour tortilla, pork, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708525,
+   "food": "Taco, flour tortilla, pork, with beans, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708526,
+   "food": "Taco, flour tortilla, chicken, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708527,
+   "food": "Taco, flour tortilla, chicken, with beans, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708528,
+   "food": "Taco, flour tortilla, with beans, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708529,
+   "food": "Taco, fish",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708530,
+   "food": "Taco, meat, no cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708531,
+   "food": "Taco, meat, with beans, no cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708532,
+   "food": "Taco, with beans, no cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708534,
+   "food": "Burrito, NFS",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708535,
+   "food": "Burrito, beef, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708536,
+   "food": "Burrito, beef, with rice, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708537,
+   "food": "Burrito, beef, with beans, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708538,
+   "food": "Burrito, beef, with beans and rice, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708539,
+   "food": "Burrito, pork, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708540,
+   "food": "Burrito, pork, with rice, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708541,
+   "food": "Burrito, pork, with beans, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708542,
+   "food": "Burrito, pork, with beans and rice, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708543,
+   "food": "Burrito, chicken, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708544,
+   "food": "Burrito, chicken, with rice, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708545,
+   "food": "Burrito, chicken, with beans, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708546,
+   "food": "Burrito, chicken, with beans and rice, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708547,
+   "food": "Burrito, with beans, no cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708548,
+   "food": "Burrito, with beans, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708549,
+   "food": "Burrito, with beans and rice, cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708550,
+   "food": "Burrito, meat, no cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708551,
+   "food": "Burrito, meat, with rice, no cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708552,
+   "food": "Burrito, meat, with beans, no cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708553,
+   "food": "Burrito, meat, with beans and rice, no cheese",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708554,
+   "food": "Burrito, cheese only",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708555,
+   "food": "Burrito bowl, NFS",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708556,
+   "food": "Burrito bowl, beef or pork",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708557,
+   "food": "Burrito bowl, beef or pork, with rice",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708558,
+   "food": "Burrito bowl, beef or pork, with beans",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708559,
+   "food": "Burrito bowl, beef or pork, with beans and rice",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708560,
+   "food": "Burrito bowl, chicken",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708561,
+   "food": "Burrito bowl, chicken, with rice",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708562,
+   "food": "Burrito bowl, chicken, with beans",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708563,
+   "food": "Burrito bowl, chicken, with beans and rice",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708564,
+   "food": "Burrito bowl, with beans",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708565,
+   "food": "Enchilada, NFS",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708566,
+   "food": "Enchilada, beef",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708567,
+   "food": "Enchilada, pork",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708568,
+   "food": "Enchilada, chicken",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708569,
+   "food": "Enchilada, no meat",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708570,
+   "food": "Tamale, NFS",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708571,
+   "food": "Tamale, beef",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708572,
+   "food": "Tamale, pork",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708573,
+   "food": "Tamale, chicken",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708574,
+   "food": "Tamale, no meat",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708576,
+   "food": "Nachos, NFS",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708577,
+   "food": "Nachos, cheese only",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708578,
+   "food": "Nachos, beef or pork",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708579,
+   "food": "Nachos, beef or pork, with beans",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708580,
+   "food": "Nachos, chicken",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708581,
+   "food": "Nachos, chicken, with beans",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708582,
+   "food": "Nachos, with beans",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708583,
+   "food": "Gordita, cheese only",
+   "cuisine": "mexican",
+   "basis": [
+    "wikidata:gordita"
+   ]
+  },
+  {
+   "foodID": 2708584,
+   "food": "Gordita, with beans",
+   "cuisine": "mexican",
+   "basis": [
+    "wikidata:gordita"
+   ]
+  },
+  {
+   "foodID": 2708585,
+   "food": "Gordita, meat",
+   "cuisine": "mexican",
+   "basis": [
+    "wikidata:gordita"
+   ]
+  },
+  {
+   "foodID": 2708586,
+   "food": "Gordita, meat, with beans",
+   "cuisine": "mexican",
+   "basis": [
+    "wikidata:gordita"
+   ]
+  },
+  {
+   "foodID": 2708587,
+   "food": "Chimichanga, meat",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708588,
+   "food": "Chimichanga, with beans",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708589,
+   "food": "Chimichanga, chicken",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708590,
+   "food": "Quesadilla, NFS",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708591,
+   "food": "Quesadilla, cheese only",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708592,
+   "food": "Quesadilla, beef or pork",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708593,
+   "food": "Quesadilla, chicken",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708594,
+   "food": "Quesadilla, with vegetables",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708595,
+   "food": "Quesadilla, beef or pork, with vegetables",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708596,
+   "food": "Quesadilla, chicken, with vegetables",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708600,
+   "food": "Taquito, beef or pork",
+   "cuisine": "mexican",
+   "basis": [
+    "wikidata:taquito"
+   ]
+  },
+  {
+   "foodID": 2708601,
+   "food": "Taquito, chicken",
+   "cuisine": "mexican",
+   "basis": [
+    "wikidata:taquito"
+   ]
+  },
+  {
+   "foodID": 2708603,
+   "food": "Fajita, NFS",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword",
+    "wikidata:fajita"
+   ]
+  },
+  {
+   "foodID": 2708604,
+   "food": "Fajita, chicken",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword",
+    "wikidata:fajita"
+   ]
+  },
+  {
+   "foodID": 2708605,
+   "food": "Fajita, beef or pork",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword",
+    "wikidata:fajita"
+   ]
+  },
+  {
+   "foodID": 2708606,
+   "food": "Fajita, shrimp",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword",
+    "wikidata:fajita"
+   ]
+  },
+  {
+   "foodID": 2708607,
+   "food": "Fajita, vegetable",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword",
+    "wikidata:fajita"
+   ]
+  },
+  {
+   "foodID": 2709162,
+   "food": "Soup, tortilla",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709307,
+   "food": "Guacamole, NFS",
+   "cuisine": "mexican",
+   "basis": [
+    "wikidata:guacamole"
+   ]
+  },
+  {
+   "foodID": 2709308,
+   "food": "Guacamole with tomatoes",
+   "cuisine": "mexican",
+   "basis": [
+    "wikidata:guacamole"
+   ]
+  },
+  {
+   "foodID": 2709736,
+   "food": "Salsa, NFS",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709737,
+   "food": "Salsa, pico de gallo",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword",
+    "wikidata:pico de gallo"
+   ]
+  },
+  {
+   "foodID": 2709738,
+   "food": "Salsa, red",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709739,
+   "food": "Salsa, red, homemade",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2709743,
+   "food": "Salsa verde or salsa, green",
+   "cuisine": "mexican",
+   "basis": [
+    "keyword",
+    "wikidata:salsa verde"
+   ]
+  },
+  {
+   "foodID": 2707124,
+   "food": "Soup, pho, with meat",
+   "cuisine": "southeastAsian",
+   "basis": [
+    "keyword",
+    "wikidata:pho"
+   ]
+  },
+  {
+   "foodID": 2707125,
+   "food": "Soup, pho, no meat",
+   "cuisine": "southeastAsian",
+   "basis": [
+    "keyword",
+    "wikidata:pho"
+   ]
+  },
+  {
+   "foodID": 2708804,
+   "food": "Pad Thai, NFS",
+   "cuisine": "southeastAsian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708805,
+   "food": "Pad Thai, meatless",
+   "cuisine": "southeastAsian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708806,
+   "food": "Pad Thai with chicken",
+   "cuisine": "southeastAsian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708807,
+   "food": "Pad Thai with seafood",
+   "cuisine": "southeastAsian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708808,
+   "food": "Pad Thai with meat",
+   "cuisine": "southeastAsian",
+   "basis": [
+    "keyword"
+   ]
+  },
+  {
+   "foodID": 2708809,
+   "food": "Adobo, with noodles",
+   "cuisine": "southeastAsian",
+   "basis": [
+    "wikidata:adobo"
+   ]
+  },
+  {
+   "foodID": 2708958,
+   "food": "Adobo, with rice",
+   "cuisine": "southeastAsian",
+   "basis": [
+    "wikidata:adobo"
+   ]
+  }
+ ]
+}

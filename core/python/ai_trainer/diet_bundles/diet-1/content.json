@@ -1,0 +1,1062 @@
+{
+  "policy": {
+    "id": "DIET_EVIDENCE_01",
+    "energy": {
+      "equation": {
+        "value": "nasem2023_eer_adult",
+        "source": "NASEM23",
+        "locator": "NASEM 2023 DRI for Energy (PMID 36693139; NCBI Bookshelf NBK588659): Summary, Table S-1 p.4 (adult TEE equations; units footnote), Table S-2 pp.6-7 (EER for ages 0-18.99 y with energy cost of growth), Tables S-5 and S-6 (lactation), p.11 (two-step planning); Ch. 5 p.68 and Table 5-1 p.72 (8,600-observation database), p.70 (PAL > 2.5 excluded), p.71 (IOM-database adults with normal weight, overweight or obesity; BMI < 18.5 excluded), p.76 (BMI-subset models), Table 5-4 p.82 (PAL bands, including 14-18.99 y), p.86 and Table 5-6 (adult n and fit; underweight/extreme-obesity sensitivity; FFM/FM model), p.87 (BMI slope test); Ch. 7 pp.146-147 (two-step method; no valid PAL classification tool)",
+        "certainty": "high",
+        "note": "This is the current US/Canada DRI and replaces the IOM 2005 EER. The equations predict total energy expenditure (TEE, which equals EER in weight-stable adults) from sex, age, height, weight and a physical-activity category. The combined doubly-labelled-water (DLW) database held 8,600 observations across all life stages (Ch. 5 p.68; Table 5-1 p.72). The adult equations' fit is reported on 1,016 men and 1,342 women (Table 5-6, p.86). Height and weight slopes did not differ between normal-weight and overweight/obese adults (p.87). Underweight adults were in the general fit, and removing them together with BMI > 40 did not change model performance (p.86). But their accuracy was not reported separately, the slope test did not include them, and the IOM part of the database excluded BMI < 18.5 (p.71). So the set is shown to cover normal weight, overweight and obesity; treat underweight as less certain. Do not mix these equations with IOM 2005 or FAO 2004 PAL bands: the same label means a different multiplier in each system (see contradictions).\n\nUsers the adult equations do not cover (cross-group flags for the safety group):\n(a) Pregnancy. The adult equations exclude it. IOM 2009 sets a positive weekly gain for every pre-pregnancy BMI group and gives no safe rate of loss (findings 748, 749, 751). safety.exclusions must list pregnancy so that safety_block withholds targets.\n(b) Lactation. The adult equations exclude it (NASEM adds milk-production and mobilisation terms, Tables S-5 and S-6), and no verified finding covers a deficit while breastfeeding (open question). safety.exclusions must list lactation until that is resolved.\n(c) BMI below 18.5. Fat loss for these users should be blocked by a safety BMI floor (17.5 vs 18.5 is an open contradiction; findings 472, 39). The engine has no BMI check today.\n\nLimits:\n(1) Age. The adult equations cover ages 19+. For under-19s NASEM uses separate EER equations with an energy-cost-of-growth term (+20 kcal/d at 14-18.99 y; Summary Table S-2) and separate 14-18.99 y PAL bands (Table 5-4). These were read in the saved NAP text but are not in the verified findings. safety.minimumAgeYears is 18, so the owner must decide how an 18-year-old is handled: apply the adult equations as an owner decision, add the 14-18.99 y equations as verified findings, or raise the minimum age to 19. Pontzer 2021 (finding 126, a single pooled-DLW study) puts the start of the adult TEE plateau at about 20.5 y (95% CI 19.8-21.2), with 20-25-year-olds averaging 102.7% of the adult-expected value. The adult equation therefore probably underestimates an 18-year-old by a few percent (app inference). That makes a deficit slightly larger than intended, and the weight-trend correction (finding 50) must catch it. Also, the engine's age_years() takes the difference in calendar years, so it can count a user up to one year older than they are, and a 17-year-old can pass an 18-year minimum. The effect on the EER is small (at most 10.83 kcal/d for men, 7.01 for women), but the admission effect is a safety-group issue.\n(2) PAL above 2.5 was excluded (finding 55; Ch. 5 p.70), so heavy endurance trainers will be underestimated even at veryActive. Do not cap their intake at the veryActive EER.\n(3) NASEM says no valid, reliable tool exists to classify an individual's PAL category (Ch. 7 p.147). The EER is only a starting point. The report's two-step method is to compute the EER, then monitor weight and adjust intake (finding 50; Summary p.11; Ch. 7 p.146).\n(4) No body-composition term. NASEM's own FFM/FM-based adult model did only slightly better than the weight-based one (Ch. 5 p.86). In muscular physique athletes, weight-based RMR equations underestimated measured RMR by 4.5-15.1% (finding 100). An athlete meta-analysis found Mifflin-St Jeor, Owen and FAO/WHO/UNU equations significantly biased and imprecise (finding 76; the verified finding gives no direction of bias). Whether this carries over to the EER is untested (low certainty).\n\nCoefficients and the Ch. 5 text were re-checked against the saved NAP read-online text on 2026-09-24. Review: accepted the objections on adult sample size, the FFM/FM model, the direction of finding 76, 18-year-old handling, the age calculation and the pregnancy exclusion. The objection that underweight adults are outside the validation range was only partly accepted, because p.86 shows underweight observations were in the general fit. Findings: docs/research/diet-evidence.json #43, #44, #45, #47, #50, #55, #76, #100, #126, #748, #749, #751, #472, #39."
+      },
+      "eerCoefficients": {
+        "value": {
+          "male": {
+            "inactive": {
+              "intercept": 753.07,
+              "age": -10.83,
+              "heightCm": 6.5,
+              "weightKg": 14.1
+            },
+            "lowActive": {
+              "intercept": 581.47,
+              "age": -10.83,
+              "heightCm": 8.3,
+              "weightKg": 14.94
+            },
+            "active": {
+              "intercept": 1004.82,
+              "age": -10.83,
+              "heightCm": 6.52,
+              "weightKg": 15.91
+            },
+            "veryActive": {
+              "intercept": -517.88,
+              "age": -10.83,
+              "heightCm": 15.61,
+              "weightKg": 19.11
+            }
+          },
+          "female": {
+            "inactive": {
+              "intercept": 584.9,
+              "age": -7.01,
+              "heightCm": 5.72,
+              "weightKg": 11.71
+            },
+            "lowActive": {
+              "intercept": 575.77,
+              "age": -7.01,
+              "heightCm": 6.6,
+              "weightKg": 12.14
+            },
+            "active": {
+              "intercept": 710.25,
+              "age": -7.01,
+              "heightCm": 6.54,
+              "weightKg": 12.34
+            },
+            "veryActive": {
+              "intercept": 511.83,
+              "age": -7.01,
+              "heightCm": 9.07,
+              "weightKg": 12.56
+            }
+          }
+        },
+        "source": "NASEM23",
+        "locator": "NASEM 2023 DRI for Energy: Summary Table S-1 p.4 (men and women 19+ y; units footnote), repeated in Table S-3 pp.7-8; Summary p.11 (worked example); Ch. 5 p.68 (database), Table 5-6 p.86 (adult n and fit), p.87 (BMI slope test), Table 5-10 p.92 (external validation)",
+        "certainty": "high",
+        "note": "Use as TEE (kcal/d) = intercept + age*years + heightCm*cm + weightKg*kg. The age coefficient is negative (-10.83 for men, -7.01 for women), and the male veryActive intercept is negative (-517.88). All 32 coefficients match the published values (saved NAP Summary Table S-1, re-checked programmatically on 2026-09-24). The footnote gives the units: kcal/d, age in years, weight in kg, height in cm. For weight-stable adults EER = TEE (Table S-3 note). Published fit (Table S-1; Table 5-6): men n 1,016, R2 0.73, RMSE 339 kcal/d, MAPE 9.4%; women n 1,342, R2 0.71, RMSE 246 kcal/d, MAPE 8.7%. External validation (65 studies, 5,056 people) compared cohort-mean predicted TEE with observed TEE across 144 cohorts: r 0.92 for men (32 cohorts) and 0.93 for women (71 cohorts), with RMSE 222 and 169 kcal/d (Table 5-10, p.92). This is cohort-level agreement and overstates individual accuracy, so use energy.predictionErrorKcal for individual error. Test case from the report: a 22-year-old, 165-cm, 63-kg low-active woman gives 2,275 kcal/d (Summary p.11; these coefficients give 2,275.37). Pair these only with the NASEM 2023 PAL bands in energy.activityLevels. Review: objection accepted (validation r is cohort-level; locator completed). Findings: docs/research/diet-evidence.json #43, #44."
+      },
+      "activityLevels": {
+        "value": [
+          {
+            "id": "inactive",
+            "title": "Inactive",
+            "palMin": 1.0,
+            "palMax": 1.53,
+            "description": "Everyday living only (about 30 min of walking and about 90 min of light-to-moderate household activity a day). Minimally active beyond daily living, with little or no occupational activity. Typical PAL about 1.4."
+          },
+          {
+            "id": "lowActive",
+            "title": "Low active",
+            "palMin": 1.53,
+            "palMax": 1.68,
+            "description": "Everyday living plus about 60-80 min of walking at 3-4 mph (about 4.8-6.4 km/h) each day. Typical PAL about 1.6."
+          },
+          {
+            "id": "active",
+            "title": "Active",
+            "palMin": 1.68,
+            "palMax": 1.85,
+            "description": "Everyday living plus, each day, about 30-50 min of walking at 3-4 mph (about 4.8-6.4 km/h), 45 min of moderate cycling and 40 min of doubles tennis. Typical PAL about 1.75."
+          },
+          {
+            "id": "veryActive",
+            "title": "Very active",
+            "palMin": 1.85,
+            "palMax": 2.5,
+            "description": "Everyday living plus, each day, about 45 min of moderate cycling, about 25 min of jogging at 10 min per mile (about 6.2 min/km) and 60 min of doubles tennis. Typical PAL about 2.05."
+          }
+        ],
+        "source": "NASEM23",
+        "locator": "NASEM 2023 DRI for Energy: Ch. 5, p.80 (derivation), Tables 5-3 and 5-4 p.82 (PAL cut-offs), p.70 (PAL > 2.5 exclusion); Ch. 7, p.147 (inactive definition; classification limits) and Table 7-1 p.148 with its text (category labels, activity examples, substitution, office-work caveat)",
+        "certainty": "low",
+        "note": "The titles are NASEM's category labels (Table 7-1). They are required, because diet_view.diet_options reads level['title'] for every level and would raise a KeyError without them. palMin is inclusive and palMax exclusive, as published (for example 1.53 <= PAL < 1.68). The cut-offs are the 25th, 50th and 75th percentiles of DLW PAL (observed plus predicted) in adults aged 19-70 (n 4,299), and they apply at all adult ages (finding 45; Ch. 5 p.80; Tables 5-3 and 5-4, p.82). They are high certainty and were checked against Table 5-4 and the Table 7-1 note. The engine never computes with palMin or palMax. The user picks a level from its title and description, and those come from Table 7-1, which NASEM offers only as a descriptive guide (finding 46, low certainty). The object is therefore graded low, the more conservative grade for the part the app uses. In Table 7-1 the activities within a category are added together on top of daily living: NASEM sums active as 30-50 min of moderate activity plus about 85 min of vigorous activity, and very active as more than 2 h of vigorous activity. NASEM adds that other activities can be substituted, since the examples show only amount and intensity. It also says the examples may suit mainly people in low-exertion jobs such as office work (p.148). The inactive wording follows NASEM: minimally active beyond daily living, with little or no occupational activity (p.147). The mph and min/mile values are converted to metric by arithmetic only (3-4 mph = 4.8-6.4 km/h; 10 min/mile = 6.2 min/km). NASEM says step counts and questionnaires correlate only weakly with DLW PAL, that meeting activity guidelines cannot place a person in a category, and that no valid, reliable tool classifies an individual (p.147). The app should therefore say the choice is approximate and rely on the weight-trend correction (finding 50). Table 7-1 does not map resistance-training sessions onto PAL (open question). PAL above 2.5 is outside the equations' range (finding 55; Ch. 5 p.70). Do not use the IOM 2005 (1.4/1.6/1.9) or FAO 2004 (1.70/2.00) bands with these equations. Review: accepted both objections. The title field and the low grade come from the second objection; the km/h correction, the substitution and office-work caveats and NASEM's inactive wording come from the first. The first objection's moderate grade was not kept, because the app uses only the low-certainty descriptions. Findings: docs/research/diet-evidence.json #45, #46, #55, #50."
+      },
+      "predictionErrorKcal": {
+        "value": {
+          "male": 342,
+          "female": 241
+        },
+        "source": "NASEM23",
+        "locator": "NASEM 2023 DRI for Energy: Ch. 5, 'Prediction Error' and Table 5-8, p.89 (SEPV, adults 19+ y); Ch. 7, pp.152-153 (interpretation and worked example); Summary p.12 (68%/95% interpretation)",
+        "certainty": "high",
+        "note": "Standard error of the predicted value (SEPV) in kcal/d, checked against Table 5-8 in the saved NAP text. NASEM gives it for an individual at the stratum's average age, height and weight with an active PAL: men 50.3 y, 175.9 cm, 83.1 kg (predicted TEE 2,930 kcal/d); women 53.9 y, 162.3 cm, 71.9 kg (2,281 kcal/d). It therefore varies somewhat with a user's characteristics. NASEM's reading is that about 68% of people have a true requirement within +/-1 SEPV of their EER, and almost everyone (about 95%) within +/-1.96 SEPV. That is +/-670 kcal/d for men and +/-472 for women (computed). Report example: a woman with EER 2,275 kcal/d has a 68% range of 2,034-2,516 kcal/d and a 95% range of 1,803-2,747 kcal/d (Ch. 7 p.152). The published model RMSE is similar (men 339, women 246 kcal/d; Table S-1). App inference, not stated by NASEM: the SEPV is equation error given the correct PAL category, so a wrongly chosen category adds error and the displayed band is a lower bound on uncertainty. Suggested UI: show the target as an estimate with a +/-1 SEPV band. Review: objection accepted (page locators, stated covariates, inference labelled). Findings: docs/research/diet-evidence.json #47, #48, #43, #44."
+      },
+      "kcalPerGram": {
+        "value": {
+          "protein": 4,
+          "carbohydrate": 4,
+          "fat": 9
+        },
+        "source": "FAO04",
+        "locator": "FAO/WHO/UNU 2004, Human energy requirements (FAO Food and Nutrition Technical Report Series 1), Ch. 2, section 2.2 'Sources of dietary energy'",
+        "certainty": "high",
+        "note": "This is an official report without a DOI or PMID: ISBN 92-5-105212-3, ISSN 1813-3932 (both checked on the FAO report page). The text gives average metabolizable energy for a mixed diet, after allowing for intestinal absorption and the unoxidised nitrogen of protein: 16.7 kJ (4 kcal)/g for carbohydrate and protein and 37.7 kJ (9 kcal)/g for fat (re-read in the saved FAO text). Ethanol is 29.3 kJ (7 kcal)/g in the same section, which matches ACSM 2016 (finding 216) if alcohol logging is added. These are general factors for turning macronutrient grams into energy, for example when splitting a kcal target into gram targets. When a food record already carries an analysed energy value (for example FoodData Central), use that value rather than recomputing it from grams. No reviewer objection; unchanged from the draft. Findings: docs/research/diet-evidence.json #36, #216."
+      },
+      "tissueKcalPerKgBodyMass": {
+        "value": 7700,
+        "source": "owner",
+        "rationale": "No official report or synthesis gives one energy value per kg of body-mass change. The published values depend on body fat, sex and time on the diet, so 7,700 kcal/kg (the 3,500 kcal/lb rule, 32.2 MJ/kg; findings 524, 525) is an owner decision. The reasoning:\n\n(1) Energy stored in tissue lost after the first month ranges from about 4,900 to over 9,300 kcal/kg. CALERIE (Heymsfield 2012; 23 overweight adults) measured a cumulative 6,041 +/- 376 (SEM) kcal/kg at week 6, with no significant change to week 24 (finding 547). Kiel's 13-week very-low-calorie diet gave 6,119 kcal/kg in men and 6,804 in women (finding 548). Hall 2008's modified-Forbes model gives about 24.7 MJ/kg (about 5,900 kcal/kg) when 15 kg is lost from 20 kg of initial fat. It finds the fixed rule roughly valid only when initial fat exceeds about 30 kg; below that the rule overestimates the deficit needed, significantly so below about 25 kg (findings 524, 525). Tissue densities are 9,300 kcal/kg for fat and 1,100 for fat-free mass (findings 550, 557, 818). Resistance-trained dieting men lost a mean 28.7% of lost weight as lean mass (range 12-54%; systematic review, finding 233), which gives about 6,950 kcal/kg (0.713 x 9,300 + 0.287 x 1,100), with a range of about 4,900-8,300. Trained women kept lean mass on average, which gives about 9,300 kcal/kg or more.\n\n(2) The intake change needed per kg of loss is larger than the tissue energy, because expenditure falls as weight falls. TEE drops about 94-100 kJ/d (about 22-24 kcal/d) per kg lost (finding 534), adaptive thermogenesis adds about 220 kcal/d (finding 53), and the thermic effect of food (about 10% of expenditure; finding 56) falls with intake. Sanghvi 2015 studied non-obese CALERIE adults with a linearised model whose weight-derived intake changes matched DLW/DXA intake-balance values at group level. The model uses an effective rho of 8,840 +/- 450 kcal/kg (findings 552, 553). The owner reads the gap between rho and tissue energy as this fall in expenditure; Sanghvi does not break rho down this way. There is also a direct test: in seven supervised trials over about 1-3 months, deficits sized with the 3,500 kcal/lb rule produced 20.1 lb of loss against 27.6 lb predicted (finding 544).\n\n(3) Safety direction. For fat loss, a larger factor gives a larger deficit. 7,700 is below the 8,840 intake-conversion value, and by the Thomas 2013 test deficits sized with it produce slower loss than targeted on average, so the first deficit errs small. The tissue-only values for lean users and men (about 5,900-6,950) would give smaller deficits still. But they ignore the expenditure fall in (2) and would push realised loss further below target for most users. They would add no safety beyond the engine's energy floor (safety.minimumEnergyKcal, safety.maximumDeficitFractionOfTEE, safety.energyAvailabilityFloorKcalPerKgFFM) and the goals.fatLoss.maxWeeklyLossFraction check. The transient early values (about 2,500-5,500 kcal/kg in the first 1-4 weeks, mostly glycogen, protein and water; findings 547, 551) are not used, because they would under-dose almost every user.\n\n(4) NASEM uses the EER only as a starting point and then adjusts intake from the weight trend (finding 50), so this factor sets only the first offset. Findings: docs/research/diet-evidence.json #525, #524, #547, #548, #551, #233, #557, #818, #550, #552, #553, #544, #537, #534, #53, #56, #50, #273."
+      }
+    },
+    "goals": {
+      "fatLoss": {
+        "weeklyChangeFraction": {
+          "value": -0.005,
+          "source": "RUIZCASTELLANO21",
+          "locator": "Ruiz-Castellano C et al. 2021, Nutrients 13(9):3255: Abstract; Section 3 Energy Intake (case studies: FFM kept better at 0.5 than at 0.7 or 1.0%/wk); Section 9 Conclusions and Practical Applications. Corroborated by Helms ER et al. 2014, JISSN 11:20 (doi:10.1186/1550-2783-11-20): Abstract, 'Caloric intake for competition', Table 1. Deficit limits: ACSM/AND/DC 2016, MSSE 48(3) p.548 (<1%/wk; 250-500 kcal/d); Murphy & Koehler 2022, Scand J Med Sci Sports 32(1):125, PubMed abstract.",
+          "certainty": "low",
+          "note": "Unit: signed fraction of body mass per week (-0.005 = lose 0.5%/wk). The engine turns this value into the daily energy offset (fraction x body mass x energy.tissueKcalPerKgBodyMass / 7), so in practice it is the prescribed deficit.\n\nChanged from the draft's -0.007. Reviewers split: one objection kept -0.007 and disclosed the conflict, the other moved to -0.005. I accepted -0.005. The %-body-mass sources and the kcal-deficit sources conflict (a listed contradiction), the task rule is to take the more conservative value for a safety-related parameter, and the cited findings support it. -0.005 is the lower bound of the 0.5-1.0%/wk range in Ruiz-Castellano 2021 and Helms 2014. Both are narrative reviews, so this is graded low.\n\nReasons: (1) In the Ruiz-Castellano case studies, fat-free mass was kept better at 0.5%/wk than at 0.7 or 1%/wk (low quality). (2) At the static 7,700 kcal/kg rule (my arithmetic), -0.007 means about 460 kcal/d at 60 kg, 580 at 75 kg and 850 at 110 kg. That is above ACSM 2016's own 250-500 kcal/d starting deficit for most adults. It is above the ~500 kcal/d at which the Murphy & Koehler 2022 meta-regression (abstract only) found that deficits abolished lean-mass gains from resistance training. Above ~100 kg it is also above AHA 2013's 500-750 kcal/d. At -0.005 the figures are about 330, 410 and 605 kcal/d. That stays inside ACSM and Murphy up to ~90 kg and inside AHA up to ~135 kg. Roth 2022 (systematic review) found that observed deficits in trained lifters averaged ~350-400 kcal/d, and case studies at ~580-882 kcal/d lost ~43% of weight as lean tissue. (3) Trials with good body-composition results achieved ~0.4-0.45%/wk (Conlin 2021; ICECAP, derived). (4) NASEM 2023 (moderate) cites a systematic review in which ~0.5 kg/wk preserved REE better than ~1.1 kg/wk. That supports the direction, not an exact rate. (5) Hall 2008: the static rule overstates the deficit needed when body fat is below ~30 kg, so lean users will probably lose faster than the target. The engine intervenes only beyond maxWeeklyLossFraction, so a lower target leaves more margin.\n\nWhat this gives up: Garthe 2011, one RCT in elite athletes of both sexes (4 RT sessions/wk), is the basis of ACSM's EAL Q1 (Grade II, Fair). The slow arm (target 0.7%/wk) lost 0.7 +/- 0.8%/wk on a ~19% intake cut and gained lean mass (+2.1%). The fast arm (target 1.4%/wk) actually lost 1.0 +/- 0.4%/wk on a ~30% cut and kept lean mass flat (-0.2%). The slow arm took ~8.5 weeks instead of 5.3 to reach the same total loss. No trial compared 0.5 with 0.7%/wk. The owner may offer -0.007 as an opt-in for lean trained users; it is still inside maxWeeklyLossFraction.\n\nLimits: the evidence comes from lean trained adults, and no source gives a body-fat cut-off for changing the rate (open gap). Obesity guidance gives kcal deficits instead (AHA 500-750; NICE trials 500-800), and no verified absolute kg/wk cap exists (open gallstone gap). So the safety-group energy floors still bind at high body mass.\n\nGating (safety group, not this value): the engine's safety_block withholds targets for pregnancy (IOM 2009 prescribes weight gain), lactation, SCOFF >=2 (refer) and listed conditions such as NICE's flags (e.g. type 1 diabetes), but only when safety.exclusions lists them. No engine gate stops fatLoss at low BMI. The owner should add one at BMI <18.5 (Triad 2014 restoration target; <=17.5 is the LEA flag). Lactation and glucose-lowering or GLP-1 drugs have no verified finding (open gaps), so exclude those users until reviewed. Findings: docs/research/diet-evidence.json #244, #245, #220, #227, #195, #345, #217, #218, #194, #346, #240, #231, #232, #780, #768, #54, #316, #723, #525, #472, #457, #479, #748, #740, #770, #366."
+        },
+        "maxWeeklyLossFraction": {
+          "value": 0.01,
+          "source": "THOMAS16",
+          "locator": "ACSM/AND/DC 2016 joint position statement, MSSE 48(3): p.548 'Principles of altering body composition and weight' ('<1% body mass per week'); Table 1 EAL Q1 p.544. Supporting trial: Garthe 2011, IJSNEM 21(2):97, PubMed abstract Results.",
+          "certainty": "low",
+          "note": "Unit: positive magnitude, as a fraction of body mass per week (0.01 = 1%/wk). weeklyChangeFraction is the signed target (-0.005). The engine never targets this rate. It compares the signed observed trend with -0.01, and a trend below that (losing faster than 1%/wk) triggers LOSING_FASTER_THAN_SAFE, a proposal to eat more. The comparison is strict, so a trend of exactly -1.0%/wk sits on the boundary and is not flagged.\n\nBasis: ACSM 2016 says weekly loss should stay below 1% of body mass to protect fat-free mass and performance. Garthe 2011, the RCT behind it, supports putting the edge here: the fast arm (planned 1.4%/wk) actually lost 1.0 +/- 0.4%/wk and kept lean mass flat (-0.2%), while the 0.7%/wk arm gained it (+2.1%). In the Ruiz-Castellano case studies, about 43% of the weight lost at 1%/wk was fat-free mass.\n\nThis is the strictest cap stated as % of body mass. Helms 2014 and Ruiz-Castellano 2021 put 1%/wk at the top of their ranges. The Female Athlete Triad Coalition 2014 scores 5 to <10% loss in one month as moderate risk (about 1.2-2.3%/wk). It and IOC 2018 flag >=10% in a month as high risk or an LEA indicator. 1%/wk for a month (~4.3%) stays under the Triad's 5%/month band.\n\nOnce kcal sources are converted, it is not the tightest limit (my arithmetic, static 7,700 kcal/kg rule). 1%/wk is about 825 kcal/d at 75 kg and 1,100 at 100 kg. That is above ACSM's own 250-500 kcal/d, Murphy & Koehler 2022's ~500 kcal/d (abstract only) and AHA 2013's 500-750 kcal/d. Hall 2008 notes that the rule overstates the deficit when body fat is below ~30 kg. Observed losses of 0.5-1.0%/wk therefore go unflagged. The kcal limits are enforced through the target (weeklyChangeFraction) and the safety-group floors (e.g. safety.maximumDeficitFractionOfTEE, safety.minimumEnergyKcal), not through this cap.\n\nNoise (my arithmetic; ~1% independent per-reading SD and a 28-day least-squares window assumed): the gap between target and cap is 0.005/wk. The slope SE is ~0.0016/wk with daily weigh-ins and ~0.0028/wk with 2.5 weigh-ins per week. A user exactly on target is therefore flagged in about 0.1% (daily) to 3.5% (2.5/wk) of checks, against 3-14% at the draft's -0.007 target. A false flag points toward eating more, the safe direction, and is only a proposal.\n\nCaveats: (1) the evidence comes from athletes. (2) No verified finding gives an absolute kg/week cap for users with obesity. Johansson 2014 (Int J Obes 38(2):279-84; epub 2013) links larger early loss to gallstones but reports no threshold (open safety gap), so this fraction does not replace an absolute cap. Graded low: ACSM gives the cap without a pooled dose-response. NASEM 2023 (moderate) supports only the direction. Findings: docs/research/diet-evidence.json #195, #345, #217, #220, #244, #245, #474, #456, #54, #792, #194, #346, #240, #780, #525."
+        },
+        "proteinGPerKgBodyMass": {
+          "value": 2.0,
+          "source": "THOMAS16",
+          "locator": "ACSM/AND/DC 2016 joint position statement, MSSE 48(3): p.551 'Protein needs'; p.548 weight-loss paragraph; p.562 summary (DC concurrent publication p.17, p.11, p.36).",
+          "certainty": "low",
+          "note": "Unit: g protein per kg body mass per day. ACSM gives >=2.0 g/kg/d during energy restriction, spread over the day. The value sits at that floor, the conservative choice among conflicting sources (a listed contradiction). The other sources: IAAF 2019 gives >1.6-2.4 g/kg BW. Ruiz-Castellano 2021 gives 2.2-3.0 g/kg BW. ISSN 2017 gives 2.3-3.1 'g/kg' with no cited source. Helms 2014 (a systematic review and a narrative review) gives 2.3-3.1 g/kg FFM. That is about 1.7-2.6 g/kg body mass at 15-25% body fat (my arithmetic), so 2.0 fits its lower end. Trials used 1.8-2.4 g/kg BM: Campbell 2020 1.8, Conlin 2021 2.0, ICECAP 2.3, and Longland 2016 2.4 vs 1.2, where the higher dose gained more lean mass. IAAF 2019 says >2.5 g/kg/d adds no adaptation.\n\nCross-group: after any pattern multiplier, the engine clamps every goal's protein between macros.proteinMinimumGPerKgBodyMass and macros.proteinMaximumGPerKgBodyMass. That maximum must be at least 2.0, or this target is silently cut, and it should not exceed 2.5 (IAAF). Once BMI reaches macros.proteinReferenceFromBMI, the engine applies this per-kg value to a reference mass (macros.proteinReferenceBMI x height squared). The high-BMI denominator decision therefore sits in the macros group, not here. That group should keep absolute intakes near the kidney data below (~1.8 g/kg at ~92 kg, about 170 g/d). On actual mass, 2.0 g/kg at 120 kg would be ~240 g/d. The only overweight-specific figure is 1.2-1.5 g/kg, and it is second-hand (Martinez-Gomez & Roberts, JSCR 2022, narrative review).\n\nKidney: the Devries 2018 meta-analysis found no GFR difference with higher protein, including during energy restriction (low/very-low certainty). Higher-protein arms averaged 1.81 +/- 0.60 g/kg/d. Participants were adults without CKD, including people with obesity, T2D or hypertension: mean BMI 31.1, mean body mass 92.4 kg, study range 64.5-106.0 kg (checked in the full text). IAAF says 2.4 g/kg/d during weight loss is not linked to kidney or bone problems in healthy athletes.\n\nExclusion: users with clinician-diagnosed kidney disease, reduced eGFR, albuminuria or a kidney transplant get no automated protein target and are referred. KDIGO 2024 defines CKD as GFR <60 or ACR >=30 mg/g for >=3 months. It advises avoiding >1.3 g/kg/d in CKD at risk of progression and suggests 0.8 g/kg/d in G3-G5 (grade 2C). Undiagnosed CKD cannot be screened out, which is one more reason to stay at the ACSM floor. The evidence comes mainly from lean, resistance-trained adults. Findings: docs/research/diet-evidence.json #197, #341, #406, #162, #221, #250, #140, #166, #725, #317, #326, #407, #187, #189, #408, #565, #566, #388, #742, #743, #744."
+        }
+      },
+      "muscleGain": {
+        "weeklyChangeFraction": {
+          "value": 0.0025,
+          "source": "IRAKI19",
+          "locator": "Iraki J et al. 2019, Sports (Basel) 7(7):154: Section 2 Energy, 'Positive Energy Balance'; Section 8 Summary; Abstract.",
+          "certainty": "low",
+          "note": "Unit: signed fraction of body mass per week (+0.0025 = gain 0.25%/wk). No objection; kept as drafted, with wording aligned to the maxWeeklyGainFraction correction. Iraki 2019 recommends about 0.25-0.5% of body mass per week for novice and intermediate lifters, and slower for advanced lifters. It is a narrative review, so this cannot be graded above low. It is the only verified source that gives a %BW/wk gain rate. The default is the lower bound because the extra gain from a larger surplus was mostly fat. In Garthe 2013 (elite athletes), a counselled surplus of about 0.3-0.5%/wk (derived, not reported) raised fat mass by 15% against 3% with ad libitum eating, and lean-mass gain did not differ. Iraki describes the trial as +1.7 kg lean and +1.1 kg fat vs +1.2 kg and +0.2 kg. In Ribeiro 2019 (a pilot), the higher intake added significant fat for little extra estimated muscle. Iraki also cites a trial suggesting 200-300 kcal/d for highly trained athletes. Slater 2019 states that the optimal surplus has not been established. Gaps: no verified trial compares gain rates, and no finding separates novices from advanced lifters or men from women. Cross-group: stableBandFractionPerWeek is derived as half of this value, so re-derive the band if this changes. The gap to maxWeeklyGainFraction is 0.0025/wk. With a 28-day window and ~1% per-reading SD (my arithmetic), a user exactly on target would be flagged GAINING_FASTER_THAN_GOAL in about 6% (daily weigh-ins) to 18% (2.5/wk) of checks. A false flag only proposes eating slightly less. Findings: docs/research/diet-evidence.json #259, #258, #262, #294, #287, #260, #272, #271, #275."
+        },
+        "maxWeeklyGainFraction": {
+          "value": 0.005,
+          "source": "IRAKI19",
+          "locator": "Iraki J et al. 2019, Sports (Basel) 7(7):154: Section 2 Energy, 'Positive Energy Balance'; Section 8 Summary; Abstract.",
+          "certainty": "low",
+          "note": "Unit: positive fraction of body mass per week (0.005 = 0.5%/wk). The engine flags GAINING_FASTER_THAN_GOAL, a proposal to eat less, only when the observed trend is strictly above this value. It is a ceiling, not a target. 0.5%/wk is the top of the Iraki 2019 range, which applies to novice and intermediate lifters; advanced lifters should gain more slowly. Garthe 2013 (elite athletes, mean age about 19 y) shows the cost of gaining near this band. The counselled group gained about 0.3-0.5%/wk (derived: +3.9% over 8-12 wk), and the ad libitum group about 0.1-0.2%/wk (+1.5%). Fat mass rose 15% vs 3%, and lean-mass gain did not differ. Iraki 2019 describes a matching trial (about 600 kcal/d over ad libitum): +1.7 kg lean and +1.1 kg fat vs +1.2 kg and +0.2 kg. So the extra gain over ad libitum was mostly fat, although the counselled group's total gain was not. Ribeiro 2019 (67.5 vs 50.1 kcal/kg/d) likewise added significant fat for little extra estimated muscle. The source is a narrative review, so this is graded low, and no trial has tested a gain-rate ceiling. Do not confuse this with the Triad 2014 weight-restoration pace (about 0.5 kg every 7-10 days). That is a treatment target for female athletes with low energy availability or amenorrhoea, not a muscle-gain cap. Findings: docs/research/diet-evidence.json #259, #294, #287, #258, #260, #477."
+        },
+        "proteinGPerKgBodyMass": {
+          "value": 1.6,
+          "source": "MORTON18",
+          "locator": "Morton RW et al. 2018, Br J Sports Med 52(6):376: Results, 'Break point analysis'; Figure 5; Results 'Meta-analyses' and 'Meta-regression' (Table 1). Corroborated by Nunes EA et al. 2022, J Cachexia Sarcopenia Muscle, Table 2 and Results 'Effect of additional protein intake on lean body mass'.",
+          "certainty": "moderate",
+          "note": "Unit: g protein per kg body mass per day. Two meta-analyses agree.\n\nMorton 2018 pooled 49 RCTs of healthy adults doing resistance training for >=6 weeks, trained and untrained, none energy-restricted (mean age 35 y). It put the plateau for training-induced FFM gain at 1.62 g/kg/d. The estimate is imprecise (95% CI 1.03-2.20), and the biphasic model did not reach significance (p = 0.079). Nunes 2022 (healthy, non-obese adults) found a significant lean-mass gain only at >=1.6 g/kg/d in under-65s (SMD 0.30, moderate GRADE); 1.2-1.59 g/kg/d was not significant. IOC 2018 calls 1.6 optimal, with no adverse effects up to 2.2.\n\nMorton suggests about 2.2 g/kg/d (its upper CI) for users trying to maximise gain, and Iraki 2019 (narrative) also leans toward 2.2. That is a possible owner-set upper option, not the default, and it must stay within macros.proteinMaximumGPerKgBodyMass. The engine clamps to that value after any pattern multiplier, so the maximum must also be >=1.6.\n\nThe expected benefit is modest. Morton found about 0.3 kg extra FFM on top of the ~1.1 kg that training alone gave over ~13 weeks, and Nunes found 0.5-0.7 kg over 8-12 weeks. In Morton's training-status meta-regression (10 studies in trained participants), the effect was clear in resistance-trained participants (+1.05 kg FFM) and small and non-significant in untrained ones (+0.15 kg). Age: in Morton the benefit was clear under 45 y and not significant over 45 y. Nunes found no trial that tested >=1.6 g/kg/d in adults 65+. PROT-AGE sets >=1.2 g/kg/d for active older adults, which 1.6 already exceeds. The value applies only with resistance training: without it, extra protein did not increase lean mass (Nunes, low GRADE).\n\nKidney: Devries 2018 found no GFR difference in adults without CKD on higher-protein arms averaging 1.81 g/kg/d (low/very-low certainty). Users with clinician-diagnosed kidney disease, reduced eGFR, albuminuria or a kidney transplant (KDIGO 2024 definition) get no automated target and are referred. KDIGO advises avoiding >1.3 g/kg/d in CKD at risk of progression. At high BMI the engine applies this per-kg value to a reference mass once BMI reaches macros.proteinReferenceFromBMI, so that decision sits in the macros group. On actual mass, 1.6 x 120 kg would be 192 g/d. Findings: docs/research/diet-evidence.json #132, #133, #134, #135, #136, #137, #155, #156, #157, #158, #159, #386, #263, #279, #139, #196, #181, #187, #742, #744."
+        }
+      },
+      "maintenance": {
+        "weeklyChangeFraction": {
+          "value": 0,
+          "source": "NASEM23",
+          "locator": "NASEM 2023, Dietary Reference Intakes for Energy: Summary pp.11-14; Ch. 7, pp.146-147 and 169.",
+          "certainty": "high",
+          "note": "No objection; kept as drafted. By DRI definition, energy intake meets the requirement when body weight is stable. The DRI says to monitor weight and adjust intake step by step, so the maintenance target is zero change, and the engine adds no energy offset. FAO/WHO/UNU 2004 likewise sets energy at the average requirement with no margin. Zero also fits recomposition within maintenance: in Morton 2018, added protein with resistance training raised FFM (+0.30 kg) and lowered fat (-0.41 kg) with no significant change in total mass. Caveat (Triad 2014): a stable weight does not prove adequate energy availability, because chronic deficits can stabilise weight through physiological suppression. Low-EA screening must stay separate from this target. The engine judges the trend against stableBandFractionPerWeek, not against this value. Findings: docs/research/diet-evidence.json #50, #38, #135, #471."
+        },
+        "proteinGPerKgBodyMass": {
+          "value": 1.6,
+          "source": "MORTON18",
+          "locator": "Morton RW et al. 2018, Br J Sports Med 52(6):376: Results, 'Break point analysis'; Figure 5 (population not energy-restricted). Nunes EA et al. 2022, Table 2.",
+          "certainty": "moderate",
+          "note": "Unit: g protein per kg body mass per day. No objection to the value. The note is aligned with the corrections accepted for the other protein targets: the Morton population, the KDIGO exclusion, and the high-BMI mass handled in the macros group. Morton's 1.62 g/kg/d break point comes from healthy adults doing resistance training, trained and untrained, who were not energy-restricted, a population that covers energy balance. Nunes 2022 found no significant added lean mass at 1.2-1.59 g/kg/d in under-65s, only at >=1.6. Other synthesis ranges that include 1.6: IAAF 2019 1.3-1.7 g/kg/d for weight-stable or gaining athletes; ISSN 2017 1.4-2.0; ACSM 2016 1.2-2.0. ACSM also says protein should follow energy availability and training rather than a goal label, which supports using the same value as muscleGain. The DRI RDA of 0.8 g/kg/d (IOM 2005; FAO/WHO 0.83) is only an adequacy floor, and Morton judged it insufficient for resistance-training goals. The value applies to users who do resistance training: without it, higher protein did not raise lean mass (Nunes, low GRADE). Kidney: Devries 2018 found no GFR difference in adults without CKD on higher-protein arms averaging 1.81 g/kg/d (low/very-low certainty). Users with clinician-diagnosed kidney disease, reduced eGFR, albuminuria or a kidney transplant (KDIGO 2024 definition) get no automated target and are referred. KDIGO advises avoiding >1.3 g/kg/d in CKD at risk of progression. Cross-group: macros.proteinMaximumGPerKgBodyMass must be >=1.6. At high BMI the engine applies this per-kg value to a reference mass once BMI reaches macros.proteinReferenceFromBMI, so that decision sits in the macros group. Findings: docs/research/diet-evidence.json #132, #134, #155, #405, #139, #196, #158, #62, #160, #181, #187, #742, #744."
+        },
+        "stableBandFractionPerWeek": {
+          "value": 0.00125,
+          "source": "owner",
+          "rationale": "This is an owner choice derived from cited findings, not a value from the literature. (1) Noise floor: morning weight moves less than 1% from day to day in a person who is euhydrated and in energy balance (ACSM 2007, finding 489; ISSN 2019, about +/-1%, finding 434). NoHoW shows a systematic day-of-week cycle of about 0.35%, and detrended single readings spread about 1.0-1.2% (finding 589). People manage about 2.5-4 weigh-ins per week (finding 593). Fluid shifts can move short-term weight: Hall 2019 estimated 14-day change by linear regression to damp fluid fluctuations, and between-diet sodium differences tracked weight change (finding 819). So only a smoothed multi-week slope can carry a weekly drift band (NASEM: monitor over time and adjust, finding 50). (2) Separability: the slowest non-zero target in this bundle is muscleGain +0.25%/wk (Iraki 2019, finding 259; fatLoss is now -0.5%/wk). Placing the band edge midway between 0 and 0.0025 gives 0.00125, so a trend counts as stable exactly when it is closer to maintenance than to the slowest intended change. (3) Long-term check: drift at the band edge reaches Stevens' 3% long-term maintenance limit after 24 weeks, so the band cannot hide a clinically relevant drift over a half-year. The AHA 2013 regain of 1-2 kg/yr (finding 784; about 0.02-0.05%/wk at 80 kg) falls well inside the band and would count as stable, so a separate cumulative-drift check is advisable. (4) Resolvability (my arithmetic, assuming independent errors with SD about 1%): the least-squares slope SE is about 0.16%/wk for 4 weeks of daily weigh-ins and about 0.06%/wk for 8 weeks. A +/-0.125%/wk band is resolved reliably only with about 8 weeks of near-daily data or equivalent smoothing. The smoothing choices used in research (finding 592) are not a validated app rule. Findings: docs/research/diet-evidence.json #489, #434, #589, #593, #592, #50, #259, #784, #819."
+        }
+      },
+      "endurance": {
+        "weeklyChangeFraction": {
+          "value": 0,
+          "source": "owner",
+          "rationale": "No verified source prescribes a weight-change rate for an endurance-performance goal, so this is an owner decision. (1) NASEM 2023 defines intake that keeps weight stable as meeting the energy requirement (finding 50, high). (2) ACSM 2016 advises scheduling planned loss in the base phase or well before competition, not during performance-focused training (finding 195). (3) IOC 2023 REDs describes about 45 kcal/kg FFM/day as adequate EA for weight maintenance, with 30-45 used for loss (finding 442, low). It counts only short, monitored body-composition phases as adaptable LEA, and treats prolonged deficits as problematic (finding 446). Thresholds in men appear lower but are uncertain (finding 443). Defaulting endurance users to energy balance avoids an unrequested deficit on top of high training expenditure. Findings: docs/research/diet-evidence.json #50, #195, #442, #446, #471, #55, #443."
+        },
+        "proteinGPerKgBodyMass": {
+          "value": 1.6,
+          "source": "owner",
+          "rationale": "The syntheses give only ranges, and they conflict (a listed contradiction): ACSM 2016 1.2-2.0 g/kg/d (findings 196, 341); IAAF 2019 1.3-1.7 for weight-stable athletes (finding 405); ISSN ultra-marathon 2019 1.6-2.1, up to 2.5 in demanding training, with a warning that nitrogen balance may turn negative below 1.6 in high-volume athletes (finding 424); T1D exercise consensus 2017 1.2-1.6, drawn from athletes without diabetes (finding 760); ISSN protein 2017 1.4-2.0 (finding 139). 1.6 g/kg/d is the only value inside every one of these ranges. It is also the ISSN ultra floor below which negative nitrogen balance is flagged. Findings: docs/research/diet-evidence.json #196, #405, #424, #760, #139, #341, #754, #187, #742, #744."
+        },
+        "carbohydrateGPerKgByTrainingLoad": {
+          "value": {
+            "light": [
+              3,
+              5
+            ],
+            "moderate": [
+              5,
+              7
+            ],
+            "high": [
+              6,
+              10
+            ],
+            "veryHigh": [
+              8,
+              12
+            ]
+          },
+          "source": "THOMAS16",
+          "locator": "ACSM/AND/DC 2016 joint position statement, MSSE 48(3): p.550 Table 2 'Daily needs for fuel and recovery' (adapted from Burke et al. 2011); p.562 summary (DC concurrent publication Table 1 p.15, Summary p.36).",
+          "certainty": "low",
+          "note": "Unit: g carbohydrate per kg body mass per day. No objection; kept as drafted. The engine uses each band's midpoint (4, 6, 8 and 10 g/kg/d) for the user-selected load and raises energy if fat would fall below its minimum share. Load definitions (ACSM Table 2): light = low-intensity or skill-based activities; moderate = a moderate exercise programme, about 1 h/day; high = an endurance programme, 1-3 h/day of moderate-to-high-intensity exercise; veryHigh = extreme commitment, >4-5 h/day of moderate-to-high-intensity exercise. Caveats: (1) The bands overlap (high 6-10 vs veryHigh 8-12), and about 3-4 h/day is not defined, so the engine needs an owner rule for users there. (2) ACSM says the targets apply when session quality or intensity matters. They should be periodised day to day, and on other days intake may follow energy goals or be lowered on purpose. (3) Consistent sources: ISSN nutrient timing 2017 (5-12 g/kg/d; 8-10 or 8-12 for high volume, with internally inconsistent hour cut-offs), ISSN ultra 2019 (5-8 for 2-3 h/day, 7-10 for greater volume), and the ISSN 2017 protein stand citing 6-10. (4) Endurance goal only: Henselmans 2022 found no carbohydrate minimum for strength-training performance. (5) For typical adult body masses, every band's lower bound is above the IOM carbohydrate RDA of 130 g/d. This is not an AMDR (45-65% energy) check. (6) The statement lists itself as in effect until 31 Dec 2019; no newer ACSM table was verified. (7) Users with type 1 diabetes are excluded from automated fuelling targets. Graded low per the verified finding: it is a consensus table without graded evidence, though several independent position stands agree. Findings: docs/research/diet-evidence.json #200, #336, #368, #423, #150, #330, #754, #64, #68."
+        }
+      }
+    },
+    "macros": {
+      "fatMinimumEnergyFraction": {
+        "value": 0.2,
+        "source": "IOM05",
+        "locator": "IOM 2005 DRI Macronutrients, Summary Tables (pp.1319-1332), AMDR table, total fat, row '19 years and over': 20-35% of energy (finding 65). Checked against the same AMDR table in the Health Canada DRI reproduction. Supported by ACSM 2016, 'Fat', MSSE p.552 (finding 343; same text in the DC co-publication pp.18-19, finding 207).",
+        "certainty": "moderate",
+        "note": "Revised on review: I accepted both objections. The value is unchanged; only the wording and locator were fixed. The sources conflict. The IOM adult AMDR (65) and ACSM 2016 (207, 343) both put the floor at 20%. ACSM discourages chronic intake below 20%. It says intakes at or below 20% give no performance benefit and risk shortfalls of fat-soluble vitamins and essential fatty acids (343). So 0.20 is the inclusive lower edge of the AMDR, not a target. In diet.macros_for, fat starts at the 0.25 default. It reaches 0.20 only when carbohydrate squeezes energy: the 130 g floor, or the training-load carbohydrate in the endurance path. Slater 2019 (282) discourages going below 15-20%. Helms 2014 (222) accepts 15-20% during a cut, and Martinez-Gomez & Roberts 2022 (569) allow 10-25%. Both are narrative reviews of lean athletes or dieters. I chose the conservative 20% because this floor is safety-related. ACSM ties it to fatty-acid and fat-soluble-vitamin adequacy, and Ruiz-Castellano 2021 (257) links fat at or below 20% with lower testosterone. This fraction does not cover the gram-based checks, which belong in separate parameters: (a) the essential fatty acid AIs (67): linoleic acid 17 g (men) and 12 g (women) at 19-50 y, 14 and 11 g at 51+ y, and alpha-linolenic acid 1.6 and 1.1 g at 19+ y; (b) at least 0.5 g/kg (257); (c) the 7-10 g/d gallbladder-emptying threshold cited by Johansson 2013 (793). These gram checks bind at low energy. At about 1,200 kcal (the female energy floor in the safety group's draft), 0.20 gives about 27 g fat/d, which is below 0.5 g/kg for anyone heavier than about 53 kg. Age 18: the DRI AMDR table has no 14-18 y row. 18-year-olds fall in its '4-18 years' row, where fat is 25-35% (Health Canada DRI reproduction, AMDR table). With safety.minimumAgeYears drafted at 19, every user is in the '19 years and over' row. This matters only if the owner lowers the minimum age to 18, and the owner would then decide whether to apply 0.25 at 18. The IOM full text was not opened, so this value comes from the Summary Tables. Findings: docs/research/diet-evidence.json #65, #207, #343, #282, #222, #569, #257, #67, #793."
+      },
+      "fatMaximumEnergyFraction": {
+        "value": 0.35,
+        "source": "IOM05",
+        "locator": "IOM 2005 DRI Macronutrients, Summary Tables (pp.1319-1332), AMDR table, total fat, row '19 years and over': upper bound 35% of energy (finding 65). Same upper bound in ACSM 2016, 'Fat', MSSE p.552 (finding 343; DC co-publication pp.18-19, finding 207).",
+        "certainty": "moderate",
+        "note": "Revised on review: I accepted both objections. The value is unchanged; I fixed the locator and the age-row wording and added an engine caveat. This is the IOM AMDR upper bound (65). ACSM 2016 (207, 343), Slater 2019 (282), Iraki 2019 (267) and the exercise consensus for athletes with type 1 diabetes (762) all use the same 35%. The AMDR is population-level guidance on chronic-disease risk, not a toxicity limit; total fat has no UL (65). AHA 2013 (788) compared diets at a 500-750 kcal/d deficit. Diets above 40% fat gave the same 6-12-month weight loss as diets below 30%, so a higher ceiling has not been shown to harm weight loss. Still, no official source sets a ceiling above 35%, so I kept the conservative value. As a result the app never generates ketogenic or high-fat targets. That fits the performance cautions from ISSN (ultra-marathon, 437) and IAAF (fat adaptation impairs performance above about 80-85% VO2peak, 415). Age: the DRI AMDR row that would cover 18-year-olds is '4-18 years' (there is no 14-18 y row). It has the same 35% upper bound (Health Canada DRI reproduction, AMDR table). So the value holds whether safety.minimumAgeYears stays at the drafted 19 or is lowered to 18. Engine issue (does not change this value): in the endurance training-load path, diet.macros_for caps fat at this fraction (fat = min(fat, fat_maximum)). It does not give the removed energy to carbohydrate or lower energyKcal. So when the cap binds, the macro grams add up to less than energyKcal. The engine should reassign that energy or recompute energy. Findings: docs/research/diet-evidence.json #65, #207, #343, #282, #267, #762, #788, #437, #415."
+      },
+      "fatDefaultEnergyFraction": {
+        "value": 0.25,
+        "source": "owner",
+        "rationale": "Several findings point to 0.25. (1) It sits inside the IOM adult AMDR of 20-35% (65), 5 percentage points above the 20% floor that ACSM discourages going below (207, 343). Ordinary logging slippage therefore does not drop users below the floor. (2) With safety.minimumAgeYears drafted at 19, every user falls in the DRI '19 years and over' AMDR row (20-35%). If the owner lowers the minimum age to 18, 0.25 is also the lower bound of the DRI '4-18 years' fat AMDR (25-35%; Health Canada DRI reproduction, AMDR table), so the default would still suit 18-year-olds. (3) It is the midpoint of Ruiz-Castellano's 20-30% 'where feasible' (257) and of the Nordic 20-30% protocol range used by Martins 2020 (582). It matches the 25% fat in the ISSN 60/15/25 split for ultra-endurance training (426) and the lower end of MATADOR's planned 25-30% (313). Peos 2021 used about 20% (318). (4) A lower-middle default leaves most non-protein energy for carbohydrate. Helms 2014 (222, 223) and Ruiz-Castellano 2021 (257) prioritise carbohydrate over extra fat for training. Iraki 2019 says fat should not crowd out protein or carbohydrate (267) and aims carbohydrate at 3-5 g/kg/d or more (268). WHO 2023 (797) says carbohydrate should follow from the protein and fat targets. (5) AHA 2013 (788) shows that fat share does not change weight loss at a matched deficit. The default is therefore a choice about training fuel and adequacy, not about fat-loss efficacy. Findings: docs/research/diet-evidence.json #65, #207, #343, #257, #582, #426, #313, #318, #222, #223, #267, #268, #797, #788."
+      },
+      "carbohydrateMinimumGPerDay": {
+        "value": 130,
+        "source": "IOM05",
+        "locator": "IOM 2005 DRI Macronutrients, Summary Tables (pp.1319-1332), macronutrient reference-value table, carbohydrate: EAR 100 g/d, RDA 130 g/d, adults 19+ y, non-pregnant (finding 68)",
+        "certainty": "moderate",
+        "note": "No objection was raised. The value is kept, and I updated only the priority-order sentence to match diet.macros_for. This is an adequacy floor (the RDA), not a training or performance intake. ACSM's g/kg/d targets by training load (200, 336) are separate. The sources conflict: (a) the IOM EAR is 100 g/d (68); (b) EFSA sets a 30 g/d minimum for total diet replacements (776, abstract only); (c) AHA 2013 accepted a low-carbohydrate diet of about 20 g/d for weight loss (789); (d) Henselmans 2022 found no carbohydrate minimum for strength (330). On the cautious side, Ruiz-Castellano 2021 warns that ketogenic intakes may preserve less fat-free mass (255). IOC REDs 2023 links intakes below 3 g/kg/d with worse bone, immune and iron markers in endurance athletes (444). I chose the conservative RDA, so the app will not generate low-carbohydrate or ketogenic targets. This does not claim that lower intakes are unsafe. The DRI table gives the same 130 g/d for the 14-18 y group, so the value holds if the owner lowers safety.minimumAgeYears to 18. diet.macros_for sets the priority order outside the endurance training-load path: protein first, fat at the 0.25 default, carbohydrate as the remainder. If carbohydrate falls below 130 g, fat drops toward the 0.20 minimum. If that is still short, carbohydrate is held at 130 g and energy is raised (ENERGY_RAISED_FOR_CARBOHYDRATE_FLOOR). In the endurance path, carbohydrate is max(130 g, training-load g/kg x body mass). Pregnancy and lactation values differ, but those users are excluded. Findings: docs/research/diet-evidence.json #68, #776, #789, #330, #255, #444, #200, #336."
+      },
+      "proteinMaximumGPerKgBodyMass": {
+        "value": 2.2,
+        "source": "MORTON18",
+        "locator": "Morton et al. 2018, Br J Sports Med, Discussion 'Muscle mass', paragraph on the two-segment regression: about 2.2 g/kg/d, the upper 95% CI bound of the 1.62 g/kg/d break point (finding 133; Results 'Break point analysis' and Figure 5, finding 132). Supported by the IOC 2018 dietary supplements consensus, Table 6 (Gaining LBM, Protein row): up to 2.2 g/kg/d with no adverse effects (finding 386).",
+        "certainty": "low",
+        "note": "Revised on review. I accepted the objection that moves the ceiling from 2.4 to 2.2, and the wording fixes from the other objection (the ISSN and Helms ranges, and the Longland result). The candidate ceilings conflict. Because this is the safety ceiling, I chose the most conservative value a synthesis supports, as the task rule for safety-related conflicts requires.\n- Morton 2018 (meta-analysis): about 2.2 g/kg/d, the upper 95% CI bound of the 1.62 break point (133). The break point's CI was 1.03-2.20 across tested intakes of 0.9-2.4 (132). This is a benefit estimate: no added FFM gain is shown above it.\n- IOC 2018: up to 2.2 with no adverse effects (386).\n- IAAF 2019: more than 1.6 and up to 2.4 during weight loss with resistance exercise (406). Above 2.5 gives no adaptive advantage (407). About 2.4 during weight loss is not associated with kidney or bone risk in healthy athletes (408).\n- ACSM 2016: at least 2.0 during restriction (197).\n- Higher ranges: ISSN 2017 prints 2.3-3.1 per kg body weight with no source cited (140). The Helms 2014 systematic review gives 2.3-3.1 per kg FFM in lean lifters (162). Ruiz-Castellano 2021 (narrative review) gives 2.2-3.0 per kg body weight (250). So 2.2 is not the only synthesis-backed ceiling, and it deliberately cuts off these higher ranges.\nSafety reasoning:\n- The Devries 2018 kidney meta-analysis found no dose threshold. But its higher-protein arms averaged 1.81 +/- 0.60 g/kg (participants' mean BMI 31.1), so its data do not show safety far above that range (187, 188). 2.2 is closer to the tested range than 2.4.\n- Slater 2019 says long-term safety above about 2.5 g/kg is not validated (280).\n- The app can exclude only users who report CKD. KDIGO advises avoiding more than 1.3 g/kg in CKD at risk of progression (742; CKD definition, 744). KDIGO 2024 also states that only 6% of the general population and 10% of the high-risk population know their CKD status (Introduction, 'Screening and prevention', p.S138). I confirmed this in the guideline text; it is not yet a finding record.\n- Both 2.2 and 2.4 exceed 1.3, so the CKD point supports a lower ceiling and a screen, not a specific number. The owner should consider asking users who report diabetes, hypertension or CVD to confirm their kidney function with a clinician before giving targets above 1.3 g/kg. No finding tests such a screen.\nEffect on goals:\n- The ceiling clips any goal target above 2.2. That includes the top of the IAAF range and the 2.4 arm of Longland 2016, a single RCT. In a deficit of about 40%, 2.4 vs 1.2 g/kg/d gave more lean-mass gain there (+1.2 vs +0.1 kg; 166, abstract only).\n- 2.2 still meets ACSM's 2.0 or more during restriction (197) and sits inside IAAF's 1.6-2.4 (406).\n- For a user at about 15% body fat, 2.2 g/kg body mass equals 2.59 g/kg FFM, inside Helms's 2.3-3.1 g/kg FFM (162).\n- If the owner accepts the extra exposure, 2.4 (IAAF 2019, fat loss only; findings 406-408) is the cited alternative.\nEngine:\n- The ceiling applies to the mass chosen by proteinBodyMassRule.\n- The engine should also cap protein at the IOM adult protein AMDR upper bound of 35% of energy (63); diet.macros_for does not check this today. At 2.2 g/kg, a 70 kg user passes 35% below about 1,760 kcal/d.\n- If the owner lowers safety.minimumAgeYears to 18, the DRI '4-18 years' AMDR row caps protein at 30% (Health Canada DRI reproduction, AMDR table).\n- The ceiling does not apply to CKD (742); those users are excluded. Findings: docs/research/diet-evidence.json #133, #132, #386, #406, #407, #408, #197, #166, #187, #188, #280, #63, #742, #744, #140, #250, #162."
+      },
+      "proteinMinimumGPerKgBodyMass": {
+        "value": 0.85,
+        "source": "IOM05",
+        "locator": "IOM 2005 DRI Macronutrients, Summary Tables (pp.1319-1332), 'Reference Values for Macronutrients' table, total protein RDA: 0.85 g/kg/d for males and females 14-18 y and 0.80 g/kg/d for 19+ y (the adult value is finding 62; Ch. 10 pp.589-768). The 14-18 y value was read in the Health Canada reproduction of the DRI summary tables (macronutrient table and footnote 30), not in the IOM full text.",
+        "certainty": "moderate",
+        "note": "Revised on review. I accepted the objection that raises the floor to 0.85, and the wording fixes from the objection that kept 0.8. The age-18 point is conditional on the minimum age, and the reference-weight BMI and the EFSA height cut-off are now exact. This is an adequacy floor only, and the sources conflict:\n- The IOM RDA is 0.80 g/kg/d for ages 19 and over (62).\n- FAO/WHO and EFSA give 0.83, restated in Nunes 2022 (160); their primary reports were not opened.\n- The IOM RDA for 14-18 y is 0.85 (DRI summary macronutrient table, read in the Health Canada reproduction).\nA higher floor has no safety downside, so I chose the most conservative value, 0.85, as the task rule asks for safety-related conflicts. It covers the FAO/WHO/EFSA figure for adults. It would also cover 18-year-olds if the owner lowers safety.minimumAgeYears from the drafted 19 to 18, because the DRI puts 18-year-olds in the 14-18 y group. With the minimum age at 19, the extra 0.05 g/kg over the adult RDA (3.5 g/d at 70 kg) is below food-logging precision. If the owner prefers the exact adult RDA, 0.80 (62) is the cited alternative. The fat floor is handled differently: its 4-18 y value (25%) is not applied to adults. Raising a protein floor that does not bind costs nothing, while raising the fat floor to 0.25 would remove the room the engine uses when energy is squeezed.\nThe floor is far below resistance-training needs. Morton 2018 judged the RDA insufficient (134), and Nunes 2022 found lean-mass gains only at 1.6 g/kg/d or more (155). In diet.protein_target the floor binds only if a goal target times a pattern multiplier falls below 0.85. So it guards against future owner changes rather than shaping today's targets.\nThe DRI computes gram values for everyone as the per-kg value times a reference weight (62; DRI table footnote 30). Those weights, 70 kg at 1.77 m and 57 kg at 1.63 m, sit at BMI about 22.3 and 21.5 (Health Canada reproduction). proteinBodyMassRule borrows this precedent, but it uses measured mass below BMI 30 and a BMI-25 reference mass only at 30 and above.\nEFSA sets a 75 g/d protein minimum for total diet replacements in adults with overweight or obesity (775, abstract only). For heights below about 1.88 m, 75 g/d is more than 0.85 x the BMI-25 reference mass, so a severe-deficit mode would need its own absolute floor. Findings: docs/research/diet-evidence.json #62, #160, #134, #155, #775."
+      },
+      "fibreGPer1000Kcal": {
+        "value": 14,
+        "source": "IOM05",
+        "locator": "IOM 2005 DRI Macronutrients, Summary Tables (pp.1319-1332), total fiber AI with footnote 32: AI based on 14 g/1,000 kcal x median usual energy intake; men 38 / women 25 g/d at 19-50 y (finding 69). Footnotes 31-32 checked in the Health Canada DRI reproduction.",
+        "certainty": "moderate",
+        "note": "Revised on review: I accepted both objections. The value is unchanged. I corrected the pre-event and definition citations and added a high-energy cap caveat. This is an Adequate Intake, not an RDA. The DRI's own gram values are 14 g/1,000 kcal x median usual energy intake (69; DRI table footnote 32), so scaling to the user's calorie target follows the DRI derivation. The 14-18 y values (boys 38, girls 26 g/d) use the same basis. Low end: below about 1,790 kcal the result is under 25 g/d. That is below WHO 2023's minimum of 25 g/d of naturally occurring fibre (796, strong recommendation) and below the 25-29 g/d supported by the Reynolds 2019 meta-analyses (801). The engine should therefore also apply that absolute floor as a separate parameter. High end: above about 2,860 kcal the result exceeds 40 g/d, the top of the range over which WHO saw benefit rise (796). Targets of 3,500-4,300 kcal give about 49-60 g/d. The dose-response shows no plateau within the observed data (802), and no fibre-related harms were found (808), apart from a qualitative caution for marginal iron status. But no benefit or harm was observed beyond that range. IOC RED-S 2018 (461) lists high fibre among diet traits that can compound low energy availability. The users with the highest energy targets are high-volume trainees and surplus users. The engine should therefore cap the scaled target: 40 g/d, the top of the WHO range, is the suggested cap, as an owner decision in a separate parameter. ACSM 2016 (338) and IAAF 2019 (411) advise low-fibre pre-event meals to limit gut upset. So the target should not be pushed during low energy availability or before events. Definitions differ. IOM total fibre is dietary plus functional (isolated) fibre (DRI table footnote 31). WHO counts only naturally occurring fibre (798). Meat-eaters most often fall short of the fibre AI: about 21 g/d vs 28 for vegetarians and 44 for vegans (691). Findings: docs/research/diet-evidence.json #69, #796, #801, #802, #808, #798, #461, #338, #411, #691."
+      },
+      "proteinReferenceFromBMI": {
+        "value": 30,
+        "source": "owner",
+        "rationale": "(1) The g/kg evidence was built on measured mass in non-obese or lean samples. Nunes 2022 excluded participants with obesity and weight-loss protocols (155, 157; Methods and Table 1 exclusion criteria). Morton 2018 studied healthy adults (132). Helms 2014 included lean samples only: men <=23% and women <=35% body fat (164). That supports measured mass below BMI 30.\n(2) There is official precedent for a healthy-weight denominator, but no official rule for obesity. The DRI computes the protein RDA in grams for every adult as the per-kg value multiplied by a reference weight, giving 56 and 46 g/d (62; DRI table footnote 30, 'per kg body weight multiplied by the reference weight'). Those reference weights sit at BMI about 22.3 and 21.5 (Health Canada reproduction). FAO/WHO/UNU 2004 sets the healthy individual range at BMI 18.5-24.9 (39). BMI 25, the rounded upper bound of that range, is therefore the most generous healthy-weight mass, heavier than the DRI reference person. That keeps targets for muscular users closer to the lean-sample evidence. Using measured mass below BMI 30 and switching only at 30 is the owner's choice.\n(3) Check against the only obesity figure. Martinez-Gomez & Roberts 2022 cite 1.2-1.5 g/kg for adults with overweight or obesity in a deficit (565, a secondary citation). In g/kg of measured mass at BMI 30, 35 and 40, the rule gives:\n- 2.2 ceiling: 1.83, 1.57 and 1.375 (inside 1.2-1.5 only from about BMI 37);\n- 2.0 target: 1.67, 1.43 and 1.25 (inside from about BMI 33);\n- 1.6 target: 1.33, 1.14 and 1.00 (inside only up to about BMI 33, below it above that).\nSo the rule does not reproduce the 1.2-1.5 figure. High targets sit above it at the low end of the obese range, and 1.6 targets fall below it at higher BMI. Even so, 1.6 targets stay above the 0.8 g/kg adult RDA on measured mass up to BMI 50. The ceiling-derived values lie within about one SD of the higher-protein arms (1.81 +/- 0.60 g/kg) of the Devries 2018 kidney meta-analysis, whose participants had BMI 21.2-36.1, mean 31.1 (187). The owner should confirm this band, or choose a different reference BMI, once the two unopened sources are checked.\n(4) Further precedent for a healthy-weight denominator: PROT-AGE sets its severe-CKD protein limit per kg of ideal body weight (184). EFSA adjusts the protein reference intake for adults with overweight or obesity rather than using it unchanged (775, abstract only; method not verified). Findings: docs/research/diet-evidence.json #155, #157, #132, #164, #62, #39, #565, #187, #184, #775."
+      },
+      "proteinReferenceBMI": {
+        "value": 25,
+        "source": "owner",
+        "rationale": "(1) The g/kg evidence was built on measured mass in non-obese or lean samples. Nunes 2022 excluded participants with obesity and weight-loss protocols (155, 157; Methods and Table 1 exclusion criteria). Morton 2018 studied healthy adults (132). Helms 2014 included lean samples only: men <=23% and women <=35% body fat (164). That supports measured mass below BMI 30.\n(2) There is official precedent for a healthy-weight denominator, but no official rule for obesity. The DRI computes the protein RDA in grams for every adult as the per-kg value multiplied by a reference weight, giving 56 and 46 g/d (62; DRI table footnote 30, 'per kg body weight multiplied by the reference weight'). Those reference weights sit at BMI about 22.3 and 21.5 (Health Canada reproduction). FAO/WHO/UNU 2004 sets the healthy individual range at BMI 18.5-24.9 (39). BMI 25, the rounded upper bound of that range, is therefore the most generous healthy-weight mass, heavier than the DRI reference person. That keeps targets for muscular users closer to the lean-sample evidence. Using measured mass below BMI 30 and switching only at 30 is the owner's choice.\n(3) Check against the only obesity figure. Martinez-Gomez & Roberts 2022 cite 1.2-1.5 g/kg for adults with overweight or obesity in a deficit (565, a secondary citation). In g/kg of measured mass at BMI 30, 35 and 40, the rule gives:\n- 2.2 ceiling: 1.83, 1.57 and 1.375 (inside 1.2-1.5 only from about BMI 37);\n- 2.0 target: 1.67, 1.43 and 1.25 (inside from about BMI 33);\n- 1.6 target: 1.33, 1.14 and 1.00 (inside only up to about BMI 33, below it above that).\nSo the rule does not reproduce the 1.2-1.5 figure. High targets sit above it at the low end of the obese range, and 1.6 targets fall below it at higher BMI. Even so, 1.6 targets stay above the 0.8 g/kg adult RDA on measured mass up to BMI 50. The ceiling-derived values lie within about one SD of the higher-protein arms (1.81 +/- 0.60 g/kg) of the Devries 2018 kidney meta-analysis, whose participants had BMI 21.2-36.1, mean 31.1 (187). The owner should confirm this band, or choose a different reference BMI, once the two unopened sources are checked.\n(4) Further precedent for a healthy-weight denominator: PROT-AGE sets its severe-CKD protein limit per kg of ideal body weight (184). EFSA adjusts the protein reference intake for adults with overweight or obesity rather than using it unchanged (775, abstract only; method not verified). Findings: docs/research/diet-evidence.json #155, #157, #132, #164, #62, #39, #565, #187, #184, #775."
+      },
+      "proteinMaximumEnergyFraction": {
+        "value": 0.35,
+        "source": "IOM05",
+        "locator": "Summary and Summary Tables (pp.1319-1332); cited pp.12, 15 and p.1325 not verified",
+        "certainty": "moderate",
+        "note": "IOM 2005 adult protein AMDR: 10-35% of energy; no UL for protein. The engine caps protein at 35% of the energy target, as the review of macros.proteinMaximumGPerKgBodyMass asked. Findings: docs/research/diet-evidence.json #63."
+      },
+      "fibreMinimumG": {
+        "value": 25,
+        "source": "WHO23",
+        "locator": "Recommendation 4 and rationale (printed pp.22, 24-25); Table 2 and Review 1 in Summary of evidence (printed pp.9, 13)",
+        "certainty": "moderate",
+        "note": "WHO 2023: at least 25 g/day of naturally occurring fibre for adults (strong recommendation, moderate-certainty evidence). The displayed fibre target is max(25 g, 14 g per 1,000 kcal), capped at fibreMaximumG. Findings: docs/research/diet-evidence.json #796."
+      },
+      "fibreMaximumG": {
+        "value": 40,
+        "source": "owner",
+        "rationale": "The fibre target is cited; its cap and its role in ranking are owner rules. WHO 2023 advises at least 25 g/day of naturally occurring fibre for adults (finding 796: strong recommendation, moderate certainty). IOM 2005 sets the total-fibre AI at 14 g per 1,000 kcal (finding 69, graded moderate, but its pages were not verified). For every goal the daily target is the larger of the two, so it scales with the user's energy target and never falls below the WHO floor. It is the same number as the fibreG target the engine displays (macros.fibreGPer1000Kcal = 14), so the app has one fibre target. The target is capped at 40 g/day, the top of the dose-response range in the WHO evidence (finding 796). Reynolds 2019 found a linear dose-response with no plateau, but only within the observed data (findings 801-802), so no benefit is shown above about 40 g. Harms at high intakes are plausible for some users: IOC 2018 lists high fibre intake and low-energy-density foods among diet traits that can compound low energy availability (finding 461); a sports-nutrition review warns that very high intakes could impair absorption of some nutrients (finding 256); and very large whole-grain intakes may worsen marginal iron status (finding 808). The cap binds above about 2,860 kcal/day and stays above every IOM gram AI (the highest is 38 g/day, men 19-50; finding 69). Reynolds' broadest benefit at 25-29 g/day and its linear slope support a ranking bonus while intake is below target. For fatLoss and maintenance the bonus runs up to the daily target. For muscleGain and endurance it stops at the 25 g WHO floor even when the displayed target is higher. The reason is energy density, not a fibre-satiety effect, which the app does not claim because interventional satiety evidence is inconsistent (finding 574). Fibre-rich whole foods are low in energy density (finding 834), lowering energy density cut ad libitum intake in feeding studies (finding 827), and raising energy density is the advised lever when appetite limits a surplus, while keeping vegetables at public-health levels (finding 285). For endurance, IOC 2018 names high fibre and low-energy-density foods as possible compounders of low energy availability (finding 461), and pre-race and during-exercise foods should be low in fibre (findings 411, 432, 383). Because the displayed target still scales for these goals and nothing penalises higher intake, the IOM-based target is still shown. Only intrinsic fibre counts: WHO counts only fibre naturally present in foods (finding 798), and Reynolds favours minimally processed sources (finding 807). The IOM AI is for total fibre (finding 69), so counting only intrinsic fibre against it is at least as strict as IOM. Fibre is only a tie-breaker because its effect on body weight is small (-0.37 kg in RCTs that excluded weight-loss trials, finding 803). Applying the iron caution (finding 808) to plant-based users, who already average 28-44 g/day (finding 691), is our inference, not the authors'. WHO ranks whole grains, vegetables, fruit and pulses first as carbohydrate sources (finding 794), and whole grains outperform refined grains in cohort data (finding 804, low GRADE); ranking by fibre per 100 kcal reproduces both. Fibre-free foods get no penalty, since a penalty would push protein foods down the ranking. Findings: docs/research/diet-evidence.json #796, #69, #798, #800, #801, #802, #803, #804, #805, #807, #808, #461, #256, #574, #285, #794, #691, #827, #834, #411, #432, #383."
+      }
+    },
+    "adaptation": {
+      "trendMethod": {
+        "value": "leastSquaresSlope",
+        "source": "HALL19",
+        "locator": "Hall KD et al. 2019, Cell Metab 30(1):67-77, full text (PMC): STAR Methods 'Body weight and composition' (14-day weight change estimated by linear regression of daily 06:00 post-void weights to damp body-fluid fluctuations)",
+        "certainty": "low",
+        "note": "The spec, as applied here. Take one value per calendar day: the first weigh-in after waking and voiding, on the same scale, in minimal clothing (#212, #350, #502, #592). Fit weight = a + b x day (b in kg/day) by ordinary least squares over the trailing window, using only days on or after the date the current target took effect. The observed rate is 7b divided by the fitted weight at the end of the window (today). It is a signed fraction of body weight per week (negative = loss), the same convention as goals.<goal>.weeklyChangeFraction. This matches the engine's weight_trend (latestKg and weeklyChangeFraction) and toleranceFractionPerWeek. The engine implements only this method and does not read this value. Engine gap: weight_trend currently fits every reading and must first keep only the first reading of each day. Do not convert the slope to kcal. The energy density of weight change conflicts across sources: 4,858-6,041 kcal/kg early (#547), rho 8,840 (#552), 9,500/1,020 FM/FFM (#588) and 9,300/1,100 FM/FFM (#818, #557). So the step is a fixed amount, and the slope sets only its direction. End-of-window leverage (my calculation): one reading 1.35% high on the last day (a holiday-sized jump, #590) moves a 15-reading 35-d slope by about 0.10%/wk and a 35-reading slope by about 0.05%/wk. A 1.5 kg creatine-loading gain (#392) in the final week moves a 35-d slope by about 0.36%/wk at 80 kg (0.53%/wk for a 28-d window), which is above the tolerance. The method does not model water shifts. Creatine loading adds 1-2 kg (#392). A carbohydrate diet break added +0.6 kg, seen as FFM (#320). Leaving a ketogenic diet is estimated to add about 1.6-2.5 kg (#583). One trial delayed measurement at least 2 days after a refeed (#328). The luteal phase can add more than 2 kg (#489, second-hand), and a slope over about one menstrual cycle does not cancel it (see windowDays). Glycogen effects fall mostly within about a week (#529). Hall & Chow found their slope-based estimate deviated most just after diet changes, because of body-fluid shifts. Open owner decision: let users flag creatine loading, a refeed or diet break, leaving keto, and menstruation, and drop the affected days (7 days for glycogen events) from the fit. Also start the window 7 days late when the app itself ends a deficit phase (see windowDays). The source is an inpatient trial with complete daily weighing, and Hall & Chow's simulations also assume daily weights. Applying the method to sparse free-living weigh-ins is therefore an extrapolation, and certainty is low. Findings: docs/research/diet-evidence.json #819, #818, #557, #589, #590, #592, #262, #434, #489, #212, #350, #502, #599, #593, #552, #547, #588, #529, #392, #320, #583, #328."
+      },
+      "intakeLoggingUse": {
+        "value": "displayOnly: logged intake is shown to the user and may prompt an adherence review when the weight trend misses the goal, but it is never used to compute observed energy expenditure, maintenance energy, or the size or direction of any proposed target change; proposals are computed only from the current target and the weigh-in trend",
+        "source": "owner",
+        "rationale": "NASEM 2023 treats the body-weight trend, not reported intake, as the valid indicator of energy adequacy (#50, high). It also says self-reported intake runs systematically low, more so in women and some higher-BMI groups, and should not be used alone (#51, moderate). Subar 2015 advises never treating self-reported energy as true intake (#622). A rule of 'use logs only when at least N days are logged' was rejected. The error is a bias, not noise, so more days do not remove it. Against doubly labelled water, food records under-reported by 11-41% in 19 studies (#630), and technology-assisted records by 6-37% (#631). People who reported diet resistance under-reported by about 47% (#619, abstract only). In the Burrows review, under-reporting was greater in adults with overweight or obesity, and in women using recall-based methods; the sex difference was inconsistent for food records (#636). NASEM's 31 days of records (#52) buys precision, not freedom from bias. Few users log that much. Under daily prescriptions, only 9% of intervention occasions reached 75% of days (#610), none did so over 12 months or more (#611), and only 15% of interventions averaged 6 or more logged days a week (#613). Logging adherence also falls over time (#606), entries get backfilled (#607), and logging itself changes eating (#629). The safety direction: observed expenditure = logged intake - change in stores. Under-reporting makes computed expenditure too low, so the app would propose lower intake targets, and for a fat-loss user that deepens the deficit. A 20% under-report on 2,500 kcal is 500 kcal/d, five times the adjustment step. Sanghvi puts self-report error at several hundred kcal/d, against a mean bias under 40 kcal/d for the weight-based method (#558). The IOC calls self-reported intake the largest source of error in field estimates of energy availability (#455). Logs still have a use. The common 6-8 month plateau in free-living dieters is more likely due to waning adherence than to metabolic adaptation (#539, #586). So a stalled trend should prompt a review of the log before any further cut. Findings: docs/research/diet-evidence.json #50, #51, #52, #630, #631, #622, #558, #636, #619, #610, #611, #613, #606, #607, #629, #455, #728, #625, #539, #586."
+      },
+      "defaultPace": {
+        "value": "standard",
+        "source": "owner",
+        "rationale": "This is an owner decision; no study compares default adaptation speeds. Standard is the default because it honours the owner's request: the first possible change comes at 4 weeks instead of 5. It is the one window Hall & Chow report directly, and the shortest they judge likely needed (+/-350 kcal/d analytic, 290-300 simulated). In simulation it flags a real miss 2-7 days sooner than slower (medians), and by 16 weeks it has corrected 77-98% as much. Noise does not drive its targets down faster than slower's. An on-goal fat-loss user who accepted every proposal ended the year at a mean change of about -13 to -55 kcal/d, against about -4 to -79 on slower. Its costs are more proposals. An on-goal fat-loss user gets 5.1-5.5 a year at a 1% daily SD, against 1.8-2.7 on slower (0.6-0.7 against 0.1 at 0.625%). A user whose weight swings with the menstrual cycle gets about 10-13 a year with up to 9 reversals of direction, against about 3-6 with up to 4 on slower (illustrative 1 kg swing at 60 kg). The app cannot detect such a swing, so the setup copy recommends slower for it. No 3-week pace is offered. In simulation a 21-day rule either corrected real misses less than slower or, in its best tested form, roughly doubled noise-driven cuts (see standard.windowDays).\n\nThe default is deliberately not tied to how fast users feel their metabolism is. In the few small studies that tested such beliefs, they did not match measurement. In Wallhuss 2010, 44 people who felt their metabolism was high and 12 who felt it was low had fasting RMRs of 7,230 vs 7,430 kJ/d (P = 0.6). This compared absolute RMR, and the 'low' group was heavier (BMI 27.8 vs 20.4), so a size-adjusted difference is not excluded. In Lichtman 1992, 10 self-described diet-resistant people had total expenditure and RMR within 5% of prediction from body composition, but under-reported intake by 47% (#619). Clark 1995 is indirect, since it grouped 18 women by how much they felt they ate, not by perceived metabolism. Its 9 self-perceived small eaters had a higher, not lower, FFM-adjusted RMR (3,891 vs 3,375 J/min), though also a higher RQ. Real residual differences do exist. In Anthanont 2016, the top and bottom 15% of 757 weight-stable volunteers had BMRs more than about 169-173 kcal/d above or below the value predicted from fat-free mass, fat mass, age and sex, so about 70% lay within that range. Yet over a mean of about 9.7 years of follow-up, the low-BMR group did not gain weight faster (0.3 vs 0.5 kg/y). Total expenditure also varies by more than +/-20% after adjustment (Pontzer 2021, #128). The weigh-in trend shows the net effect of expenditure and actual intake on the current target, and that is what the suggestions act on. Pace research: docs/research/diet-evidence.json (paceResearch)."
+      },
+      "paces": {
+        "slower": {
+          "windowDays": {
+            "value": 35,
+            "source": "owner",
+            "rationale": "Pace paragraph to append. This is the most precise pace. With daily weights, a 0.5 kg weight SD, rho 9,100 kcal/kg and epsilon 22 kcal/kg/d, Hall & Chow's Eq. 3 gives a 95% CI on intake change of about +/-295 kcal/d at 35 d, against +/-352 at 28 d and +/-457 at 21 d (reviewer calculations; the paper itself states +/-350 at 28 d). At a 0.35 kg SD the figures are +/-207, 247 and 320. The equation's epsilon-rho cross term dominates at these lengths, so the variance falls only about 1.4-fold from 28 to 35 d, not the 1.95-fold of the slope term alone. In the engine's own units, the 95% half-width of the weekly slope is 0.23 x the daily SD with daily weights and 0.34 x at the 15-weigh-in minimum (my arithmetic). This window also resists cyclic swings best. With an illustrative 1 kg peak-to-trough, 28-day menstrual swing (#489 reports that the luteal phase can add more than 2 kg; the size is an open gap), the worst-phase slope bias is about 0.08 kg/wk at 35 d, against 0.24 at 28 d and 0.43 at 21 d (my calculation). This is therefore the pace the setup copy recommends when weight swings with the menstrual cycle. Pace research: docs/research/diet-evidence.json (paceResearch)."
+          },
+          "minimumWeighIns": {
+            "value": 15,
+            "source": "owner",
+            "rationale": "Pace paragraph to append. 15 of 35 days is 43% of the window, and the standard pace keeps that share (12 of 28), about 3 weigh-ins a week. So a user who weighs about 3 days a week has a broadly similar chance of qualifying under either pace. With weigh-ins on random days, a single check on this pace qualified 41% of the time at 3 a week, 68% at 3.5 and 86% at 4; on standard it was 46%, 71% and 87-88% (reviewer simulation of the engine's trend rule). Pace research: docs/research/diet-evidence.json (paceResearch)."
+          },
+          "minimumWeighInDaysPerWeek": {
+            "value": 2,
+            "source": "owner",
+            "rationale": "Unchanged. The rule needs at least 2 weigh-in days in every full 7-day block. Weekend readings go missing most often (#593), and weight follows a weekday cycle (#589), so an uneven spread would bias the slope. The rule also keeps the 15 weigh-ins from bunching. At the most clustered spread the rule allows, the slope half-width is 0.54 x the daily SD, against 0.34 x when evenly spread (my arithmetic). Pace research: docs/research/diet-evidence.json (paceResearch)."
+          },
+          "toleranceFractionPerWeek": {
+            "value": 0.0025,
+            "source": "owner",
+            "rationale": "Unchanged. This is the reference band that the standard pace widens from. At the 15-weigh-in minimum, the one-sided chance that an on-goal fat-loss user gets an 'eat less' proposal from noise alone at one check is about 0.2%, 1.0% and 7.3% at daily SDs of 0.5%, 0.625% (0.5 kg at 80 kg) and 1% of body weight (my arithmetic). Pace research: docs/research/diet-evidence.json (paceResearch)."
+          },
+          "adjustmentStepKcal": {
+            "value": 100,
+            "source": "owner",
+            "rationale": "Pace paragraph to append. 100 kcal per 35 days sets the reference maximum rate of change, about 2.9 kcal/d per day, and the standard pace keeps it (80 kcal per 28 d). So both paces can move targets toward the goal by about the same total over a phase: at most 300 kcal/d on slower (days 35, 70 and 105) and 320 on standard (days 28, 56, 84 and 112) in 16 weeks. They differ in how early the steps come and how small they are. The bound covers goal-direction proposals, which wait out minimumDaysBetweenAdjustments. A 'losing faster than safe' proposal can come sooner, but it only ever raises intake. Pace research: docs/research/diet-evidence.json (paceResearch)."
+          },
+          "minimumDaysBetweenAdjustments": {
+            "value": 35,
+            "source": "owner",
+            "rationale": "Unchanged, with the correction above. Setting it equal to windowDays means every goal-direction proposal is judged on a full window recorded entirely under the current target, so an accepted change cannot be counted twice. The 35-day spacing also moves each check a week later in a roughly 28-day menstrual cycle (#489), so successive checks do not land on the same phase. Pace research: docs/research/diet-evidence.json (paceResearch)."
+          }
+        },
+        "standard": {
+          "windowDays": {
+            "value": 28,
+            "source": "owner",
+            "rationale": "No source sets a trend window for an adaptive app, so this is an owner decision. Twenty-eight days is the one window Hall & Chow report directly. With 28 daily weights, a 0.5 kg SD, rho 9,100 kcal/kg and epsilon 22 kcal/kg/d, the intake-change estimate has an SD of 180 kcal/d and a 95% CI of +/-350. Their three simulated free-living subjects gave 95% CIs of 290-300 kcal/d. The authors judge that daily weights over at least 28 d are likely needed to assess diet adherence, and their abstract says more than 28 d was needed for a CI under 300. So 28 d is the likely minimum by the paper's own standard, not a comfortable margin. Precision given up against slower (reviewer Eq. 3 values, daily weights): +/-352 vs +/-295 kcal/d at a 0.5 kg SD and +/-247 vs +/-207 at 0.35 kg, about 19% wider. In the engine's slope units, the 95% half-width is 0.32 x vs 0.23 x the daily SD with daily weights, and 0.47 x vs 0.34 x at each pace's minimum count (my arithmetic). Weekly cycle: a 0.35% Monday-to-Friday swing (#589) leaves a worst-phase slope residual of 0.021%/wk over 4 whole weeks. Cadence precedents: MATADOR recalculated the prescription every 4 weeks (#304), and ACSM describes progress toward short-term goals over about 3-6 weeks (#346). Early transients: glycogen and water act mainly in the first week (#529), and early loss has a low energy density until weeks 4-6 (#547). Hall & Chow saw their largest errors just after diet changes. At 28 d the first week is a quarter of the window, against a fifth at 35 d.\n\nWhat the shorter window buys (simulation, every proposal accepted): a fat-loss user whose weight is flat gets a first cut at day 28 instead of 35. From about day 35, slower's larger steps catch up. By day 112 this pace has cut that user by 214-244 kcal/d, against 240-288 on slower. The correction comes a week sooner but is not larger.\n\nMenstrual caveat: with an illustrative 1 kg peak-to-trough swing (#489; the size is an open gap), the worst-phase slope bias is 0.24 kg/wk. At 60 kg that is 0.40%/wk, which exceeds this pace's 0.3%/wk tolerance. And 28-day spacing can put successive checks on the same phase of a roughly 28-day cycle, so the bias can repeat. For a 60-kg on-goal fat-loss user with that swing, with proposals declined, this pace gave 4.4-6.2 'eat less' and 3.7-8.5 'losing faster than safe, eat more' proposals a year, about 10-13 in all. Slower gave 2.9-4.2 and 0.6-1.3, about 3.7-5.1 in all. With every proposal accepted, this pace gave 9.8-12.8 proposals a year with 4-9 reversals of direction, against 2.9-6.4 and 1-4 on slower. The year's net change stayed within about +/-160 kcal/d (5th-95th percentile). Hence the setup copy points such users to slower.\n\nNo shorter pace is offered. At 21 d, Eq. 3 gives +/-457 kcal/d at a 0.5 kg SD, and 21 d is below the 28 d the paper judges likely needed. In 46 free-living adults not trying to change weight, the change between two weighings 2 weeks apart had an SD of 1.1-1.3 kg. About 84% of it was fat-free mass, at about 2,380 kcal/kg. The authors conclude that weight change alone cannot be expected to separate energy balance from a sustained imbalance under 500 kcal/d in an individual (Bhutani 2017). That was a two-point change, not a daily-weight trend, so it is indirect support. In simulation with every proposal accepted, the drafted 21-day pace (0.4%/wk band, 60 kcal step) corrected real misses less than slower from day 42 on. By day 112 it had cut a flat-weight fat-loss user by 150-214 kcal/d (slower 240-288), and it made 2.3-13 proposals a year to an on-goal fat-loss user (slower 0.1-2.7). The best 21-day variant tested (0.3%/wk band, 80 kcal step, loss ceiling judged on slower's trend, which needs an engine change) did correct more than slower. But noise then cut an on-goal fat-loss user's target by about 100-170 kcal/d a year, against about 5-80 on slower, with 1.9-7.7 proposals a year. Pace research: docs/research/diet-evidence.json (paceResearch)."
+          },
+          "minimumWeighIns": {
+            "value": 12,
+            "source": "owner",
+            "rationale": "No source gives a minimum count, so this is an owner decision. It keeps the slower pace's 43% share of days (15/35 = 12/28), about 3 weigh-ins a week. Adherence: trials instructing daily weighing averaged 44%, 50% and 95% of days, about 3.1, 3.5 and 6.7 a week (#599). Under daily prescriptions, 65% of weight-tracking interventions averaged at least half of days logged (#612). NoHoW participants managed about 4 a week at first, falling to about 2.5 over 2 years (#593). About half of daily-tracking interventions averaged at least 4 logged days a week, though that counts all tracked behaviours, not weighing alone (#613). With weigh-ins on random days, a single check qualified 46% of the time at 3 a week (41% on slower), 71% at 3.5 and 87-88% at 4 (reviewer simulation). Precision: 12 evenly spread weigh-ins give a slope half-width of 0.47 x the daily SD per week, against 0.32 x with daily weights. More weigh-ins still help, as Hall & Chow and Sanghvi (#556) note, but window length matters more than count. Pace research: docs/research/diet-evidence.json (paceResearch)."
+          },
+          "minimumWeighInDaysPerWeek": {
+            "value": 2,
+            "source": "owner",
+            "rationale": "Same reasoning as slower: weekend readings go missing most often (#593), and a weekday weight cycle (#589) means an uneven spread biases the slope. At the most clustered spread the rule allows, the 28-day slope half-width is 0.79 x the daily SD, against 0.47 x when evenly spread (my arithmetic). Without the rule the spread could be worse still. Raising it to 3 would drop many windows for people who average 3 weigh-ins a week. Pace research: docs/research/diet-evidence.json (paceResearch)."
+          },
+          "toleranceFractionPerWeek": {
+            "value": 0.003,
+            "source": "owner",
+            "rationale": "No source defines a tolerance band, so this is an owner decision. It is widened from 0.0025 because the 28-day slope is noisier: at the minimum count its SD is 0.2385 x the daily SD per week, against 0.172 x for slower (1.38x). For one check by an on-goal fat-loss user, the one-sided chance of a noise-only 'eat less' proposal is 0.6%, 2.2% and 10.4% at daily SDs of 0.5%, 0.625% and 1%, against 0.2%, 1.0% and 7.3% for slower. Fully matching slower would need about 0.0035. In simulation (proposals declined), 0.0035 flagged partial misses later than slower in most cases. Fat loss at half the goal rate was flagged later in 3 of the 4 noise cases (median 39, 42 and 37 days against 38, 36 and 36), and sooner only at a 1% SD on half the days (36 against 39). At a 0.625% SD a stalled gainer was flagged at 39-41 days against 36-38 (at a 1% SD it was sooner, 33-35 against 35.5-39). That defeats the purpose of the pace. At 0.003 the first flag came sooner than on slower in all four noise cases: a fat-loss stall at a median day 28 against 35, half the goal rate at 33-34 against 36-39, and a muscle-gain stall at 30-34 against 35.5-39.\n\nThe total correction is similar, not larger. With every proposal accepted and weight responding at 7,700 kcal/kg, by day 112 this pace had cut a flat-weight fat-loss user by 214-244 kcal/d (slower 240-288). It cut a user losing at half the goal rate by 125-169 (slower 147-176) and raised a stalled gainer by 138-166 (slower 152-184). That is 77-98% of slower's correction.\n\nNoise: an on-goal fat-loss user who accepted every proposal ended the year at a mean change of about -13, -28 and -55 kcal/d in the three noise cases (5th percentile -80 to -160), against about -4, -56 and -70 to -79 on slower (5th percentile 0 to -200). So the wider band and the 80 kcal step keep noise from deepening the deficit faster than on slower. (Counting 'eat less' proposals in declined runs and multiplying by the step gives a gross proxy that is 1.2x slower's at a 1% SD on half the days, 1.6x with daily weighing and 2-4x at a 0.625% SD; it ignores the weight response and opposing proposals.) The cost is frequency: 0.6-5.5 proposals a year with 0.2-3.0 reversals of direction, against 0.1-2.7 and 0-1.2 on slower. About half the extra come from the loss ceiling (see minimumWeighIns).\n\nThe price of the wider band is sensitivity. The smallest real fat-loss shortfall that triggers is 0.24 kg/wk at 80 kg, about 207-264 kcal/d at 6,041-7,700 kcal/kg (#547). That is below the intake uncertainty of a 28-day window (+/-350 kcal/d in Hall & Chow), so a single check cannot reliably separate such a shortfall from noise; repeated checks do. For muscle gain the trigger sits just below zero slope (-0.05%/wk), so a flat trend is flagged only when noise pushes the fitted slope below that; in simulation stalled gainers were still flagged sooner than on slower. The 80 kcal step is below the smallest triggering fat-loss shortfall even at 50 kg (129-165 kcal/d). So one step does not overshoot a real deviation that triggers, for users of about 50 kg or more. Pace research: docs/research/diet-evidence.json (paceResearch)."
+          },
+          "adjustmentStepKcal": {
+            "value": 80,
+            "source": "owner",
+            "rationale": "No source prescribes a trend-adjustment step. NASEM says to adjust intake incrementally but gives no size (#50). The one number is a 100-200 kcal/d taper for lean bodybuilders (#227, narrative review). I chose 80 so that the maximum rate of change matches the reviewed slower pace: 100 kcal per 35 d and 80 per 28 d are both about 2.9 kcal/d per day. A 16-week phase then allows at most 4 goal-direction changes (days 28, 56, 84 and 112), 320 kcal/d in total, against 300 on slower. On either pace, loss-ceiling 'eat more' proposals skip the wait and only raise intake. So this pace moves sooner, not further: in simulation with every proposal accepted, by day 112 it had made 77-98% of slower's correction of real misses (see toleranceFractionPerWeek). The smaller step cuts the cost of each noise-driven proposal by 20%, which matters because this pace re-checks sooner and its window is noisier. The step is well below the individual precision of weight-based estimates (RMS 215 kcal/d, #553; Hall & Chow +/-350 kcal/d at 28 d), which limits the cost of a false trigger. It is also below the smallest fat-loss shortfall that triggers (129-165 kcal/d at 50 kg, #547), so one step does not overshoot a real deviation that triggers. Pace research: docs/research/diet-evidence.json (paceResearch)."
+          },
+          "minimumDaysBetweenAdjustments": {
+            "value": 28,
+            "source": "owner",
+            "rationale": "Same logic as slower: with spacing below the window, the deviation behind the last accepted change would still sit in the next window and could trigger a second change in the same direction. Four-weekly recalculation has trial precedent in MATADOR (#304), and ACSM describes a 3-6 week horizon for short-term goals (#346). Caveat: in a user with a roughly 28-day cycle, 28-day spacing can put successive checks on the same menstrual phase (#489), so a cycle-driven bias can repeat. That is why slower remains the recommended pace for users whose weight swings with their cycle. Pace research: docs/research/diet-evidence.json (paceResearch)."
+          }
+        }
+      },
+      "paceCopy": {
+        "value": {
+          "question": "How soon should the app suggest calorie changes from your weigh-ins?",
+          "slower": "Can suggest a change after 5 weeks of regular weigh-ins, then at most every 5 weeks. The most reliable, and the better choice if your weight swings with your menstrual cycle.",
+          "standard": "Can suggest a change after 4 weeks of regular weigh-ins, then at most every 4 weeks. A week sooner than the slower pace, in slightly smaller steps, but a little less certain.",
+          "perceivedMetabolismNote": "In the few small studies that have tested it, people's sense of having a fast or slow metabolism did not match their measured metabolic rate, so it is not a reliable guide. Real differences between people do exist. On either pace, suggestions follow how your weight actually changes on your current targets, so choose a pace for how soon you want changes. On either pace, the app may suggest eating more sooner if you are losing weight faster than is safe."
+        },
+        "source": "owner",
+        "rationale": "Setup-screen wording for the pace choice, summarising the pace research: self-perceived metabolism did not match measured metabolic rate (Wallhuss 2010, Lichtman 1992, Clark 1995); individual differences exist (Pontzer 2021, Anthanont 2016) and are revealed by the weight trend. Pace research: docs/research/diet-evidence.json (paceResearch)."
+      },
+      "intakeNote": {
+        "value": "Logged food is shown against your targets, but it never changes them: food logs usually under-count what was eaten, so targets adapt to your weight trend instead.",
+        "source": "owner",
+        "rationale": "NASEM 2023 treats the body-weight trend, not reported intake, as the valid indicator of energy adequacy (#50, high). It also says self-reported intake runs systematically low, more so in women and some higher-BMI groups, and should not be used alone (#51, moderate). Subar 2015 advises never treating self-reported energy as true intake (#622). A rule of 'use logs only when at least N days are logged' was rejected. The error is a bias, not noise, so more days do not remove it. Against doubly labelled water, food records under-reported by 11-41% in 19 studies (#630), and technology-assisted records by 6-37% (#631). People who reported diet resistance under-reported by about 47% (#619, abstract only). In the Burrows review, under-reporting was greater in adults with overweight or obesity, and in women using recall-based methods; the sex difference was inconsistent for food records (#636). NASEM's 31 days of records (#52) buys precision, not freedom from bias. Few users log that much. Under daily prescriptions, only 9% of intervention occasions reached 75% of days (#610), none did so over 12 months or more (#611), and only 15% of interventions averaged 6 or more logged days a week (#613). Logging adherence also falls over time (#606), entries get backfilled (#607), and logging itself changes eating (#629). The safety direction: observed expenditure = logged intake - change in stores. Under-reporting makes computed expenditure too low, so the app would propose lower intake targets, and for a fat-loss user that deepens the deficit. A 20% under-report on 2,500 kcal is 500 kcal/d, five times the adjustment step. Sanghvi puts self-report error at several hundred kcal/d, against a mean bias under 40 kcal/d for the weight-based method (#558). The IOC calls self-reported intake the largest source of error in field estimates of energy availability (#455). Logs still have a use. The common 6-8 month plateau in free-living dieters is more likely due to waning adherence than to metabolic adaptation (#539, #586). So a stalled trend should prompt a review of the log before any further cut. Findings: docs/research/diet-evidence.json #50, #51, #52, #630, #631, #622, #558, #636, #619, #610, #611, #613, #606, #607, #629, #455, #728, #625, #539, #586."
+      }
+    },
+    "safety": {
+      "minimumAgeYears": {
+        "value": 19,
+        "source": "owner",
+        "rationale": "No source sets a minimum age for a consumer diet-target app, so this is an owner decision. The profile stores only the birth year. The engine computes age as the current calendar year minus the birth year (diet.age_years), and the same age goes into the EER equation. With a threshold of 19, the youngest user admitted was born on 31 December nineteen years before the current year, and is 18 years and 1 day old on 1 January. So 19 is the smallest whole number that admits no one under 18. A threshold of 18 would admit 17-year-olds for part of every year. Every adult reference value the engine uses is defined for ages 19 and over: the NASEM 2023 EER equations for men and women (#43, #44), their SEPV (#47) and PAL bands (#45), and the IOM protein RDA (#62), carbohydrate RDA (#68), iron (#701) and calcium (#712) values. The DRI places people who are truly 18 in the 14-18 y life stage, where the values differ. IOM 2011 Table S-1, the table behind #712, sets the calcium RDA at 1,300 mg/d for 14-18 y and 1,000 mg/d for 19-30 y (checked in the saved Summary text). No adolescent energy equation is among the verified findings. Pontzer (#126) puts the adult plateau of size-adjusted TEE at about 20.5 y (95% CI 19.8-21.2), and 20-25-year-olds averaged 102.7% of the adult-expected value. So adult equations may slightly underestimate need in the late teens and early twenties, which errs toward too large a deficit. That applies to 19- and 20-year-olds as well. It argues for caution near the boundary, but it does not favour 19 over 18, and the energy floors and the deficit cap limit that error. AAP 2016 (#752, #753; abstract only, no age cut-off) says guidance for adolescents should focus on habits rather than weight, because some teens who try to lose weight develop eating disorders. The Triad statement judges adolescent energy stores by % of expected weight rather than by adult BMI cut-offs (#472), and IOC 2023 allows body-composition assessment under 18 only for medical reasons (#450). Together these support excluding everyone under 18, and 19 is the value that does this when only the birth year is known. Findings: docs/research/diet-evidence.json #43, #44, #45, #47, #62, #68, #701, #712, #126, #752, #753, #472, #450."
+      },
+      "exclusions": {
+        "value": [
+          {
+            "id": "underMinimumAge",
+            "title": "Under the minimum age",
+            "description": "Age below safety.minimumAgeYears (19), counted as the current calendar year minus birth year. This excludes everyone under 18.",
+            "action": "withholdTargets"
+          },
+          {
+            "id": "pregnancy",
+            "title": "Pregnant",
+            "description": "Currently pregnant or may be pregnant.",
+            "action": "withholdTargets"
+          },
+          {
+            "id": "lactation",
+            "title": "Breastfeeding",
+            "description": "Currently breastfeeding or expressing breast milk.",
+            "action": "withholdTargets"
+          },
+          {
+            "id": "eatingDisorderRisk",
+            "title": "Eating-disorder screen",
+            "description": "SCOFF score at or above safety.scoff.referralScore.",
+            "action": "withholdTargets"
+          },
+          {
+            "id": "eatingDisorderHistory",
+            "title": "Eating disorder, now or in the past",
+            "description": "Has ever been diagnosed with, or treated for, an eating disorder such as anorexia nervosa, bulimia nervosa or binge eating disorder.",
+            "action": "withholdTargets"
+          },
+          {
+            "id": "chronicKidneyDisease",
+            "title": "Kidney disease",
+            "description": "Told by a clinician they have chronic kidney disease, reduced kidney function (eGFR below 60) or albumin/protein in the urine lasting 3 months or more, or has a kidney transplant or receives dialysis.",
+            "action": "withholdTargets"
+          },
+          {
+            "id": "type1Diabetes",
+            "title": "Type 1 diabetes",
+            "description": "Has type 1 diabetes.",
+            "action": "withholdTargets"
+          },
+          {
+            "id": "hypoglycaemiaRiskMedication",
+            "title": "Medicine that can cause low blood sugar",
+            "description": "Takes insulin, a sulfonylurea, or any other medicine a clinician has said can cause low blood sugar.",
+            "action": "withholdTargets"
+          },
+          {
+            "id": "glp1Therapy",
+            "title": "GLP-1 or GIP/GLP-1 medicine",
+            "description": "Currently takes a GLP-1 receptor agonist or combined GIP/GLP-1 medicine (for example semaglutide, liraglutide, dulaglutide or tirzepatide), for weight or for diabetes.",
+            "action": "withholdTargets"
+          },
+          {
+            "id": "bariatricSurgery",
+            "title": "Weight-loss surgery",
+            "description": "Has ever had weight-loss (bariatric or metabolic) surgery, such as a gastric band, sleeve gastrectomy or gastric bypass.",
+            "action": "withholdTargets"
+          },
+          {
+            "id": "lowBmi",
+            "title": "Very low body weight",
+            "description": "Body mass index of 17.5 kg/m2 or lower (weight in kg divided by height in metres squared).",
+            "action": "withholdTargets"
+          },
+          {
+            "id": "rapidRecentWeightLoss",
+            "title": "Rapid recent weight loss",
+            "description": "Has lost 10% or more of body weight within the past month.",
+            "action": "withholdTargets"
+          },
+          {
+            "id": "missedPeriods",
+            "title": "Missed periods",
+            "description": "Has missed three or more menstrual periods in a row without a known cause such as pregnancy, menopause or hormonal contraception.",
+            "action": "withholdTargets"
+          },
+          {
+            "id": "clinicianManagedDiet",
+            "title": "Diet managed by a clinician",
+            "description": "Follows a diet prescribed or supervised by a clinician or dietitian for a medical condition (for example inflammatory bowel disease, coeliac disease or liver disease).",
+            "action": "withholdTargets"
+          }
+        ],
+        "source": "owner",
+        "rationale": "The list combines exclusions backed by guidelines with conservative owner decisions where the research has gaps. The support for each item follows. underMinimumAge: see safety.minimumAgeYears (#43, #44, #126, #752, #753, #472, #450). pregnancy: IOM 2009 sets a positive gain range and a weekly gain rate for every pre-pregnancy BMI (#748, #749, #750) and gives no safe rate of loss (#751). eatingDisorderRisk (a positive screen): SCOFF accuracy (#738, #739, #740, #741); NICE says to tailor care or refer for eating disorders (#770); IOC 2010 says to refer people at risk (#366). eatingDisorderHistory (a self-reported diagnosis or treatment): IOC 2023 CAT2 counts a diagnosed eating disorder as a primary indicator (#447); the Triad statement requires physician, dietitian and mental-health care for a clinical eating disorder (#481); NICE says to tailor or refer (#770); aggressive dieting raises the risk of binge eating and food preoccupation (#229). SCOFF sensitivity is only 0.71-0.77 in community samples, samples with more men, and samples that include binge eating disorder (#739), so a known diagnosis must gate on its own. Including past eating disorders is the conservative owner choice. chronicKidneyDisease: the KDIGO 2024 definition, GFR <60 and/or ACR >=30 mg/g for >=3 months, or a transplant history (#744); protein 0.8 g/kg in G3-G5, and avoid >1.3 g/kg (#743, #742); renal dietitian input (#745); PROT-AGE CKD limits (#184). Devries (#187) shows the protein-safety evidence covers only adults without CKD. type1Diabetes: carbohydrate intake and insulin dosing are linked and individual, and glucose and ketone thresholds are clinical decisions (#754, #755, #756); NICE lists T1D as needing tailored care (#770). lowBmi: BMI <=17.5 is a proposed low-energy-availability warning sign (#457) and the Triad high-risk score (#474). The Triad text flag is <17.5 (#472), so <=17.5 is the inclusive, conservative reading. <=75% of median BMI is an IOC urgent-care flag (#448). BMI 17.5 to <18.5 scores moderate risk (#474) and sits below the FAO healthy range (#39); that band belongs to a fat-loss BMI floor, not to this list, which withholds all targets. rapidRecentWeightLoss: >=10% in a month is Triad high risk (#474) and an IOC 2018 LEA indicator (#456). missedPeriods: in IOC 2023 CAT2, secondary amenorrhoea of 3-11 missed cycles is a primary indicator and 12 or more is a severe primary indicator (#447); fewer than 6 menses a year is Triad high risk (#476); finding one Triad component should prompt evaluation for the others (#481); ACSM 2016 links sustained EA below 30 kcal/kg FFM/d to impaired body functions and reports menses returning once EA was raised to about 40 (#192). clinicianManagedDiet: NICE requires tailoring or referral for IBD, MASLD, coeliac disease and similar conditions (#770), and KDIGO asks for dietitian input in CKD (#745). The remaining items are owner decisions for gaps. lactation: the verified findings cover pregnancy only (#748-#751). hypoglycaemiaRiskMedication: extrapolated from the T1D consensus (#754, #756); from AHA 2013, which says larger weight losses reduce medication needs, so doses need clinical review (#782); and from NICE, which places low-energy diets for type 2 diabetes inside long-term-condition services (#766). glp1Therapy: larger deficits cost lean mass (#240, #232), rapid loss raises gallstone risk (#791, #792), and NICE requires supervision for low-energy intakes (#765, #766, #767). bariatricSurgery: no finding covers it directly; energy restriction raises the risk of micronutrient deficiency (#359). Withholding targets is the safe direction for every gap item. Findings: docs/research/diet-evidence.json #43, #44, #126, #752, #753, #472, #450, #748, #749, #750, #751, #738, #739, #740, #741, #770, #366, #447, #481, #229, #742, #743, #744, #745, #184, #187, #754, #755, #756, #782, #766, #765, #767, #240, #232, #791, #792, #359, #457, #474, #448, #39, #456, #476, #192."
+      },
+      "scoff": {
+        "value": {
+          "questions": [
+            "Do you ever make yourself throw up because you feel too full?",
+            "Do you worry that you cannot control how much you eat?",
+            "In the past 3 months, have you lost more than 6 kg (13 lb)?",
+            "Do you think you are fat even when other people say you are too thin?",
+            "Do you feel that food rules your life?"
+          ],
+          "referralScore": 2
+        },
+        "source": "KUTZ20",
+        "locator": "Kutz 2020 J Gen Intern Med: Results 'Diagnostic accuracy' (pooled sensitivity 0.86, specificity 0.83; threshold effect r=-0.21, p=0.32); Table 3 subgroup analyses (community, <60% female, binge eating disorder, North America); Discussion and Conclusions (large-scale screening in primary care and community settings). Item content and scoring rule (one point per yes, score >=2): Morgan 1999 BMJ (doi:10.1136/bmj.319.7223.1467, PMID 10582927), box of questions and footnote.",
+        "certainty": "low",
+        "note": "Scoring: 1 point per 'yes', 0-5 in total. diet.safety_block compares scoffYesCount >= referralScore, so a score of 2 or more triggers eatingDisorderRisk and a referral message. The cut-off of 2 is kept for four reasons: Morgan 1999 defines it (#740); USPSTF 2022 pooled adult accuracy at >=2 (#741, abstract only: sensitivity 84%, specificity 80%, 10 studies); Kutz found no threshold effect (#738); and no verified finding supports a cut-off of 1. I lowered certainty from moderate to low, as one review asked. The other two reviews noted that moderate is allowed for a meta-analysis. That is true, but the grade should reflect how well the value fits this use. The reasons for low: Morgan's cut-off comes from a case-control derivation in 116 women with anorexia or bulimia and 96 female college controls (checked in the saved full text). In community samples, which is this app's setting, Kutz found sensitivity 0.71; it was 0.75 in samples with more men, 0.77 with binge eating disorder included and 0.69 in North America (#739). Kutz pooled 25 studies with I2 about 98%, only two of them rated low on every risk-of-bias and applicability domain (#738), and concluded there is insufficient evidence to recommend the SCOFF for large-scale screening in primary care and diverse community settings (Discussion, saved full text). The questions are paraphrased, as the brief asked, but the validated accuracy applies only to the original wording. So a negative score is not clearance. The screen is one layer of the safety gate, alongside the self-reported eatingDisorderHistory exclusion. The owner must accept that the paraphrase is unvalidated or have it checked. Item 3 unit fix, accepted from all reviews: the draft's '6 kg (about 14 lb)' mixed two thresholds, because 6 kg is 13.2 lb and 14 lb is one stone (6.35 kg). It now reads 6 kg (13 lb). Since 13 lb is 5.9 kg, both units sit just below one stone, so both are slightly more sensitive than the original. Users already losing weight on purpose may answer yes to item 3 (#740). The conservative choice is to count that answer anyway and to run the screen at onboarding, before any weight loss driven by the app. A user losing about 0.5 kg a week passes 6 kg within 3 months, so a later re-screen would flag some users who are on plan; that errs toward withholding. Whether to re-screen, and how often, is an owner decision. Findings: docs/research/diet-evidence.json #738, #739, #740, #741."
+      },
+      "energyAvailabilityFloorKcalPerKgFFM": {
+        "value": 30,
+        "source": "MOUNTJOY23",
+        "locator": "Mountjoy 2023 IOC REDs consensus, Br J Sports Med 57(17): Clinical applications > Assessment of EA (pp.1078, 1080; zones: 30-45 reduced EA for mass/fat loss, <=30 LEA with health implications); Key scientific advances > REDs in male athletes (p.1077); Clinical applications > Body composition assessment and management (pp.1080, 1082-1083)",
+        "certainty": "low",
+        "note": "EA = (daily energy intake - exercise energy expenditure) / fat-free mass, in kcal/kg FFM/day. Engine behaviour, corrected from the draft as two reviews asked: diet.energy_floor applies this floor whenever the user has entered a body-fat percentage, with FFM = latest weight x (1 - bodyFatPercent/100). Exercise energy is not measured, so it counts as zero and the floor is 30 x FFM kcal/d. This is a necessary lower bound, not the full EA floor. Intake must be at least 30 x FFM plus the day's exercise energy, so for active users EA at the engine floor is below 30. Example: FFM 45 kg gives an engine floor of 1,350 kcal/d, but with 300 kcal/d of exercise the full EA floor is 30 x 45 + 300 = 1,650 kcal/d. The draft said to skip the check when exercise energy is missing; keep the engine's behaviour instead, because a floor that ignores exercise still protects more than no floor. The check is skipped, and recorded as unassessed, only when body fat is missing; the absolute floor and the deficit cap then apply alone. Where exercise energy could come from (logged sessions, MET estimates or HealthKit) is an open gap. Adding it would raise this floor, and using HealthKit for it needs an owner ruling under AGENTS.md rule 4. Boundary: IOC 2023, the main source, puts <=30 in the LEA zone with health implications and 30-45 in the reduced zone used for fat loss (#442). ACSM 2016 and IOC 2018 use <30 instead (#344, #192, #454), and Loucks 2003 found LH pulsatility intact after 5 days at 30 kcal/kg LBM/day and disrupted below that (#464). Under the conservative rule the bound is exclusive: EA must stay above 30. One review argued for an inclusive bound because EA measurement error is far larger than 1 kcal/kg. That is true, but it does not make the less conservative reading preferable. The value stays 30. The engine currently clamps to exactly 30 x FFM and rounds to the nearest 10 kcal, so a binding floor can land up to 5 kcal (under 0.2 kcal/kg FFM) below it. Rounding up to the next 10 kcal whenever a floor binds would keep the target above the bound. That gap is far smaller than the uncounted exercise energy. Sex: in men, symptoms appear at lower EA, about 9-25 (#443) or below 25 (#246); about 20-25 may be pathological in bodybuilders (#460); and male thresholds are unknown (#459). I apply 30 to both sexes as the more conservative value. Other support: the Triad statement (#468) and Schofield (#104). IOC 2023 says the zones come from small, short studies in sedentary women and are a guide, not a diagnostic endpoint (#442). Lieberman 2018, Med Sci Sports Exerc, doi:10.1249/MSS.0000000000001451, PMID 29023359: I checked the PubMed abstract on 2026-09-24. It is not yet a finding, so the owner should add it before citing it. In a secondary analysis of an RCT in 35 sedentary, ovulatory women aged 18-24, the odds of menstrual disturbance fell 9% for each unit increase in EA (OR 0.91, 95% CI 0.84-0.98), and no threshold emerged. So 30 is not a safe line. The app uses it only as a clamp that raises a target, and never tells a user they have low energy availability or REDs. Never estimate FFM or body fat from BMI, age or sex equations. IOC 2023 judges easy-to-use 'doubly indirect' methods, which derive body fat from regression equations, to be invalid (#450), and the open questions list no validated method for an app. Consumer bioimpedance scales use such equations, so treat a body-fat % the user enters as low-validity. If body fat is overestimated, FFM and the floor come out too low, and the check may not bind. That is why the check only ever raises targets and never relaxes the other floors. Findings: docs/research/diet-evidence.json #442, #443, #344, #192, #454, #464, #468, #104, #246, #460, #459, #450."
+      },
+      "maximumDeficitFractionOfTEE": {
+        "value": 0.25,
+        "source": "owner",
+        "rationale": "No source gives a maximum deficit as a fraction of TEE, so this is an owner decision. The evidence behind it follows. AHA 2013 accepts deficits of 500-750 kcal/d for adults with overweight or obesity, and its evidence statement also lists a 30% deficit (#780). Two trials in resistance-trained adults, described as lean in #326 and #724, prescribed 25% below maintenance. In Conlin 2021 (about 18-20% achieved over 10 weeks), fat-free mass was maintained and about 98% of the loss was fat (#722, #724). In Campbell 2020 (21% achieved in the continuous arm and 26% in the refeed arm, over 7 weeks; #326), the continuous -25% arm lost 1.3 kg FFM and 1.9 kg dry FFM within-group (#325), so 25% is not free of lean-mass cost. In Garthe 2011, elite athletes who cut intake by about 19% gained lean mass, and those who cut about 30% did not (#217, #218). Murphy 2022 found that a deficit of about 500 kcal/d prevented lean-mass gains (#240), and ACSM 2016 advises 250-500 kcal/d (#346, #194). At TEEs of 2,000-3,000 kcal, 25% equals 500-750 kcal, which spans the AHA range; at a TEE of 2,000 it equals the Murphy ceiling. NASEM's starting rule, EER - 1.96 x SEPV (#48, #47), is a fixed 670 kcal/d for men and 472 for women. That is about 22% for the report's example man (EER 3,041) and about 21% for its example woman (EER 2,275). It exceeds 25% only when EER is below about 2,680 kcal/d for men or 1,890 for women. The 33% deficit (MATADOR, obese men on provided food, #304) and the ~40% deficit (Longland, a 4-week diet provided by the researchers, #167) come from supervised trials that do not apply to an unsupervised app. The value 0.25 is below the 30% that AHA lists and that Garthe's fast arm used. It equals the largest deficit prescribed in the trials of resistance-trained adults, and one of those arms lost some FFM. So 0.25 is a ceiling at the edge of the tested range, not a default that is safe for lean mass. Findings: docs/research/diet-evidence.json #780, #722, #724, #326, #325, #217, #218, #240, #232, #346, #194, #304, #167, #48, #47, #50, #768."
+      },
+      "minimumEnergyKcal": {
+        "value": {
+          "female": 1210,
+          "male": 1500
+        },
+        "source": "owner",
+        "rationale": "Men 1,500 kcal/d and women 1,200 kcal/d are the lower ends of the AHA/ACC/TOS 2013 guideline's diet ranges (Jensen 2013, Table 4 recommendation 3a; finding #779). NICE NG246 (finding #766) classes 800-1,200 kcal/d, including 1,200 itself, as a low-energy diet for specialist services only. To stay outside that band the women's floor is set just above it: 1,210 kcal, the lowest value the engine can show at its 10-kcal rounding. NICE NG246 is an official guideline without a DOI or PMID, so it is recorded here as an owner decision rather than as a cited source. Findings: docs/research/diet-evidence.json #779, #766."
+      },
+      "minimumBMI": {
+        "value": 17.5,
+        "source": "DESOUZA14",
+        "locator": "Figure 4 (Cumulative Risk Assessment) and 'Who Should Get DXA Scans for BMD Testing?' list, CJSM co-publication",
+        "certainty": "low",
+        "note": "Female Athlete Triad 2014 consensus: BMI 17.5 or lower is a high-risk criterion. Targets are withheld at or below it (exclusion lowBmi), computed from height and the latest weight, not only self-reported. Findings: docs/research/diet-evidence.json #474."
+      },
+      "fatLossMinimumBMI": {
+        "value": 18.5,
+        "source": "owner",
+        "rationale": "The drafts left the 17.5 to below 18.5 band open (Triad 2014 moderate risk, finding #474; FAO/WHO/UNU individual maintenance range from BMI 18.5, finding #39). Conservative fallback chosen by the safety review: no fat-loss targets below BMI 18.5; other goals remain available. Findings: docs/research/diet-evidence.json #43, #44, #126, #752, #753, #472, #450, #748, #749, #750, #751, #738, #739, #740, #741, #770, #366, #447, #481, #229, #742, #743, #744, #745, #184, #187, #754, #755, #756, #782, #766, #765, #767, #240, #232, #791, #792, #359, #457, #474, #448, #39, #456, #476, #192."
+      },
+      "rapidLossFraction": {
+        "value": 0.1,
+        "source": "DESOUZA14",
+        "locator": "Figure 4 (Cumulative Risk Assessment) and 'Who Should Get DXA Scans for BMD Testing?' list, CJSM co-publication",
+        "certainty": "low",
+        "note": "Female Athlete Triad 2014 consensus: losing 10% or more of body mass within 1 month is a high-risk criterion (exclusion rapidRecentWeightLoss), computed from the weigh-ins. Findings: docs/research/diet-evidence.json #474."
+      },
+      "rapidLossDays": {
+        "value": 30,
+        "source": "DESOUZA14",
+        "locator": "Figure 4 (Cumulative Risk Assessment) and 'Who Should Get DXA Scans for BMD Testing?' list, CJSM co-publication",
+        "certainty": "low",
+        "note": "The 1-month window of the rapid-loss criterion, in days. Findings: docs/research/diet-evidence.json #474."
+      }
+    },
+    "patterns": {
+      "vegetarian": {
+        "proteinMultiplier": {
+          "value": 1.0,
+          "source": "MELINA16",
+          "locator": "Melina V, Craig W, Levin S. Position of the Academy of Nutrition and Dietetics: vegetarian diets. J Acad Nutr Diet 2016;116(12):1970-1980 (PMID 27886704): 'Nutrition Considerations for Vegetarians: Protein', pp. 1970-1971 (adults, including athletes; no adult multiplier); 'Infants, Children, and Adolescents', p. 1975 (the 15-35% uplifts apply to vegan children only). Corroborated by Neufingerl & Eilander 2022 (doi:10.3390/nu14010029) section 4.3, paragraph 2 (WHO and IOM specify no increase). IOM 2005 (doi:10.17226/10490) Ch. 10 agrees, but its cited pp. 661-662 were not verified.",
+          "certainty": "low",
+          "note": "Value 1.0 (no adjustment). AND 2016 (full text read) gives no adult protein multiplier for vegetarians, including athletes: varied plant proteins eaten over the day meet needs when energy intake is adequate (finding 646). IOM 2005 is reported to set no separate requirement for vegetarians who eat complementary plant proteins (finding 72), and Neufingerl 2022 confirms that WHO and IOM specify no increase (finding 682). The IOM pages could not be read (the NAP reader serves page images only), so IOM is corroboration, not the cited locator. A lacto-ovo diet also includes dairy and egg protein, which have the highest leucine density (ISSN 2017, finding 153). Across RCTs the protein source made no significant difference to absolute lean mass or strength, with or without resistance training (Lim 2021 meta-analysis, findings 835 and 839; Messina 2018 soy-vs-animal meta-analysis, findings 641-642, small trials, first author with soy-industry ties). The Lim null for absolute lean mass is fragile: dropping any one of three trials made it significant for animal protein (WMD 0.25-0.29 kg; finding 835). The conflict points upward. Neufingerl 2022 cites proposals of about 20% more protein; with vegetarian diet protein quality put at ~90%, that works out to roughly 1.1x (finding 682; the 1.1 is our arithmetic, not the review's). Lim 2021 also found a small, fragile animal-protein advantage in percent lean mass (+0.50%, no longer significant when any one of four trials was dropped; finding 836). The Nunes 2022 g/kg thresholds come mostly from animal-protein trials (65 of 74; finding 161). The uplift proposals are second-hand and framed at RDA level, and observed vegetarian intakes (13.4% of energy) already exceed a 20% uplift on the 10% AMDR floor (finding 681). Safety: protein has no UL (IOM, finding 63), though IOM notes that this does not show chronic high intakes are tolerated. An uplift would raise the target for every vegetarian user; KDIGO 2024 advises adults with CKD at risk of progression to avoid more than 1.3 g/kg/day (finding 742). Diagnosed CKD is outside the app's scope and handled by exclusion, so this is a direction, not a binding limit: as far as the conservative-for-safety rule applies, it points to 1.0, the same answer as the evidence hierarchy. Protein quality is handled through food suggestions, not a higher target. Source equivalence was shown only at total intakes of about 1.0 g/kg/day or more (finding 840); if any goal ever uses a base target below 1.0 g/kg/day, the owner should revisit this value. Graded low: the AND finding is graded low, the position stand reports no adult trial of a multiplier, and the open-questions file lists the vegetarian/vegan protein adjustment as unresolved. Review changes: primary source moved from IOM 2005 (unverified pages) to AND 2016; 'not a safety parameter' replaced by the safety reasoning above; Lim fragility added. Findings: docs/research/diet-evidence.json #646, #682, #681, #72, #63, #742, #835, #836, #839, #840, #641, #642, #161, #153."
+        },
+        "nutrientsOfConcern": {
+          "vitamin B12": {
+            "value": {
+              "nutrient": "vitamin B12",
+              "referenceIntake": {
+                "basis": "RDA",
+                "values": [
+                  {
+                    "sex": "all",
+                    "ageYears": "19+",
+                    "amount": 2.4
+                  }
+                ],
+                "upperLimit": null,
+                "patternAdjustment": null
+              },
+              "unit": "ug/day",
+              "note": "IOM 1998 (doi:10.17226/6015) Ch. 9 pp. 337-339: RDA 2.4 ug/day; no UL. Modest dairy and egg intake falls short: 1 cup of milk plus 1 egg a day gives only about two-thirds of the RDA. AND 2016 (p. 1972) says most vegetarians should also use fortified foods or supplements, and that algae and fermented foods do not count. Deficiency averaged 32% in vegetarians (Neufingerl 2022). Adults over 50 should get most B12 in crystalline form (IOM p. 338). Findings 697-700, 649, 683."
+            },
+            "source": "IOM98",
+            "locator": "IOM 1998 (doi",
+            "certainty": "low",
+            "note": "Reference intake for a nutrient to plan for on this pattern; shown to the athlete, never used to compute targets."
+          },
+          "iron": {
+            "value": {
+              "nutrient": "iron",
+              "referenceIntake": {
+                "basis": "RDA x 1.8 (IOM vegetarian adjustment)",
+                "values": [
+                  {
+                    "sex": "male",
+                    "ageYears": "19+",
+                    "baseAmount": 8,
+                    "amount": 14.4
+                  },
+                  {
+                    "sex": "female",
+                    "ageYears": "19-50",
+                    "baseAmount": 18,
+                    "amount": 32.4
+                  },
+                  {
+                    "sex": "female",
+                    "ageYears": "51+",
+                    "baseAmount": 8,
+                    "amount": 14.4
+                  }
+                ],
+                "upperLimit": 45,
+                "patternAdjustment": {
+                  "factor": 1.8,
+                  "status": "IOM 2001 sets the vegetarian requirement at 1.8x the standard value (bioavailability ~10% vs 18%); amounts are RDA x 1.8"
+                }
+              },
+              "unit": "mg/day",
+              "note": "IOM 2001 (doi:10.17226/10026) Ch. 9 p. 351: the x1.8 factor applies to vegetarians. RDA pp. 343-344; UL 45 mg/day. Conflict: AND 2016 argues the factor overstates need because absorption adapts; the IOM value is kept as the conservative choice. Mean ferritin was 33.8 ug/L in vegetarians vs 55.5 ug/L in meat-eaters, and anaemia affected 11% vs 5% (Neufingerl 2022). The pooled ferritin gap was largest in men (-61.9 ug/L; Haider 2018 subgroup, from the abstract). Suggest iron-rich foods, with plant iron eaten alongside vitamin C foods, rather than supplements (ACSM 2016, finding 215; IAAF 2019, finding 417). Findings 701-703, 651, 685, 694-695, 215, 417."
+            },
+            "source": "IOM01",
+            "locator": "IOM 2001 (doi",
+            "certainty": "low",
+            "note": "Reference intake for a nutrient to plan for on this pattern; shown to the athlete, never used to compute targets."
+          },
+          "zinc": {
+            "value": {
+              "nutrient": "zinc",
+              "referenceIntake": {
+                "basis": "RDA x 1.5 (upper bound of IOM vegetarian range)",
+                "values": [
+                  {
+                    "sex": "male",
+                    "ageYears": "19+",
+                    "baseAmount": 11,
+                    "amount": 16.5
+                  },
+                  {
+                    "sex": "female",
+                    "ageYears": "19+",
+                    "baseAmount": 8,
+                    "amount": 12
+                  }
+                ],
+                "upperLimit": 40,
+                "patternAdjustment": {
+                  "factor": 1.5,
+                  "status": "IOM 2001: the requirement 'may be as much as 50% greater' for vegetarians, particularly strict vegetarians eating mainly grains and legumes. IOM set no algorithm. The upper bound is applied as the conservative choice; lacto-ovo diets may need less"
+                }
+              },
+              "unit": "mg/day",
+              "note": "IOM 2001 (doi:10.17226/10026) Ch. 12 pp. 475 and 479-480; UL 40 mg/day. The factor of up to 1.5 applies to vegetarians generally but most to strict vegetarians on grain- and legume-based diets. A lacto-ovo diet with dairy may need less, so using the upper bound is conservative. Adult vegetarians' serum zinc is lower than omnivores' but within the normal range (AND 2016 p. 1972). Deficiency affected 14% of vegetarians vs 13% of meat-eaters (Neufingerl 2022, 3 studies). Findings 707-709, 657, 686."
+            },
+            "source": "IOM01",
+            "locator": "IOM 2001 (doi",
+            "certainty": "low",
+            "note": "Reference intake for a nutrient to plan for on this pattern; shown to the athlete, never used to compute targets."
+          },
+          "calcium": {
+            "value": {
+              "nutrient": "calcium",
+              "referenceIntake": {
+                "basis": "RDA",
+                "values": [
+                  {
+                    "sex": "male",
+                    "ageYears": "19-70",
+                    "amount": 1000
+                  },
+                  {
+                    "sex": "male",
+                    "ageYears": "71+",
+                    "amount": 1200
+                  },
+                  {
+                    "sex": "female",
+                    "ageYears": "19-50",
+                    "amount": 1000
+                  },
+                  {
+                    "sex": "female",
+                    "ageYears": "51+",
+                    "amount": 1200
+                  }
+                ],
+                "upperLimit": [
+                  {
+                    "ageYears": "19-50",
+                    "amount": 2500
+                  },
+                  {
+                    "ageYears": "51+",
+                    "amount": 2000
+                  }
+                ],
+                "patternAdjustment": null
+              },
+              "unit": "mg/day",
+              "note": "IOM 2011 (doi:10.17226/13050) Table S-1 p. 7; UL 2,500 mg/day at ages 19-50 and 2,000 mg/day at 51+. Average lacto-ovo intake is not lower than meat-eaters' (895 vs 858 mg/day; Neufingerl 2022). Calcium is included because ACSM 2016 (p. 559) lists it as at risk for vegetarian athletes, depending on how restrictive the diet is, and because about a third of studies in every pattern fall below the EAR. It matters most when dairy intake is low. Findings 712-713, 688, 214, 355."
+            },
+            "source": "IOM11",
+            "locator": "IOM 2011 (doi",
+            "certainty": "low",
+            "note": "Reference intake for a nutrient to plan for on this pattern; shown to the athlete, never used to compute targets."
+          },
+          "vitamin D": {
+            "value": {
+              "nutrient": "vitamin D",
+              "referenceIntake": {
+                "basis": "RDA (assumes minimal sun exposure)",
+                "values": [
+                  {
+                    "sex": "all",
+                    "ageYears": "19-70",
+                    "amount": 15
+                  },
+                  {
+                    "sex": "all",
+                    "ageYears": "71+",
+                    "amount": 20
+                  }
+                ],
+                "upperLimit": 100,
+                "patternAdjustment": null
+              },
+              "unit": "ug/day",
+              "note": "IOM 2011 (doi:10.17226/13050) p. 8 and Table S-2: RDA 15 ug at ages 19-70 and 20 ug at 71+, assuming minimal sun; UL 100 ug/day. Conversion for display only: 15 ug = 600 IU, 20 ug = 800 IU, 100 ug = 4,000 IU (1 ug = 40 IU). Mean vegetarian intake is 2.67 ug/day, and deficiency ranges from 0% to 33% across studies (Neufingerl 2022). The app must not infer serum status. Findings 714-715, 684, 656."
+            },
+            "source": "IOM11",
+            "locator": "IOM 2011 (doi",
+            "certainty": "low",
+            "note": "Reference intake for a nutrient to plan for on this pattern; shown to the athlete, never used to compute targets."
+          },
+          "omega-3": {
+            "value": {
+              "nutrient": "omega-3 fatty acids (EPA+DHA; ALA as plant precursor)",
+              "referenceIntake": {
+                "basis": "AI for ALA only; no DRI exists for EPA+DHA",
+                "values": [
+                  {
+                    "sex": "male",
+                    "ageYears": "19+",
+                    "form": "ALA",
+                    "amount": 1.6
+                  },
+                  {
+                    "sex": "female",
+                    "ageYears": "19+",
+                    "form": "ALA",
+                    "amount": 1.1
+                  }
+                ],
+                "epaDha": null,
+                "upperLimit": null,
+                "patternAdjustment": null
+              },
+              "unit": "g/day",
+              "note": "ALA AI 1.6 g/day for men and 1.1 g/day for women: the IOM 2005 DRI (doi:10.17226/10490) as restated in AND 2016 p. 1971 (finding 647, full text read). The IOM 2005 pages themselves were not verified (findings 66-67). The unit and amounts apply to ALA only (form: ALA). No DRI exists for EPA+DHA, so it stays null. Vegetarians eat ~47 mg/day EPA+DHA vs ~266 mg/day for meat-eaters, and their ALA intake (1.78 g/day) exceeds the AI (Neufingerl 2022). ACSM 2016 lists n-3 fatty acids as at risk for vegetarian athletes. AND 2016 (p. 1971) suggests microalgae DHA only for raised needs and says the clinical relevance of low status is unknown. Findings 647-648, 689-690, 214 (66-67 context only)."
+            },
+            "source": "IOM05",
+            "locator": "ALA AI 1.6 g/day for men and 1.1 g/day for women",
+            "certainty": "low",
+            "note": "Reference intake for a nutrient to plan for on this pattern; shown to the athlete, never used to compute targets."
+          }
+        }
+      },
+      "vegan": {
+        "proteinMultiplier": {
+          "value": 1.0,
+          "source": "MELINA16",
+          "locator": "Melina V, Craig W, Levin S. Position of the Academy of Nutrition and Dietetics: vegetarian diets. J Acad Nutr Diet 2016;116(12):1970-1980 (PMID 27886704): 'Nutrition Considerations for Vegetarians: Protein', pp. 1970-1971 (adults, including athletes; no adult multiplier); 'Infants, Children, and Adolescents', p. 1975 (the 15-35% uplifts apply to vegan children only). Corroborated by Neufingerl & Eilander 2022 (doi:10.3390/nu14010029) section 4.3, paragraph 2 (WHO and IOM specify no increase). IOM 2005 (doi:10.17226/10490) Ch. 10 agrees, but its cited pp. 661-662 were not verified.",
+          "certainty": "low",
+          "note": "Value 1.0 (no adjustment), held with less confidence than the vegetarian value. For 1.0: AND 2016 (full text read) gives no adult multiplier; its 15-35% uplifts are for vegan children only (finding 646). IOM 2005 is reported to set no separate requirement when plant proteins are complementary (finding 72), and Neufingerl 2022 confirms that WHO and IOM specify no increase (finding 682). The IOM pages could not be read, so IOM is corroboration only. The Lim 2021 meta-analysis found no significant difference in absolute lean mass (WMD 0.22 kg, 95% CI -0.02 to 0.46) or strength (findings 835, 839), but that null is fragile: dropping any one of three trials made it significant (WMD 0.25-0.29 kg). Messina 2018 found soy not significantly different from animal protein for lean mass and 1RM (findings 641-643; small trials, within-arm comparisons, first author with soy-industry ties). Hevia-Larrain 2021 matched vegans and omnivores at ~1.6 g/kg/day and found the same leg lean-mass gain (+1.2 kg each); it is a single non-randomised trial in untrained men, read from the abstract and trial registry (findings 638-640). The conflict points upward. Neufingerl 2022 cites proposals of about 20% more protein because vegan diet protein quality is put at ~80% (e.g. 12% of energy instead of 10%), which implies about 1.2-1.25x (finding 682; the 1.25 is our arithmetic). Pinckaers 2021, a narrative review, calls the question unresolved and speculates, without testing, that quality matters more in a calorie deficit (finding 664). Lim 2021 found +0.50% percent lean mass for animal protein, which lost significance when any one of four trials was dropped (finding 836). Only 9 of 74 RCTs in Nunes 2022 used plant protein (finding 161). Whole legumes deliver about 50-75% absorbable protein, against 85-95% for egg and chicken (finding 663). Most plant-protein arms in the Lim 2021 trials used soy, and Hevia-Larrain used soy isolate (findings 835, 640), so evidence for whole-food vegan diets is thinner. Safety: protein has no UL (finding 63), though IOM notes that this does not show chronic high intakes are tolerated. An uplift would raise the target for every vegan user; KDIGO 2024 advises adults with CKD at risk of progression to avoid more than 1.3 g/kg/day (finding 742). Diagnosed CKD is outside the app's scope and handled by exclusion, so this is a direction, not a binding limit: as far as the conservative-for-safety rule applies, it points to 1.0, the same answer as the evidence hierarchy (position stand, DRI corroboration and meta-analyses). Food suggestions should make up for lower protein quality. Combine legume-type and grain-type proteins: in modelling, a 1:1 blend of corn, hemp or brown rice with soy or pea needs 1.1-1.9x the protein of a reference source, against 2-4x for corn, hemp, brown rice, soy or pea alone and 3-8x for oat, lupin, quinoa or wheat alone (finding 661; modelled, not trial-tested). Favour soy and pea, and use larger per-meal plant servings to reach ~2.7 g leucine (finding 659). If the owner wants an uplift, the only cited figure is ~1.2x: second-hand, framed at RDA level, low certainty. Source equivalence was shown only at total intakes of about 1.0 g/kg/day or more (finding 840); if any goal ever uses a base target below 1.0 g/kg/day, the owner should revisit this value. Graded low: the position stand reports no adult trial of a multiplier, and the open-questions file lists the vegan protein adjustment as unresolved. Review changes: primary source moved to AND 2016; Messina wording corrected from 'equal' to 'not significantly different'; the unsupported 'most trials used soy isolate' claim narrowed; 2-4x vs 3-8x single-source factors stated in full; Lim fragility and safety reasoning added. Findings: docs/research/diet-evidence.json #646, #682, #681, #72, #63, #742, #664, #665, #661, #663, #659, #638, #639, #640, #835, #836, #839, #840, #641, #642, #643, #161."
+        },
+        "nutrientsOfConcern": {
+          "vitamin B12": {
+            "value": {
+              "nutrient": "vitamin B12",
+              "referenceIntake": {
+                "basis": "RDA",
+                "values": [
+                  {
+                    "sex": "all",
+                    "ageYears": "19+",
+                    "amount": 2.4
+                  }
+                ],
+                "upperLimit": null,
+                "patternAdjustment": null
+              },
+              "unit": "ug/day",
+              "note": "IOM 1998 (doi:10.17226/6015) Ch. 9 pp. 337-339: RDA 2.4 ug/day for all adults; no UL (p. 346). Count only fortified foods or supplements as B12 sources (IOM p. 342 and Table 9-4 p. 317; AND 2016 p. 1972). IOM p. 342 names certain algae as an exception among plant foods, but AND 2016 (p. 1972) says tempeh, nori, spirulina, chlorella and unfortified nutritional yeast are not reliable sources, so none of them count (the conservative choice). Adults over 50 should get most B12 in crystalline form from fortified foods or supplements (IOM pp. 306, 338). Neufingerl 2022: mean vegan intake 1.5 ug/day; deficiency in 44% of vegans. Findings 697-700, 649-650, 683."
+            },
+            "source": "IOM98",
+            "locator": "IOM 1998 (doi",
+            "certainty": "low",
+            "note": "Reference intake for a nutrient to plan for on this pattern; shown to the athlete, never used to compute targets."
+          },
+          "iron": {
+            "value": {
+              "nutrient": "iron",
+              "referenceIntake": {
+                "basis": "RDA x 1.8 (IOM vegetarian adjustment)",
+                "values": [
+                  {
+                    "sex": "male",
+                    "ageYears": "19+",
+                    "baseAmount": 8,
+                    "amount": 14.4
+                  },
+                  {
+                    "sex": "female",
+                    "ageYears": "19-50",
+                    "baseAmount": 18,
+                    "amount": 32.4
+                  },
+                  {
+                    "sex": "female",
+                    "ageYears": "51+",
+                    "baseAmount": 8,
+                    "amount": 14.4
+                  }
+                ],
+                "upperLimit": 45,
+                "patternAdjustment": {
+                  "factor": 1.8,
+                  "status": "IOM 2001 sets the vegetarian requirement at 1.8x the standard value (bioavailability ~10% vs 18%); amounts are RDA x 1.8"
+                }
+              },
+              "unit": "mg/day",
+              "note": "IOM 2001 (doi:10.17226/10026) Ch. 9: RDA pp. 343-344; x1.8 for vegetarians p. 351; UL 45 mg/day p. 375. Conflict: AND 2016 (pp. 1971-1972) argues the 1.8 factor rests on limited single-meal data and that absorption adapts over time. The higher IOM value is kept as the conservative choice for a deficiency-related value. Supporting data: pooled ferritin was 29.7 ug/L lower in vegetarians (Haider 2018 meta-analysis, abstract only), and iron deficiency affected 15% of vegans vs 7% of meat-eaters (Neufingerl 2022). The 32.4 mg value for women aged 19-50 is below the UL but hard to reach from food. ACSM 2016 favours food iron, including non-heme iron eaten with vitamin C foods, and discourages routine unmonitored supplementation (finding 215). IAAF 2019 gives the same pairing advice and recommends screening vegetarians (finding 417). The engine should therefore suggest iron-rich plant foods eaten with vitamin C foods, not supplements, and must not infer iron status. Not applied: IOM raises the EAR by 30% or more for regular intense exercise (p. 352), which needs its own owner decision. Findings 701-704, 651, 685, 694, 215, 417."
+            },
+            "source": "IOM01",
+            "locator": "IOM 2001 (doi",
+            "certainty": "low",
+            "note": "Reference intake for a nutrient to plan for on this pattern; shown to the athlete, never used to compute targets."
+          },
+          "zinc": {
+            "value": {
+              "nutrient": "zinc",
+              "referenceIntake": {
+                "basis": "RDA x 1.5 (upper bound of IOM vegetarian range)",
+                "values": [
+                  {
+                    "sex": "male",
+                    "ageYears": "19+",
+                    "baseAmount": 11,
+                    "amount": 16.5
+                  },
+                  {
+                    "sex": "female",
+                    "ageYears": "19+",
+                    "baseAmount": 8,
+                    "amount": 12
+                  }
+                ],
+                "upperLimit": 40,
+                "patternAdjustment": {
+                  "factor": 1.5,
+                  "status": "IOM 2001: the requirement 'may be as much as 50% greater' for vegetarians, especially strict vegetarians eating mainly grains and legumes (phytate:zinc > 15). IOM set no algorithm; the upper bound is used as the conservative choice"
+                }
+              },
+              "unit": "mg/day",
+              "note": "IOM 2001 (doi:10.17226/10026) Ch. 12: RDA p. 475; vegetarian range pp. 479-480; UL 40 mg/day total, set to protect copper status (p. 486). The x1.5 factor is the upper end of a range that IOM did not formalise. It matches the adjustment used by Neufingerl 2022, who found zinc deficiency in 30% of vegans. Soaking, sprouting and leavening reduce phytate binding (AND 2016 p. 1972). Findings 707-709, 686, 657."
+            },
+            "source": "IOM01",
+            "locator": "IOM 2001 (doi",
+            "certainty": "low",
+            "note": "Reference intake for a nutrient to plan for on this pattern; shown to the athlete, never used to compute targets."
+          },
+          "calcium": {
+            "value": {
+              "nutrient": "calcium",
+              "referenceIntake": {
+                "basis": "RDA",
+                "values": [
+                  {
+                    "sex": "male",
+                    "ageYears": "19-70",
+                    "amount": 1000
+                  },
+                  {
+                    "sex": "male",
+                    "ageYears": "71+",
+                    "amount": 1200
+                  },
+                  {
+                    "sex": "female",
+                    "ageYears": "19-50",
+                    "amount": 1000
+                  },
+                  {
+                    "sex": "female",
+                    "ageYears": "51+",
+                    "amount": 1200
+                  }
+                ],
+                "upperLimit": [
+                  {
+                    "ageYears": "19-50",
+                    "amount": 2500
+                  },
+                  {
+                    "ageYears": "51+",
+                    "amount": 2000
+                  }
+                ],
+                "patternAdjustment": null
+              },
+              "unit": "mg/day",
+              "note": "IOM 2011 (doi:10.17226/13050) Table S-1 p. 7: RDA values; UL 2,500 mg/day at ages 19-50 and 2,000 mg/day at 51+. The DRI has no pattern adjustment. Vegans show higher PTH and, in 2 of 3 studies, lower lumbar-spine BMD (Neufingerl 2022). In the EPIC-Oxford cohort cited by AND 2016 (p. 1974), vegans' 30% excess fracture risk disappeared above 525 mg/day. For ranking, count low-oxalate greens (~50% absorbed), calcium-set tofu and fortified plant milks (~30%). High-oxalate greens such as spinach are only ~5% absorbed and should not be treated as calcium sources (AND 2016 p. 1972). Findings 712-713, 688, 654-655."
+            },
+            "source": "IOM11",
+            "locator": "IOM 2011 (doi",
+            "certainty": "low",
+            "note": "Reference intake for a nutrient to plan for on this pattern; shown to the athlete, never used to compute targets."
+          },
+          "vitamin D": {
+            "value": {
+              "nutrient": "vitamin D",
+              "referenceIntake": {
+                "basis": "RDA (assumes minimal sun exposure)",
+                "values": [
+                  {
+                    "sex": "all",
+                    "ageYears": "19-70",
+                    "amount": 15
+                  },
+                  {
+                    "sex": "all",
+                    "ageYears": "71+",
+                    "amount": 20
+                  }
+                ],
+                "upperLimit": 100,
+                "patternAdjustment": null
+              },
+              "unit": "ug/day",
+              "note": "IOM 2011 (doi:10.17226/13050) p. 8 and Table S-2 p. 9: EAR 10 ug; RDA 15 ug at ages 19-70 and 20 ug at 71+, assuming minimal sun exposure (p. 6); UL 100 ug/day. Conversion for display only: 15 ug = 600 IU, 20 ug = 800 IU, 100 ug = 4,000 IU (1 ug = 40 IU). Intake is below the EAR in every pattern and lowest in vegans (1.5 ug/day); deficiency ranges from 3% to 67% of vegans across studies (Neufingerl 2022). AND 2016 (p. 1972) recommends supplements when sun and fortified foods fall short. Its 1,000-2,000 IU figure is attributed to 'some experts' and is not used. The app must not infer serum status. Findings 714-716, 684, 656."
+            },
+            "source": "IOM11",
+            "locator": "IOM 2011 (doi",
+            "certainty": "low",
+            "note": "Reference intake for a nutrient to plan for on this pattern; shown to the athlete, never used to compute targets."
+          },
+          "iodine": {
+            "value": {
+              "nutrient": "iodine",
+              "referenceIntake": {
+                "basis": "RDA",
+                "values": [
+                  {
+                    "sex": "all",
+                    "ageYears": "19+",
+                    "amount": 150
+                  }
+                ],
+                "upperLimit": 1100,
+                "patternAdjustment": null
+              },
+              "unit": "ug/day",
+              "note": "IOM 2001 (doi:10.17226/10026) Ch. 8: RDA pp. 274-275, with no vegetarian adjustment; UL 1,100 ug/day p. 282. Urinary iodine was below 100 ug/L in 92% of vegans, and mean vegan intake was 111 ug/day (Neufingerl 2022). AND 2016 (p. 1972) recommends a 150 ug/day supplement for vegan women of child-bearing age. IOC 2018 advises iodine where iodised salt or iodine-rich foods are not used. Sea salt, kosher salt and tamari are generally not iodised. Seaweed iodine varies widely and can exceed the UL, so seaweed must not be suggested as an iodine source without a known amount. Findings 710-711, 652-653, 687, 396."
+            },
+            "source": "IOM01",
+            "locator": "IOM 2001 (doi",
+            "certainty": "low",
+            "note": "Reference intake for a nutrient to plan for on this pattern; shown to the athlete, never used to compute targets."
+          },
+          "omega-3": {
+            "value": {
+              "nutrient": "omega-3 fatty acids (EPA+DHA; ALA as plant precursor)",
+              "referenceIntake": {
+                "basis": "AI for ALA only; no DRI exists for EPA+DHA",
+                "values": [
+                  {
+                    "sex": "male",
+                    "ageYears": "19+",
+                    "form": "ALA",
+                    "amount": 1.6
+                  },
+                  {
+                    "sex": "female",
+                    "ageYears": "19+",
+                    "form": "ALA",
+                    "amount": 1.1
+                  }
+                ],
+                "epaDha": null,
+                "upperLimit": null,
+                "patternAdjustment": null
+              },
+              "unit": "g/day",
+              "note": "ALA AI 1.6 g/day for men and 1.1 g/day for women: the IOM 2005 DRI (doi:10.17226/10490) as restated in AND 2016 p. 1971 (finding 647, full text read). The IOM 2005 pages themselves were not verified (findings 66-67), so no IOM AMDR figure is used. The unit and amounts apply to ALA only (form: ALA). No DRI exists for EPA+DHA, so epaDha stays null (unknown stays unknown). Neufingerl 2022 restates a 250 mg/day lower AMDR for EPA+DHA from FAO/WHO; that source was not opened, so do not use the figure until it is verified. Vegans eat ~31 mg/day EPA+DHA vs ~266 mg/day for meat-eaters, and conversion from ALA is generally below 10%. Vegans already exceed the ALA AI on average (2.0 g/day). AND 2016 (p. 1971) suggests slightly higher ALA may be prudent but gives no number, so it is not applied. AND suggests microalgae DHA only for raised needs or reduced conversion, and says the clinical relevance of low status is unknown. Findings 647-648, 689-690 (66-67 context only)."
+            },
+            "source": "IOM05",
+            "locator": "ALA AI 1.6 g/day for men and 1.1 g/day for women",
+            "certainty": "low",
+            "note": "Reference intake for a nutrient to plan for on this pattern; shown to the athlete, never used to compute targets."
+          }
+        }
+      },
+      "flexibleVsRigid": {
+        "value": "Letting dieters pick their own foods within daily energy and macronutrient targets produced the same weight and fat loss as a dietitian-set fixed meal plan. This was a 10-week RCT in resistance-trained adults (Conlin 2021): fat mass -2.3 kg flexible vs -3.2 kg rigid, with no significant between-group difference on any measure. The trial was small (23 completers, about 40% attrition) and showed no adherence advantage. In observational data, flexible restraint predicted better maintenance of weight loss. Rigid restraint predicted smaller losses and went with more attentional bias toward food and body-shape cues (Westenhoefer 2013; abstract only). In one comparison of four diets, adherence predicted weight loss (r = 0.60) and diet type did not (r = 0.07) (Dansinger 2005). Guidelines name no single superior macronutrient pattern (NICE NG246; AHA/ACC/TOS 2013). Letting people choose between two diet patterns did not improve adherence or weight loss at 48 weeks (Yancy 2015). Use: offer food suggestions within targets rather than fixed meal plans, because outcomes were equivalent, fixed plans showed no advantage, and rigid rules carry a correlational risk. Do not claim that flexible choice improves adherence, results or muscle gain.",
+        "source": "CONLIN21",
+        "locator": "Conlin 2021 (PMC8243453): Abstract Results; Results paragraphs 1-2; Methods 'Dietary and Exercise Intervention'",
+        "certainty": "low",
+        "note": "No synthesis compares flexible food choice with rigid meal plans directly. The one RCT is small and lost about 40% of participants, and the Westenhoefer data are observational and were read from the abstract only. The evidence supports suggestions as non-inferior to fixed plans, not superior. Do not cite Conlin's post-diet fat-free-mass result (+1.7 kg flexible vs -0.7 kg rigid): the authors decline to attribute it to diet assignment. Two narrative reviews (Iraki 2019; Helms 2014) link cutting out food groups and eating the same few foods to micronutrient shortfalls, which also favours varied suggestions. The populations studied were resistance-trained adults aged 18-39 and women maintaining weight loss; the finding is untested in other groups. No reviewer objection was raised; the draft is kept unchanged. Findings: docs/research/diet-evidence.json #721, #722, #730, #736, #737, #717, #718, #719, #731, #732, #769, #790, #269, #230."
+      }
+    },
+    "foods": {
+      "proteinDenseGPer100Kcal": {
+        "value": 5.0,
+        "source": "FAO13",
+        "locator": "Section 4.8 DIAAS - regulatory issues (p.43)",
+        "certainty": "low",
+        "note": "Codex 'high in protein' criterion restated in FAO 2013 (protein NRV 50 g): 5 g protein per 100 kcal. The app requires this AND the absolute content per 100 g (stricter than Codex, which accepts either). Findings: docs/research/diet-evidence.json #674."
+      },
+      "proteinDenseMinGPer100g": {
+        "value": 10.0,
+        "source": "FAO13",
+        "locator": "Section 4.8 DIAAS - regulatory issues (p.43)",
+        "certainty": "low",
+        "note": "Codex 'high in protein' criterion for solids restated in FAO 2013: 10 g protein per 100 g. The food table carries no solid/liquid flag, so the solid threshold applies to every food (conservative: milk counts as a protein source, not protein-dense). Findings: docs/research/diet-evidence.json #674."
+      },
+      "minimumPortionProteinG": {
+        "value": 10.0,
+        "source": "FAO13",
+        "locator": "Section 4.8 DIAAS - regulatory issues (p.43)",
+        "certainty": "low",
+        "note": "Codex per-serving criterion restated in FAO 2013: 'source' of protein is 10% of the 50 g NRV per serving and 'high' twice that, 10 g. A protein-focused food idea must deliver at least this in its USDA household portion. Findings: docs/research/diet-evidence.json #674."
+      },
+      "minimumPortionFibreG": {
+        "value": 3.0,
+        "source": "owner",
+        "rationale": "No source sets a per-food fibre amount for suggestions. 3 g per portion is about a tenth of the 25-40 g daily range (WHO 2023, finding #796), so each fibre-focused idea makes a visible dent in the target and condiments or garnishes with a trace of fibre are not suggested. Findings: docs/research/diet-evidence.json #796, #69, #798, #800, #801, #802, #803, #804, #805, #807, #808, #461, #256, #574, #285, #794, #691, #827, #834, #411, #432, #383."
+      }
+    }
+  }
+}

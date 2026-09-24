@@ -159,7 +159,54 @@ private struct CatalogDetailView: View {
                     Text(instruction).stitch(.body15).foregroundStyle(Stitch.textSecondary)
                 }
             }
+            if let evidence = exercise.evidence, !evidence.isEmpty {
+                StitchSectionLabel("What research found", meta: "\(evidence.count) cited")
+                StitchNotice("Reference only", body: "These study findings describe the exercise. They do not change your plan.")
+                ForEach(Array(evidence.enumerated()), id: \.offset) { _, entry in
+                    CatalogEvidenceCard(entry: entry)
+                }
+            }
             StitchFootnote("Source: free-exercise-db · public domain")
+        }
+    }
+}
+
+/// One cited finding for a catalog exercise, shown with its certainty and source.
+private struct CatalogEvidenceCard: View {
+    let entry: CatalogEvidence
+    var body: some View {
+        StitchCard {
+            StitchKeyValue(Self.outcomeLabel(entry.outcome), value: Self.resultLabel(entry.result, outcome: entry.outcome))
+            StitchKeyValue("Muscles", value: entry.muscles.isEmpty ? "Whole body" : entry.muscles.joined(separator: ", "))
+            Text(entry.finding).stitch(.body15).foregroundStyle(Stitch.textSecondary)
+            StitchKeyValue("Certainty", value: entry.certainty + (entry.fullTextRead ? "" : " · abstract only"))
+            Text("\(entry.citation) \(entry.locator).").stitch(.monoSmall).foregroundStyle(Stitch.textSecondary)
+                .textSelection(.enabled)
+        }
+    }
+
+    static func outcomeLabel(_ outcome: String) -> String {
+        switch outcome {
+        case "muscleActivation": return "Activation (EMG)"
+        case "hypertrophy": return "Muscle growth"
+        case "strength": return "Strength"
+        case "localEndurance": return "Muscular endurance"
+        case "power": return "Power"
+        case "agility": return "Agility"
+        case "posture": return "Posture"
+        case "cardiorespiratory": return "Stamina"
+        default: return outcome
+        }
+    }
+
+    /// EMG compares activation only, so its results never read as "better" or "worse" training.
+    static func resultLabel(_ result: String, outcome: String) -> String {
+        let activation = outcome == "muscleActivation"
+        switch result {
+        case "favoured": return activation ? "Higher activation" : "Did better"
+        case "lessFavoured": return activation ? "Lower activation" : "Did worse"
+        case "noDifference": return "No clear difference"
+        default: return "Studied"
         }
     }
 }
