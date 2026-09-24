@@ -763,3 +763,112 @@ public struct CatalogExercise: Codable, Equatable, Identifiable {
         self.images = images
     }
 }
+
+/// What Today shows under one slot: a needs-state, a paused state or a kept plan.
+public struct SlotStatus: Codable, Equatable {
+    public var slotID: UUID
+    public var reason: String
+    public var tone: String
+    public var title: String
+    public var body: String
+    public var action: String?
+
+    public init(
+        slotID: UUID,
+        reason: String,
+        tone: String,
+        title: String,
+        body: String,
+        action: String? = nil
+    ) {
+        self.slotID = slotID
+        self.reason = reason
+        self.tone = tone
+        self.title = title
+        self.body = body
+        self.action = action
+    }
+}
+
+/// A pending recommendation as Today shows it. Accept and reject still go through state commands.
+public struct ProposalCard: Codable, Equatable {
+    public var recommendationID: UUID
+    public var kind: String
+    public var slotID: UUID?
+    public var title: String
+    public var body: String
+
+    public init(
+        recommendationID: UUID,
+        kind: String,
+        slotID: UUID? = nil,
+        title: String,
+        body: String
+    ) {
+        self.recommendationID = recommendationID
+        self.kind = kind
+        self.slotID = slotID
+        self.title = title
+        self.body = body
+    }
+}
+
+/// Read-only Today view model. ``autoRequest`` names one slot whose progression the host may request.
+public struct TodayStatus: Codable, Equatable {
+    public var slots: [SlotStatus]
+    public var proposals: [ProposalCard]
+    public var autoRequest: UUID?
+
+    public init(
+        slots: [SlotStatus] = [],
+        proposals: [ProposalCard] = [],
+        autoRequest: UUID? = nil
+    ) {
+        self.slots = slots
+        self.proposals = proposals
+        self.autoRequest = autoRequest
+    }
+}
+
+/// One recorded session as logged.
+public struct ProgressEntry: Codable, Equatable {
+    public var sessionID: UUID
+    public var date: Date
+    public var summary: String
+
+    public init(
+        sessionID: UUID,
+        date: Date,
+        summary: String
+    ) {
+        self.sessionID = sessionID
+        self.date = date
+        self.summary = summary
+    }
+}
+
+/// Recorded values for one exercise, newest first. Nothing is estimated or projected.
+public struct ExerciseProgress: Codable, Equatable {
+    public var exerciseID: String
+    public var name: String
+    public var unit: MassUnit
+    public var load: Double?
+    public var unchangedSessions: Int
+    public var entries: [ProgressEntry]
+
+    public init(
+        exerciseID: String,
+        name: String,
+        unit: MassUnit,
+        load: Double? = nil,
+        unchangedSessions: Int,
+        entries: [ProgressEntry]
+    ) {
+        self.exerciseID = exerciseID
+        self.name = name
+        self.unit = unit
+        self.load = load
+        self.unchangedSessions = unchangedSessions
+        self.entries = entries
+    }
+}

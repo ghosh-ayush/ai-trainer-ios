@@ -134,6 +134,17 @@ final class AppFlowTests: XCTestCase {
         XCTAssertNil(service.repository.snapshot.profile)
         XCTAssertTrue(service.repository.snapshot.sessions.isEmpty)
     }
+    func testTodayAutoRequestsAProposalThenShowsIt() throws {
+        let service = try trainedService()
+        let slot = try XCTUnwrap(service.repository.snapshot.nextPlan?.slots.first)
+        XCTAssertEqual(try service.todayStatus(now: now).autoRequest, slot.id)
+        try service.request(.progression(slot.id), now: now)
+        let status = try service.todayStatus(now: now)
+        XCTAssertNil(status.autoRequest)
+        XCTAssertEqual(status.proposals.first?.title, "Proposed · 100 → 105 lb")
+        XCTAssertEqual(try service.progress(now: now).first?.entries.count, 2)
+        XCTAssertEqual(try service.loadSteps(base: 100, step: 5).count, 21)
+    }
     func testProductionLibraryCannotActivateFixtureContent() throws {
         let production = TrainerService(repository: try StateRepository(persistence: MemoryPersistence(), core: core),
                                         library: try core.library(permitsFixtures: false), core: core)
@@ -150,5 +161,6 @@ final class AppFlowTests: XCTestCase {
     func testBundledResourcesLoad() throws {
         XCTAssertEqual(try ExerciseCatalog.bundled().exercises.count, 876)
         XCTAssertTrue(try ThirdPartyNotices.text().contains("Copyright (c) 2026 Nazar Kozak"))
+        XCTAssertTrue(try ThirdPartyNotices.text().contains("SIL OPEN FONT LICENSE"))
     }
 }

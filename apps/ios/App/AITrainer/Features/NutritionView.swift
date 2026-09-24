@@ -1,43 +1,49 @@
 import SwiftUI
 import AITrainerCore
 
+/// P31 / P30 Meal logging (Developer ▸ Labs): user-confirmed estimates with an audit trail.
 struct NutritionView: View {
     @EnvironmentObject private var store: AppStore
     @State private var showNew = false
     @State private var selectedMeal: Meal?
     @State private var selectedRecipe: Recipe?
     var body: some View {
-        List {
-            Section("Today's confirmed estimates") {
-                let total = Meal.total(store.state.meals, on: Date())
-                Text("\(number(total.calories)) kcal").font(.largeTitle.bold())
-                Text("Protein \(number(total.protein)) g · Carbs \(number(total.carbs)) g · Fat \(number(total.fat)) g")
-                Text("These are estimates you enter and confirm. No food-photo accuracy or training adaptation is implied.").font(.footnote)
-                Button("Log a meal") { showNew = true }
+        DetailScreen("P4 meal logging") {
+            let total = Meal.total(store.state.meals, on: Date())
+            StitchSectionLabel("Today's confirmed estimates")
+            StitchCard {
+                StitchStat("Energy", value: number(total.calories), unit: "kcal")
+                StitchKeyValue("Protein · carbs · fat", value: "\(number(total.protein)) · \(number(total.carbs)) · \(number(total.fat)) g")
+                StitchFootnote("These are estimates you enter and confirm. No food-photo accuracy or training adaptation is implied.")
             }
+            Button("Log a meal") { showNew = true }.buttonStyle(.stitch())
             if !store.state.recipes.isEmpty {
-                Section("Reusable portions") {
-                    ForEach(store.state.recipes) { recipe in
-                        Button(recipe.name) { selectedRecipe = recipe }
+                StitchSectionLabel("Reusable portions")
+                ForEach(store.state.recipes) { recipe in
+                    Button { selectedRecipe = recipe } label: {
+                        StitchListRow(recipe.name, subtitle: "\(number(recipe.perServing.calories)) kcal per portion", symbol: "takeoutbag.and.cup.and.straw")
                     }
+                    .buttonStyle(.plain)
                 }
             }
-            Section("Meal history") {
-                ForEach(store.state.meals.sorted { $0.occurredAt > $1.occurredAt }) { meal in
-                    Button { selectedMeal = meal } label: {
-                        VStack(alignment: .leading) {
-                            Text(meal.name).font(.headline)
-                            Text("\(number(meal.nutrients.calories)) kcal · \(meal.occurredAt.formatted(date: .abbreviated, time: .shortened))").font(.caption)
-                        }
-                    }
-                }
+            StitchSectionLabel("Meal history", meta: "Newest first")
+            if store.state.meals.isEmpty {
+                StitchCard("No meals yet", body: "Logged estimates appear here. Nothing is imported or inferred.")
             }
-        }.navigationTitle("P4 meal logging")
+            ForEach(store.state.meals.sorted { $0.occurredAt > $1.occurredAt }) { meal in
+                Button { selectedMeal = meal } label: {
+                    StitchListRow(meal.name, subtitle: "\(number(meal.nutrients.calories)) kcal · \(meal.occurredAt.formatted(date: .abbreviated, time: .shortened))", symbol: "fork.knife")
+                }
+                .buttonStyle(.plain)
+            }
+        }
         .sheet(isPresented: $showNew) { MealEditor() }
         .sheet(item: $selectedMeal) { MealEditor(existing: $0) }
         .sheet(item: $selectedRecipe) { RecipePortionView(recipe: $0) }
     }
 }
+
+/// P32 / P33 / P46: new meal, correct meal, delete meal.
 struct MealEditor: View {
     @EnvironmentObject private var store: AppStore
     @Environment(\.dismiss) private var dismiss
@@ -52,65 +58,79 @@ struct MealEditor: View {
     @State private var confirmed = false
     @State private var confirmDelete = false
     var body: some View {
-        NavigationStack {
-            Form {
-                Section("Estimate for this entire portion") {
-                    TextField("Meal name", text: $name)
-                    TextField("Calories (kcal)", text: $calories).keyboardType(.decimalPad)
-                    TextField("Protein (g)", text: $protein).keyboardType(.decimalPad)
-                    TextField("Carbohydrate (g)", text: $carbs).keyboardType(.decimalPad)
-                    TextField("Fat (g)", text: $fat).keyboardType(.decimalPad)
-                    DatePicker("Eaten at", selection: $date)
-                    Toggle("Save this amount as one reusable portion", isOn: $saveRecipe)
-                    Toggle("I confirm these are estimates for my portion", isOn: $confirmed)
-                }
-                Button(existing == nil ? "Save meal" : "Save correction") {
-                    if store.perform({ service in
-                        guard let energy = try parseOptionalNumber(calories), let p = try parseOptionalNumber(protein),
-                              let c = try parseOptionalNumber(carbs), let f = try parseOptionalNumber(fat) else {
-                            throw TrainerError.invalid("Enter each nutrient estimate explicitly, including known zero values.")
-                        }
-                        var meal = existing ?? Meal(name: name, nutrients: Nutrients())
-                        meal.name = name; meal.nutrients = Nutrients(calories: energy, protein: p, carbs: c, fat: f); meal.occurredAt = date
-                        try service.saveMeal(meal, asRecipe: saveRecipe)
-                    }) { dismiss() }
-                }.disabled(!confirmed)
-                if let existing {
-                    Button("Delete meal", role: .destructive) { confirmDelete = true }
-                        .confirmationDialog("Delete this meal estimate?", isPresented: $confirmDelete) {
-                            Button("Delete", role: .destructive) {
-                                if store.perform({ service in try service.deleteMeal(id: existing.id) }) { dismiss() }
-                            }
-                        }
-                }
-            }.scrollDismissesKeyboard(.interactively)
-                .navigationTitle(existing == nil ? "New meal" : "Correct meal").toolbar { Button("Cancel") { dismiss() } }
-                .onAppear {
-                    if let existing {
-                        name = existing.name; calories = String(existing.nutrients.calories); protein = String(existing.nutrients.protein)
-                        carbs = String(existing.nutrients.carbs); fat = String(existing.nutrients.fat); date = existing.occurredAt
-                    }
-                }
+        Group {
+            StitchSectionLabel("Estimate for this entire portion")
+            field("Meal name", text: $name, keyboard: .default)
+            field("Calories (kcal)", text: $calories, keyboard: .decimalPad)
+            field("Protein (g)", text: $protein, keyboard: .decimalPad)
+            field("Carbohydrate (g)", text: $carbs, keyboard: .decimalPad)
+            field("Fat (g)", text: $fat, keyboard: .decimalPad)
+            StitchField("Eaten at", value: date.formatted(date: .abbreviated, time: .shortened)) {
+                DatePicker("Eaten at", selection: $date).labelsHidden()
+            }
+            StitchToggleField("Save as one reusable portion", isOn: $saveRecipe, on: "Save", off: "Don't save")
+            StitchToggleField("I confirm these are estimates for my portion", isOn: $confirmed, on: "Confirmed", off: "Not confirmed")
+            Button(existing == nil ? "Save meal" : "Save correction") { save() }.buttonStyle(.stitch()).disabled(!confirmed)
+            if existing != nil {
+                Button("Delete meal", role: .destructive) { confirmDelete = true }.buttonStyle(.stitch(.destructive))
+            }
+        }
+        .stitchSheet(existing == nil ? "New meal" : "Correct meal") { dismiss() }
+        .confirmationDialog("Delete this meal estimate?", isPresented: $confirmDelete, titleVisibility: .visible) {
+            Button("Delete", role: .destructive) {
+                guard let existing else { return }
+                if store.perform({ try $0.deleteMeal(id: existing.id) }) { dismiss() }
+            }
+        }
+        .onAppear {
+            if let existing {
+                name = existing.name; calories = number(existing.nutrients.calories); protein = number(existing.nutrients.protein)
+                carbs = number(existing.nutrients.carbs); fat = number(existing.nutrients.fat); date = existing.occurredAt
+            }
         }
     }
+    private func field(_ label: String, text: Binding<String>, keyboard: UIKeyboardType) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label).stitch(.monoLabel).textCase(.uppercase).foregroundStyle(Stitch.textMuted)
+            TextField(label, text: text).keyboardType(keyboard).stitch(.monoBody).foregroundStyle(Stitch.textPrimary)
+        }
+        .padding(.horizontal, 16).padding(.vertical, 14).glass(radius: 8)
+    }
+    private func save() {
+        let didSave = store.perform { service in
+            guard let energy = try parseOptionalNumber(calories), let p = try parseOptionalNumber(protein),
+                  let c = try parseOptionalNumber(carbs), let f = try parseOptionalNumber(fat) else {
+                throw TrainerError.invalid("Enter each nutrient estimate explicitly, including known zero values.")
+            }
+            var meal = existing ?? Meal(name: name, nutrients: Nutrients())
+            meal.name = name; meal.nutrients = Nutrients(calories: energy, protein: p, carbs: c, fat: f); meal.occurredAt = date
+            try service.saveMeal(meal, asRecipe: saveRecipe)
+        }
+        if didSave { dismiss() }
+    }
 }
+
+/// P34: log a saved portion scaled by servings (scaling runs in the core).
 struct RecipePortionView: View {
     @EnvironmentObject private var store: AppStore
     @Environment(\.dismiss) private var dismiss
     let recipe: Recipe
     @State private var servings = 1.0
     var body: some View {
-        NavigationStack {
-            Form {
-                Text(recipe.name).font(.headline)
-                Stepper("\(number(servings)) saved portions", value: $servings, in: 0.5...10, step: 0.5)
-                Text("\(number(recipe.perServing.calories * servings)) kcal estimated")
-                Button("Confirm portion and log") {
-                    if store.perform({ service in
-                        try service.saveMeal(Meal(name: recipe.name, nutrients: try service.scaleNutrients(recipe.perServing, servings: servings)))
-                    }) { dismiss() }
+        Group {
+            StitchSectionLabel(recipe.name, meta: "Saved portion")
+            StitchField("Saved portions", value: number(servings)) {
+                StitchStepperButtons(decrement: { servings = max(0.5, servings - 0.5) }, increment: { servings = min(10, servings + 0.5) })
+            }
+            StitchStat("Estimated energy", value: number(recipe.perServing.calories * servings), unit: "kcal")
+            Button("Confirm portion and log") {
+                let didSave = store.perform { service in
+                    try service.saveMeal(Meal(name: recipe.name, nutrients: try service.scaleNutrients(recipe.perServing, servings: servings)))
                 }
-            }.navigationTitle("Reuse a portion").toolbar { Button("Cancel") { dismiss() } }
+                if didSave { dismiss() }
+            }
+            .buttonStyle(.stitch())
         }
+        .stitchSheet("Reuse a portion") { dismiss() }
     }
 }

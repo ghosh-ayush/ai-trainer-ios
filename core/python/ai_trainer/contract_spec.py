@@ -214,6 +214,27 @@ MODELS: list[ModelSpec] = [
         "Descriptive record from free-exercise-db. Never a governed Exercise.",
     ),
     _model(
+        "SlotStatus",
+        "slotID:UUID reason:String tone:String title:String body:String action?:String",
+        "What Today shows under one slot: a needs-state, a paused state or a kept plan.",
+    ),
+    _model(
+        "ProposalCard",
+        "recommendationID:UUID kind:String slotID?:UUID title:String body:String",
+        "A pending recommendation as Today shows it. Accept and reject still go through state commands.",
+    ),
+    _model(
+        "TodayStatus",
+        "slots:[SlotStatus] proposals:[ProposalCard] autoRequest?:UUID",
+        "Read-only Today view model. ``autoRequest`` names one slot whose progression the host may request.",
+    ),
+    _model("ProgressEntry", "sessionID:UUID date:Date summary:String", "One recorded session as logged."),
+    _model(
+        "ExerciseProgress",
+        "exerciseID:String name:String unit:Unit load?:Number unchangedSessions:Int entries:[ProgressEntry]",
+        "Recorded values for one exercise, newest first. Nothing is estimated or projected.",
+    ),
+    _model(
         "RecoveryObservation",
         "id:UUID title:String value:String date:Date source:String",
         "A read-only HealthKit sample with provenance. Never a readiness score.",
@@ -257,6 +278,9 @@ OPERATIONS: list[tuple[str, str]] = [
     ("migrateState", "state:Object"),
     ("nutrients", "nutrients:Nutrients servings:Number"),
     ("recovery", "observations:[RecoveryObservation]"),
+    ("todayStatus", "state:State permitsFixtures:Bool now:Date"),
+    ("progress", "state:State permitsFixtures:Bool now:Date"),
+    ("loadSteps", "base:Number step:Number"),
 ]
 
 # State commands: name -> arguments spec. Order matters for the generated union.
@@ -296,6 +320,9 @@ RESULT_TYPES: dict[str, str] = {
     "nutrients": "Nutrients",
     "stateCommand": "StateResult",
     "recovery": "RecoveryResult",
+    "todayStatus": "TodayStatus",
+    "progress": "[ExerciseProgress]",
+    "loadSteps": "[Number]",
 }
 
 # --------------------------------------------------------------------------- #
@@ -461,4 +488,9 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
         sets=frozenset({"painExclusions", "operations"}),
     ),
     "CatalogExercise": SwiftModel("CatalogExercise", identifiable=True),
+    "SlotStatus": SwiftModel("SlotStatus", defaults={"action": "nil"}),
+    "ProposalCard": SwiftModel("ProposalCard", defaults={"slotID": "nil"}),
+    "TodayStatus": SwiftModel("TodayStatus", defaults={"slots": "[]", "proposals": "[]", "autoRequest": "nil"}),
+    "ProgressEntry": SwiftModel("ProgressEntry"),
+    "ExerciseProgress": SwiftModel("ExerciseProgress", defaults={"load": "nil"}),
 }

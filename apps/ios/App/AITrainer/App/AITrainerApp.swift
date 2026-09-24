@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import AITrainerCore
 
 @main
@@ -6,12 +7,55 @@ import AITrainerCore
 struct AITrainerApp: App {
     @StateObject private var store = AppStore()
     init() {
+        Stitch.registerFonts()
+        StitchChrome.configure()
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--core-smoke-test") { CoreSmokeTest.run() }
         #endif
     }
     var body: some Scene {
         WindowGroup { RootView().environmentObject(store) }
+    }
+}
+
+/// UIKit appearance for the system bars so the tab bar and pushed navigation bars match the Stitch kit.
+enum StitchChrome {
+    static func configure() {
+        let chrome = UIColor(red: 16 / 255, green: 20 / 255, blue: 26 / 255, alpha: 0.78)
+        let muted = UIColor(red: 144 / 255, green: 143 / 255, blue: 160 / 255, alpha: 1)
+        let accent = UIColor(red: 192 / 255, green: 193 / 255, blue: 255 / 255, alpha: 1)
+        let primary = UIColor(red: 223 / 255, green: 226 / 255, blue: 235 / 255, alpha: 1)
+        let hairline = UIColor(red: 38 / 255, green: 42 / 255, blue: 49 / 255, alpha: 1)
+
+        let tabs = UITabBarAppearance()
+        tabs.configureWithTransparentBackground()
+        tabs.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
+        tabs.backgroundColor = chrome
+        tabs.shadowColor = hairline
+        let tabFont = UIFont(name: "JetBrainsMono-Medium", size: 11) ?? .monospacedSystemFont(ofSize: 11, weight: .medium)
+        for layout in [tabs.stackedLayoutAppearance, tabs.inlineLayoutAppearance, tabs.compactInlineLayoutAppearance] {
+            layout.normal.iconColor = muted
+            layout.normal.titleTextAttributes = [.font: tabFont, .foregroundColor: muted, .kern: 0.275]
+            layout.selected.iconColor = accent
+            layout.selected.titleTextAttributes = [.font: tabFont, .foregroundColor: accent, .kern: 0.275]
+        }
+        UITabBar.appearance().standardAppearance = tabs
+        UITabBar.appearance().scrollEdgeAppearance = tabs
+
+        let bar = UINavigationBarAppearance()
+        bar.configureWithTransparentBackground()
+        bar.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
+        bar.backgroundColor = chrome
+        bar.shadowColor = hairline
+        bar.titleTextAttributes = [.foregroundColor: primary, .font: UIFont(name: "SpaceGrotesk-Bold", size: 20) ?? .boldSystemFont(ofSize: 20)]
+        bar.largeTitleTextAttributes = [.foregroundColor: primary, .font: UIFont(name: "SpaceGrotesk-Bold", size: 28) ?? .boldSystemFont(ofSize: 28)]
+        let back = UIBarButtonItemAppearance()
+        back.normal.titleTextAttributes = [.foregroundColor: accent, .font: UIFont(name: "Inter-Medium", size: 15) ?? .systemFont(ofSize: 15)]
+        bar.backButtonAppearance = back
+        UINavigationBar.appearance().standardAppearance = bar
+        UINavigationBar.appearance().scrollEdgeAppearance = bar
+        UINavigationBar.appearance().compactAppearance = bar
+        UINavigationBar.appearance().tintColor = accent
     }
 }
 
@@ -25,12 +69,19 @@ enum StartupFailure {
 }
 
 /// The app's composition root: builds the one domain core, the one repository and the one
-/// `TrainerService`, then publishes state snapshots to the views.
+/// `TrainerService`, then publishes state snapshots and the core's view models to the views.
 @MainActor
 final class AppStore: ObservableObject {
     @Published private(set) var state = AthleteState()
+    /// Today's slot cards and proposal titles, recomputed by the core after every change.
+    @Published private(set) var today = TodayStatus()
+    /// Recorded values per exercise for the Progress tab.
+    @Published private(set) var progress: [ExerciseProgress] = []
+    /// The session just finished, shown as a summary card on Today until the next start.
+    @Published var justFinishedSessionID: UUID?
     @Published var errorMessage: String?
     @Published var experimentalToolsEnabled = false
+    @Published var showPreviewInfo = false
     /// Whether the state file participates in iCloud/computer backups of this device (B.1).
     @Published private(set) var includeInDeviceBackup: Bool
     let service: TrainerService?
@@ -64,22 +115,44 @@ final class AppStore: ObservableObject {
             persistence = filePersistence
             startupFailure = nil
             state = repository.snapshot
+            refreshViews()
         } catch {
             service = nil; persistence = nil; startupFailure = .savedData(error.localizedDescription)
         }
     }
     @discardableResult func perform(_ action: (TrainerService) throws -> Void) -> Bool {
         guard let service else { return false }
-        do { try action(service); state = service.repository.snapshot; return true }
-        catch { errorMessage = error.localizedDescription; state = service.repository.snapshot; return false }
+        defer { state = service.repository.snapshot; refreshViews() }
+        do { try action(service); return true }
+        catch { errorMessage = error.localizedDescription; return false }
     }
+    /// Asks for a change the athlete chose (less time, move day, swap). A non-proposal answer is shown.
     func request(_ request: TrainingRequest) {
         perform { service in
             let result = try service.request(request)
             if result.outcome != .proposeChange { errorMessage = result.explanation }
         }
     }
+    /// Recomputes Today and Progress in the core. When the core names a slot to auto-request,
+    /// its progression proposal is requested once — so proposals appear without a review step.
+    private func refreshViews() {
+        guard let service, state.profile != nil else { return }
+        do {
+            today = try service.todayStatus()
+            if let slotID = today.autoRequest {
+                try service.request(.progression(slotID))
+                state = service.repository.snapshot
+                today = try service.todayStatus()
+            }
+            progress = try service.progress()
+        } catch { errorMessage = error.localizedDescription }
+    }
     func name(_ id: String) -> String { service?.library.exercise(id)?.name ?? id }
+    /// "PREVIEW FIXTURE · fixture-1" while fixture content drives guidance; nothing otherwise.
+    var previewPill: String? {
+        guard let library = service?.library, library.permitsFixtures, library.policy.review == .fixture else { return nil }
+        return "Preview fixture · \(library.policy.version)"
+    }
     /// Flips the backup attribute on the state directory first; the preference is only recorded
     /// once the file system accepted the change, so the toggle never lies about what is backed up.
     func setIncludeInDeviceBackup(_ include: Bool) {
@@ -90,54 +163,118 @@ final class AppStore: ObservableObject {
     }
 }
 
+enum AppTab: Hashable { case today, progress, you }
+
 struct RootView: View {
     @EnvironmentObject private var store: AppStore
+    @State private var tab: AppTab = .today
     var body: some View {
         Group {
             if case .runtime(let error) = store.startupFailure {
-                ContentUnavailableView("Training engine did not start", systemImage: "cpu",
-                    description: Text(error + " This build's bundled training rules could not run, so the app read nothing and changed nothing. Your saved data is untouched. Update the app, or report this build."))
+                StartupGateView(title: "Training engine did not start", symbol: "cpu", detail: error,
+                    advice: "This build's bundled training rules could not run, so the app read nothing and changed nothing. Your saved data is untouched. Update the app, or report this build.")
             } else if case .savedData(let error) = store.startupFailure {
-                ContentUnavailableView("Saved data needs attention", systemImage: "externaldrive.badge.exclamationmark",
-                    description: Text(error + " Your file was not reset. Unlock the device and reopen the app; preserve its container before recovery."))
+                StartupGateView(title: "Saved data needs attention", symbol: "externaldrive.badge.exclamationmark", detail: error,
+                    advice: "Your file was not reset. Unlock the device and reopen the app; preserve its container before recovery.")
             } else if store.state.profile == nil {
                 OnboardingView()
             } else {
-                TabView {
-                    NavigationStack { TodayView() }.tabItem { Label("Today", systemImage: "sun.max") }
-                    NavigationStack { HistoryView() }.tabItem { Label("History", systemImage: "chart.xyaxis.line") }
-                    NavigationStack { CoachView() }.tabItem { Label("Coach", systemImage: "bubble.left.and.text.bubble.right") }
-                    NavigationStack { LabsView() }.tabItem { Label("Labs", systemImage: "flask") }
-                    NavigationStack { SettingsView() }.tabItem { Label("Settings", systemImage: "gearshape") }
+                TabView(selection: $tab) {
+                    NavigationStack { TodayView() }
+                        .tabItem { Label("TODAY", systemImage: "sun.max") }.tag(AppTab.today)
+                    NavigationStack { ProgressTabView() }
+                        .tabItem { Label("PROGRESS", systemImage: "chart.xyaxis.line") }.tag(AppTab.progress)
+                    NavigationStack { YouView() }
+                        .tabItem { Label("YOU", systemImage: "gearshape") }.tag(AppTab.you)
                 }
             }
         }
-        .tint(.indigo)
+        .tint(Stitch.accentPrimary)
+        .preferredColorScheme(.dark)
+        .sheet(isPresented: $store.showPreviewInfo) { PreviewInfoSheet() }
         .alert("Trainer update", isPresented: Binding(get: { store.errorMessage != nil }, set: { if !$0 { store.errorMessage = nil } })) {
             Button("OK", role: .cancel) { store.errorMessage = nil }
         } message: { Text(store.errorMessage ?? "") }
     }
 }
 
-struct Panel<Content: View>: View {
-    private let content: Content
-    init(@ViewBuilder content: () -> Content) { self.content = content() }
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) { content }
-            .frame(maxWidth: .infinity, alignment: .leading).padding(18)
-            .background(.background, in: RoundedRectangle(cornerRadius: 20))
-    }
-}
-struct PhaseNotice: View {
+/// P56 / P37: the two launch gates. Nothing was read or written when either is shown.
+private struct StartupGateView: View {
     let title: String
+    let symbol: String
     let detail: String
+    let advice: String
     var body: some View {
-        Label { VStack(alignment: .leading, spacing: 4) {
-            Text(title).font(.subheadline.bold())
-            Text(detail).font(.footnote).foregroundStyle(.secondary)
-        } } icon: { Image(systemName: "info.circle") }
+        VStack(spacing: 0) {
+            StitchRootHeader("AI Trainer", pill: nil)
+            Group {
+                Image(systemName: symbol).font(.system(size: 40)).foregroundStyle(Stitch.accentPrimary)
+                    .frame(maxWidth: .infinity).padding(.top, 24)
+                Text(title).stitch(.displayH2).foregroundStyle(Stitch.textPrimary).frame(maxWidth: .infinity)
+                StitchNotice(title, body: detail, tone: .danger)
+                Text(advice).stitch(.body15).foregroundStyle(Stitch.textSecondary)
+            }
+            .stitchScrollColumn()
+        }
+        .background { StitchBackdrop() }
     }
 }
+
+/// PInfo: replaces every inline "phase" notice. Opened from the preview pill in any header.
+struct PreviewInfoSheet: View {
+    @EnvironmentObject private var store: AppStore
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        Group {
+            StitchNotice("Development preview · policy \(store.service?.library.policy.version ?? "unknown")",
+                         body: "Sample programs and test policies. They are not approved training prescriptions. Release builds refuse this content.",
+                         tone: .warn)
+            Text("What the app never does: estimate your strength, fill unknown effort, change your plan without your acceptance, or let camera, sleep or meals write training evidence. No account, no network, no language model in the decision path.")
+                .stitch(.body15).foregroundStyle(Stitch.textSecondary)
+            Button("Got it") { dismiss() }.buttonStyle(.stitch())
+        }
+        .stitchSheet("Preview build") { dismiss() }
+    }
+}
+
+/// A tab root: the Stitch root header pinned above a scrolling column, system bar hidden.
+struct TabRoot<Content: View>: View {
+    @EnvironmentObject private var store: AppStore
+    let title: String
+    let content: Content
+    init(_ title: String, @ViewBuilder content: () -> Content) { self.title = title; self.content = content() }
+    var body: some View {
+        content
+            .stitchScrollColumn()
+            .safeAreaInset(edge: .top, spacing: 0) {
+                StitchRootHeader(title, pill: store.previewPill) { store.showPreviewInfo = true }
+            }
+            .toolbar(.hidden, for: .navigationBar)
+    }
+}
+
+/// A pushed screen: system bar with the Stitch appearance, inline title and the preview pill.
+struct DetailScreen<Content: View>: View {
+    @EnvironmentObject private var store: AppStore
+    let title: String
+    let content: Content
+    init(_ title: String, @ViewBuilder content: () -> Content) { self.title = title; self.content = content() }
+    var body: some View {
+        content
+            .stitchScrollColumn()
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                if let pill = store.previewPill {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { store.showPreviewInfo = true } label: { StitchPill(pill.components(separatedBy: " · ").first ?? pill) }
+                            .buttonStyle(.plain)
+                    }
+                }
+            }
+    }
+}
+
 func number(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(0...2))) }
 func parseOptionalNumber(_ text: String) throws -> Double? {
     let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -175,6 +312,8 @@ private enum CoreSmokeTest {
                   let rec = repository.snapshot.recommendations.last else { throw TrainerError.invalid("Progression smoke failed: " + decision.reason) }
             try service.acceptRecommendation(id: rec.id, now: now)
             guard repository.snapshot.nextPlan?.slots.first?.load == 105 else { throw TrainerError.invalid("Acceptance smoke failed") }
+            _ = try service.todayStatus(now: now)
+            guard try service.progress(now: now).first?.entries.count == 2 else { throw TrainerError.invalid("Progress smoke failed") }
             let nutrients = try service.scaleNutrients(Nutrients(calories: 200, protein: 10), servings: 2)
             let catalog = try ExerciseCatalog.bundled()
             guard nutrients.calories == 400, catalog.exercises.count == 876 else { throw TrainerError.invalid("Content smoke failed") }
