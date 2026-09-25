@@ -19,6 +19,8 @@ public final class TrainerService {
         var exerciseID: String?; var excluded: Bool?; var expectedRevision: Int?; var id: UUID?
         var useIncoming: Bool?; var meal: Meal?; var asRecipe: Bool?; var request: TrainingRequest?
         var optionID: String?
+        var status: StatusKind?
+        var endsAt: Date?
     }
     private struct Payload<CommandArguments: Encodable>: Encodable {
         let command: String; let state: AthleteState; let arguments: CommandArguments
@@ -95,6 +97,16 @@ public final class TrainerService {
         try command("exclude", Arguments(exerciseID: exerciseID, excluded: excluded))
     }
 
+    // MARK: Status (ADR-019)
+    /// Marks a break, illness or injury. Automatic proposals pause and its days never count as missed.
+    public func setStatus(_ status: StatusKind, endsAt: Date? = nil, now: Date = Date()) throws {
+        try command("setStatus", Arguments(status: status, endsAt: endsAt), now: now)
+    }
+    /// "I'm back": ends the active status now.
+    public func endStatus(now: Date = Date()) throws {
+        try command("endStatus", now: now)
+    }
+
     // MARK: Records
     /// Returns `false` when the edit raced another one and was kept as a conflict instead.
     @discardableResult public func correctSet(sessionID: UUID, logID: UUID, expectedRevision: Int,
@@ -140,6 +152,24 @@ public final class TrainerService {
         try core.call("views", StatePayload(state: repository.snapshot, permitsFixtures: library.permitsFixtures, now: now,
                                             dayStart: calendar.startOfDay(for: now),
                                             utcOffset: calendar.timeZone.secondsFromGMT(for: now)))
+    }
+    /// What the spoken coach says for the workout in progress (ADR-022); empty without one.
+    public func workoutCues(now: Date = Date()) throws -> WorkoutCues {
+        struct Cues: Encodable {
+            let state: AthleteState
+            let permitsFixtures: Bool
+            let now: Date
+        }
+        return try core.call("workoutCues", Cues(state: repository.snapshot, permitsFixtures: library.permitsFixtures, now: now))
+    }
+    /// Plates for each side of a barbell at `load`, from the athlete's own bar and plates (ADR-021).
+    public func plates(load: Double, bar: Double, plates: [Double]) throws -> PlateLoad {
+        struct Plates: Encodable {
+            let load: Double
+            let bar: Double
+            let plates: [Double]
+        }
+        return try core.call("plateLoad", Plates(load: load, bar: bar, plates: plates))
     }
     /// Available loads around a confirmed working load, in the athlete's own equipment step.
     public func loadSteps(base: Double, step: Double) throws -> [Double] {

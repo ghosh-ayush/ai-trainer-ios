@@ -158,5 +158,9 @@
   "TRAINING_DAYS_REPLAN": [
     "proposeChange",
     "You have mostly trained on other days than this week uses. A week on your days fits better."
+  ],
+  "STATUS_PAUSED": [
+    "withholdGuidance",
+    "Suggestions are paused while you are on a break, sick or injured. Tap I'm back to resume them."
   ]
 }

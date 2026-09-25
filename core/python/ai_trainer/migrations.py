@@ -43,6 +43,8 @@ def migrate_state(state: JSON) -> JSON:
     if state.get("schemaVersion") == 3:
         state = _repair_early_v3(state)
         state = _v3_to_v4(state)
+    if state.get("schemaVersion") == 4:
+        state = _v4_to_v5(state)
     if state.get("schemaVersion") != CURRENT_STATE_VERSION:
         raise DomainError("unsupported", "Saved state was written by a newer app version.")
     contracts.validate(state, contracts.REQUEST["$defs"]["State"])
@@ -76,6 +78,13 @@ def _v3_to_v4(state: JSON) -> JSON:
     until the athlete picks them.
     """
     state["schemaVersion"] = 4
+    return state
+
+
+def _v4_to_v5(state: JSON) -> JSON:
+    """Training status (ADR-019): no period was ever recorded, so the history starts empty."""
+    state.setdefault("statusPeriods", [])
+    state["schemaVersion"] = 5
     return state
 
 

@@ -51,6 +51,7 @@ ENUMS: dict[str, list[str]] = {
     "Outcome": ["keepPlan", "proposeChange", "needsInput", "unassessed", "withholdGuidance"],
     "RecommendationStatus": ["proposed", "applied", "rejected", "expired"],
     "Omission": ["time", "equipment", "userChoice", "pain", "interruption", "unspecified"],
+    "StatusKind": ["onBreak", "sick", "injured"],
     "DietGoal": ["fatLoss", "muscleGain", "maintenance", "endurance"],
     "DietPattern": ["omnivore", "vegetarian", "vegan"],
     "ActivityLevel": ["inactive", "lowActive", "active", "veryActive"],
@@ -243,12 +244,39 @@ MODELS: list[ModelSpec] = [
         "An accepted or rejected diet suggestion, kept as history.",
     ),
     _model(
+        "WorkoutCues",
+        "afterSet?:String restOver?:String next?:String",
+        "What the spoken coach says (ADR-022), built from the plan and logged sets only. Empty without a workout.",
+    ),
+    _model(
+        "PlateLoad",
+        "perSide:[Number] total:Number exact:Bool",
+        "Plates for each side of a barbell from the athlete's own bar and plates (ADR-021).",
+    ),
+    _model(
+        "MuscleRing",
+        "muscle:String done:Number planned:Number target:Number",
+        "One major muscle this week: sets logged, sets the accepted week prescribes, and the weekly target.",
+    ),
+    _model(
+        "WeekRings",
+        "weekStart:Date muscles:[MuscleRing]",
+        "This week's muscle rings from the athlete's local Monday (ADR-020). Counted from logged sets only.",
+    ),
+    _model(
+        "StatusPeriod",
+        "id:UUID kind:StatusKind startedAt:Date endsAt?:Date endedAt?:Date",
+        "A period the athlete marked as on a break, sick or injured. While active, automatic proposals and "
+        "plan adaptation pause, and its days do not count as missed (ADR-019).",
+    ),
+    _model(
         "State",
         "schemaVersion:Int athleteID:UUID revision:Int contextRevision:Int profile?:Profile program?:Program "
         "nextPlanOverride?:Plan previousPrograms:[Program] sessions:[Session] recommendations:[Recommendation] "
         "painExclusions:[String] audits:[Audit] conflicts:[Conflict] operations:[UUID] events:[Event] meals:[Meal] "
         "mealAudits:[MealAudit] recipes:[Recipe] dietProfile?:DietProfile weighIns:[WeighIn] "
-        "dietTargets?:DietTargets dietDecisions:[DietDecision] excludedWeighIns:[Date]",
+        "dietTargets?:DietTargets dietDecisions:[DietDecision] excludedWeighIns:[Date] "
+        "statusPeriods:[StatusPeriod]",
         "Everything the app persists. One file, one athlete.",
     ),
     _model(
@@ -277,7 +305,7 @@ MODELS: list[ModelSpec] = [
     ),
     _model(
         "TodayStatus",
-        "slots:[SlotStatus] proposals:[ProposalCard] autoRequest?:UUID autoReplan?:Bool",
+        "slots:[SlotStatus] proposals:[ProposalCard] autoRequest?:UUID autoReplan?:Bool status?:StatusPeriod",
         "Read-only Today view model. ``autoRequest`` names one slot whose progression the host may request; "
         "``autoReplan`` says the host may request a week that fits recent attendance (ADR-018).",
     ),
@@ -317,7 +345,7 @@ MODELS: list[ModelSpec] = [
     ),
     _model(
         "Views",
-        "today:TodayStatus progress:[ExerciseProgress] diet:DietView",
+        "today:TodayStatus progress:[ExerciseProgress] diet:DietView rings?:WeekRings",
         "Everything the tab screens derive from state, computed in one pass after each change.",
     ),
     _model(
@@ -376,7 +404,7 @@ INTEGER_BOUNDS: list[tuple[str, str, int, int]] = [
     ("Slot", "workingSets", 1, 1000),
     ("Policy", "requiredExposures", 1, 1000),
 ]
-STATE_SCHEMA_VERSION = 4  # migrations.py upgrades older saved files
+STATE_SCHEMA_VERSION = 5  # migrations.py upgrades older saved files
 
 # Training request variants: kind -> ordered (field, type) pairs.
 REQUEST_KINDS: dict[str, list[tuple[str, str]]] = {
@@ -412,6 +440,8 @@ OPERATIONS: list[tuple[str, str]] = [
     ("recovery", "observations:[RecoveryObservation]"),
     ("views", "state:State permitsFixtures:Bool now:Date dayStart?:Date utcOffset?:Int"),
     ("loadSteps", "base:Number step:Number"),
+    ("plateLoad", "load:Number bar:Number plates:[Number]"),
+    ("workoutCues", "state:State permitsFixtures:Bool now:Date"),
     ("dietOptions", "now:Date"),
     ("dietPreview", "state:State profile:DietProfile now:Date"),
     ("foods", "query:String pattern?:DietPattern limit:Int"),
@@ -434,6 +464,8 @@ COMMANDS: dict[str, str] = {
     "correctSet": "sessionID:UUID logID:UUID expectedRevision:Int load?:Number reps:Int rir?:Int",
     "resolveConflict": "id:UUID useIncoming:Bool",
     "deleteSession": "id:UUID",
+    "setStatus": "status:StatusKind endsAt?:Date",
+    "endStatus": "",
     "deleteMeal": "id:UUID",
     "saveMeal": "meal:Meal asRecipe:Bool",
     "requestChange": "request:Request",
@@ -466,6 +498,8 @@ RESULT_TYPES: dict[str, str] = {
     "recovery": "RecoveryResult",
     "views": "Views",
     "loadSteps": "[Number]",
+    "plateLoad": "PlateLoad",
+    "workoutCues": "WorkoutCues",
     "dietOptions": "DietOptions",
     "dietPreview": "DietView",
     "foods": "[FoodItem]",
@@ -504,6 +538,7 @@ SWIFT_ENUMS: dict[str, tuple[str, bool]] = {  # schema enum -> (Swift name, Case
     "Outcome": ("DecisionOutcome", False),
     "RecommendationStatus": ("RecommendationStatus", False),
     "Omission": ("OmissionReason", True),
+    "StatusKind": ("StatusKind", True),
     "DietGoal": ("DietGoal", True),
     "DietPattern": ("DietPattern", True),
     "ActivityLevel": ("ActivityLevel", True),
@@ -630,7 +665,7 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "State": SwiftModel(
         "AthleteState",
         defaults={
-            "schemaVersion": "4",
+            "schemaVersion": "5",
             "athleteID": "UUID()",
             "revision": "0",
             "contextRevision": "0",
@@ -653,6 +688,7 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
             "dietTargets": "nil",
             "dietDecisions": "[]",
             "excludedWeighIns": "[]",
+            "statusPeriods": "[]",
         },
         sets=frozenset({"painExclusions", "operations"}),
     ),
@@ -717,13 +753,21 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "SlotStatus": SwiftModel("SlotStatus", defaults={"action": "nil"}),
     "ProposalCard": SwiftModel("ProposalCard", defaults={"slotID": "nil"}),
     "TodayStatus": SwiftModel(
-        "TodayStatus", defaults={"slots": "[]", "proposals": "[]", "autoRequest": "nil", "autoReplan": "nil"}
+        "TodayStatus",
+        defaults={"slots": "[]", "proposals": "[]", "autoRequest": "nil", "autoReplan": "nil", "status": "nil"},
     ),
     "ProgressEntry": SwiftModel("ProgressEntry"),
     "ExerciseProgress": SwiftModel("ExerciseProgress", defaults={"load": "nil"}),
+    "StatusPeriod": SwiftModel("StatusPeriod", defaults={"endsAt": "nil", "endedAt": "nil"}, identifiable=True),
+    "PlateLoad": SwiftModel("PlateLoad"),
+    "WorkoutCues": SwiftModel("WorkoutCues", defaults={"afterSet": "nil", "restOver": "nil", "next": "nil"}),
+    "MuscleRing": SwiftModel("MuscleRing"),
+    "WeekRings": SwiftModel("WeekRings"),
     "WeekSession": SwiftModel("WeekSession"),
     "WeekOption": SwiftModel("WeekOption", identifiable=True),
-    "Views": SwiftModel("CoreViews", defaults={"today": "TodayStatus()", "progress": "[]", "diet": "DietView()"}),
+    "Views": SwiftModel(
+        "CoreViews", defaults={"today": "TodayStatus()", "progress": "[]", "diet": "DietView()", "rings": "nil"}
+    ),
     "SpokenSet": SwiftModel("SpokenSet", defaults={"exercise": "nil", "reps": "nil", "load": "nil", "rir": "nil"}),
     "SetPreview": SwiftModel("SetPreview", defaults={"load": "nil", "rir": "nil"}),
     "SetReading": SwiftModel("SetReading", defaults={"preview": "nil", "question": "nil", "ignored": "[]"}),

@@ -17,6 +17,8 @@ struct WorkoutView: View {
     @State private var showFinish = false
     @State private var showPain = false
     @State private var showWords = false
+    @AppStorage(SpokenCoachSettings.key) private var spokenCoach = false
+    @State private var coach = SpokenCoach()
     var body: some View {
         Group {
             if let session = store.state.activeSession {
@@ -24,8 +26,16 @@ struct WorkoutView: View {
                     DetailScreen("Workout") { sessionContent(session) }
                         // After each save, bring the next set still to log into view.
                         .onChange(of: session.logs.count) {
+                            speak(\.afterSet)
                             guard let next = Self.nextUnloggedSet(in: session) else { return }
                             withAnimation { proxy.scrollTo(Self.rowID(slot: next.slot.id, index: next.index), anchor: .center) }
+                        }
+                        // ADR-022: when the rest timer runs out, say the next set.
+                        .task(id: session.restEndsAt) {
+                            guard spokenCoach, let ends = session.restEndsAt, ends > Date() else { return }
+                            try? await Task.sleep(for: .seconds(ends.timeIntervalSinceNow))
+                            guard !Task.isCancelled else { return }
+                            speak(\.restOver)
                         }
                 }
             } else {
@@ -58,6 +68,10 @@ struct WorkoutView: View {
         }
         ForEach(session.plan.slots) { slot in
             StitchSectionLabel(store.name(slot.exerciseID), meta: "Target \(slot.load.map(number) ?? "unknown") \(slot.equipment.unit.rawValue) · \(slot.equipment.basis.label)")
+            if let last = store.progress.first(where: { $0.exerciseID == slot.exerciseID })?.entries.first {
+                Text("Last time: \(last.summary)").stitch(.body13).foregroundStyle(Stitch.textSecondary)
+            }
+            PlateLine(slot: slot)
             ForEach(0..<slot.workingSets, id: \.self) { index in
                 Group {
                     if let log = Self.workingLog(in: session, slot: slot.id, index: index) {
@@ -67,6 +81,13 @@ struct WorkoutView: View {
                         Button(doneLabel(slot: slot, index: index)) { logAsPlanned(session: session, slot: slot, index: index) }
                             .buttonStyle(.stitch())
                             .disabled(paused)
+                        if let previous = Self.sameAsLast(in: session, slot: slot, index: index) {
+                            Button("Same as last · \(previous.reps) reps · \(previous.load.map { "\(number($0)) \(previous.unit.rawValue)" } ?? "load unknown")") {
+                                logSameAsLast(session: session, slot: slot, index: index, previous: previous)
+                            }
+                            .buttonStyle(.stitch(.secondary))
+                            .disabled(paused)
+                        }
                     }
                 }
                 .id(Self.rowID(slot: slot.id, index: index))
@@ -101,6 +122,25 @@ struct WorkoutView: View {
     }
     private func loadText(_ slot: Prescription) -> String {
         slot.load.map { "\(number($0)) \(slot.equipment.unit.rawValue)" } ?? "load unknown"
+    }
+    /// ADR-022: fetch the core's cue off the main thread and say it, when the spoken coach is on.
+    private func speak(_ cue: KeyPath<WorkoutCues, String?>) {
+        guard spokenCoach, let service = store.service else { return }
+        Task {
+            let text = await Task.detached(priority: .userInitiated) { (try? service.workoutCues())?[keyPath: cue] }.value
+            if let text { coach.say(text) }
+        }
+    }
+    /// ADR-021: repeat the previous set's reps and load. Effort is never copied, so RIR stays unknown.
+    private func logSameAsLast(session: WorkoutSession, slot: Prescription, index: Int, previous: SetLog) {
+        store.perform { try $0.saveSet(sessionID: session.id, slotID: slot.id, index: index, load: previous.load, reps: previous.reps, rir: nil) }
+    }
+    /// The next open working set can repeat the set just before it, when that one differs from the plan.
+    static func sameAsLast(in session: WorkoutSession, slot: Prescription, index: Int) -> SetLog? {
+        guard index > 0, firstOpenIndex(in: session, slot: slot) == index,
+              let previous = workingLog(in: session, slot: slot.id, index: index - 1) else { return nil }
+        let planned = slot.targets.indices.contains(index) ? slot.targets[index] : slot.lowerReps
+        return previous.reps == planned && previous.load == slot.load ? nil : previous
     }
     /// One tap: the planned reps at the planned load. Effort is not assumed, so RIR stays unknown.
     private func logAsPlanned(session: WorkoutSession, slot: Prescription, index: Int) {
@@ -310,5 +350,31 @@ struct FinishSheet: View {
         case .interruption: return "Interruption"
         case .unspecified: return "Unspecified"
         }
+    }
+}
+
+
+/// ADR-021: "Plates: 25 + 15 + 1.25 per side" for a barbell slot with a known load, once the athlete
+/// has entered their bar and plates in Settings. The arithmetic runs in the core, off the main thread.
+struct PlateLine: View {
+    @EnvironmentObject private var store: AppStore
+    let slot: Prescription
+    @State private var text: String?
+    var body: some View {
+        Group {
+            if let text { Text(text).stitch(.body13).foregroundStyle(Stitch.textSecondary) }
+        }
+        .task(id: slot.load) { text = await line() }
+    }
+    private func line() async -> String? {
+        guard slot.equipment.basis == .total, let load = slot.load, let service = store.service,
+              service.library.exercise(slot.exerciseID)?.equipmentKind == "barbell",
+              let saved = PlateSettings.saved else { return nil }
+        let unit = slot.equipment.unit.rawValue
+        return await Task.detached(priority: .userInitiated) { () -> String? in
+            guard let answer = try? service.plates(load: load, bar: saved.bar, plates: saved.plates) else { return nil }
+            let side = answer.perSide.isEmpty ? "just the bar" : answer.perSide.map(number).joined(separator: " + ") + " per side"
+            return answer.exact ? "Plates: \(side)" : "Plates: \(side) = \(number(answer.total)) \(unit) (closest you can load)"
+        }.value
     }
 }

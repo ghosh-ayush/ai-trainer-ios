@@ -28,6 +28,7 @@ import math
 from collections.abc import Iterable
 from typing import Any
 
+from ..athlete_state import status_seconds
 from ..messages import Decision, decision
 from .week_plans import WEEKDAY_NAMES
 from .week_program import option_summaries, program_from_options, week_options
@@ -55,7 +56,8 @@ def attendance(state: JSON, now: float, window_days: float, utc_offset: int | No
         return None
     end = _end_of_day(now)
     start = max(end - window_days * DAY, program["acceptedAt"])
-    weeks = max((end - start) / WEEK, 0.0)
+    away = status_seconds(state, start, end)  # ADR-019: a break or illness is not a missed session
+    weeks = max((end - start - away) / WEEK, 0.0)
     done = [
         session
         for session in state["sessions"]
@@ -68,6 +70,7 @@ def attendance(state: JSON, now: float, window_days: float, utc_offset: int | No
     ]
     summary: JSON = {
         "weeks": weeks,
+        "activeDays": weeks * 7,
         "planned": planned_sessions_per_week(program, profile),
         "done": len(done),
         "donePerWeek": len(done) / weeks if weeks > 0 else 0.0,
@@ -109,10 +112,8 @@ def replan_due(state: JSON, library: JSON, now: float, utc_offset: int | None = 
     if planner is None or not program:
         return False
     rules = planner["adaptation"]
-    if _end_of_day(now) - program["acceptedAt"] < rules["minimumPlanAgeDays"] * DAY:
-        return False
     summary = attendance(state, now, rules["windowDays"], utc_offset)
-    return summary is not None and bool(_drift(summary, program, rules))
+    return summary is not None and _old_enough(summary, program, now, rules) and bool(_drift(summary, program, rules))
 
 
 def propose_replan(state: JSON, library: JSON, now: float, utc_offset: int | None = None) -> Decision:
@@ -123,7 +124,7 @@ def propose_replan(state: JSON, library: JSON, now: float, utc_offset: int | Non
     rules = planner["adaptation"]
     program = state["program"]
     summary = attendance(state, now, rules["windowDays"], utc_offset)
-    if summary is None or _end_of_day(now) - program["acceptedAt"] < rules["minimumPlanAgeDays"] * DAY:
+    if summary is None or not _old_enough(summary, program, now, rules):
         return decision("REPLAN_NEEDS_HISTORY")
     drift = _drift(summary, program, rules)
     if not drift:
@@ -146,6 +147,14 @@ def replan_program(
     adjust = _adjustments(summary, _drift(summary, state["program"], rules), rules)
     options = week_options(state["profile"], library, adjust)
     return program_from_options(options, option_id, state["profile"], library, now, ids)
+
+
+def _old_enough(summary: JSON, program: JSON, now: float, rules: JSON) -> bool:
+    """The week has run long enough to judge, and enough of that time was not a break or illness."""
+    minimum: float = rules["minimumPlanAgeDays"]
+    age_ok = _end_of_day(now) - program["acceptedAt"] >= minimum * DAY
+    active_days: float = summary["activeDays"]
+    return age_ok and active_days >= minimum
 
 
 def _drift(summary: JSON, program: JSON, rules: JSON) -> list[str]:

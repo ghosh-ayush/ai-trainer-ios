@@ -41,6 +41,10 @@ public enum OmissionReason: String, Codable, CaseIterable {
     case time, equipment, userChoice, pain, interruption, unspecified
 }
 
+public enum StatusKind: String, Codable, CaseIterable {
+    case onBreak, sick, injured
+}
+
 public enum DietGoal: String, Codable, CaseIterable {
     case fatLoss, muscleGain, maintenance, endurance
 }
@@ -849,6 +853,97 @@ public struct DietDecision: Codable, Equatable, Identifiable {
     }
 }
 
+/// What the spoken coach says (ADR-022), built from the plan and logged sets only. Empty without a workout.
+public struct WorkoutCues: Codable, Equatable {
+    public var afterSet: String?
+    public var restOver: String?
+    public var next: String?
+
+    public init(
+        afterSet: String? = nil,
+        restOver: String? = nil,
+        next: String? = nil
+    ) {
+        self.afterSet = afterSet
+        self.restOver = restOver
+        self.next = next
+    }
+}
+
+/// Plates for each side of a barbell from the athlete's own bar and plates (ADR-021).
+public struct PlateLoad: Codable, Equatable {
+    public var perSide: [Double]
+    public var total: Double
+    public var exact: Bool
+
+    public init(
+        perSide: [Double],
+        total: Double,
+        exact: Bool
+    ) {
+        self.perSide = perSide
+        self.total = total
+        self.exact = exact
+    }
+}
+
+/// One major muscle this week: sets logged, sets the accepted week prescribes, and the weekly target.
+public struct MuscleRing: Codable, Equatable {
+    public var muscle: String
+    public var done: Double
+    public var planned: Double
+    public var target: Double
+
+    public init(
+        muscle: String,
+        done: Double,
+        planned: Double,
+        target: Double
+    ) {
+        self.muscle = muscle
+        self.done = done
+        self.planned = planned
+        self.target = target
+    }
+}
+
+/// This week's muscle rings from the athlete's local Monday (ADR-020). Counted from logged sets only.
+public struct WeekRings: Codable, Equatable {
+    public var weekStart: Date
+    public var muscles: [MuscleRing]
+
+    public init(
+        weekStart: Date,
+        muscles: [MuscleRing]
+    ) {
+        self.weekStart = weekStart
+        self.muscles = muscles
+    }
+}
+
+/// A period the athlete marked as on a break, sick or injured. While active, automatic proposals and plan adaptation pause, and its days do not count as missed (ADR-019).
+public struct StatusPeriod: Codable, Equatable, Identifiable {
+    public var id: UUID
+    public var kind: StatusKind
+    public var startedAt: Date
+    public var endsAt: Date?
+    public var endedAt: Date?
+
+    public init(
+        id: UUID,
+        kind: StatusKind,
+        startedAt: Date,
+        endsAt: Date? = nil,
+        endedAt: Date? = nil
+    ) {
+        self.id = id
+        self.kind = kind
+        self.startedAt = startedAt
+        self.endsAt = endsAt
+        self.endedAt = endedAt
+    }
+}
+
 /// Everything the app persists. One file, one athlete.
 public struct AthleteState: Codable, Equatable {
     public var schemaVersion: Int
@@ -874,9 +969,10 @@ public struct AthleteState: Codable, Equatable {
     public var dietTargets: DietTargets?
     public var dietDecisions: [DietDecision]
     public var excludedWeighIns: [Date]
+    public var statusPeriods: [StatusPeriod]
 
     public init(
-        schemaVersion: Int = 4,
+        schemaVersion: Int = 5,
         athleteID: UUID = UUID(),
         revision: Int = 0,
         contextRevision: Int = 0,
@@ -898,7 +994,8 @@ public struct AthleteState: Codable, Equatable {
         weighIns: [WeighIn] = [],
         dietTargets: DietTargets? = nil,
         dietDecisions: [DietDecision] = [],
-        excludedWeighIns: [Date] = []
+        excludedWeighIns: [Date] = [],
+        statusPeriods: [StatusPeriod] = []
     ) {
         self.schemaVersion = schemaVersion
         self.athleteID = athleteID
@@ -923,6 +1020,7 @@ public struct AthleteState: Codable, Equatable {
         self.dietTargets = dietTargets
         self.dietDecisions = dietDecisions
         self.excludedWeighIns = excludedWeighIns
+        self.statusPeriods = statusPeriods
     }
 }
 
@@ -1069,17 +1167,20 @@ public struct TodayStatus: Codable, Equatable {
     public var proposals: [ProposalCard]
     public var autoRequest: UUID?
     public var autoReplan: Bool?
+    public var status: StatusPeriod?
 
     public init(
         slots: [SlotStatus] = [],
         proposals: [ProposalCard] = [],
         autoRequest: UUID? = nil,
-        autoReplan: Bool? = nil
+        autoReplan: Bool? = nil,
+        status: StatusPeriod? = nil
     ) {
         self.slots = slots
         self.proposals = proposals
         self.autoRequest = autoRequest
         self.autoReplan = autoReplan
+        self.status = status
     }
 }
 
@@ -1278,15 +1379,18 @@ public struct CoreViews: Codable, Equatable {
     public var today: TodayStatus
     public var progress: [ExerciseProgress]
     public var diet: DietView
+    public var rings: WeekRings?
 
     public init(
         today: TodayStatus = TodayStatus(),
         progress: [ExerciseProgress] = [],
-        diet: DietView = DietView()
+        diet: DietView = DietView(),
+        rings: WeekRings? = nil
     ) {
         self.today = today
         self.progress = progress
         self.diet = diet
+        self.rings = rings
     }
 }
 

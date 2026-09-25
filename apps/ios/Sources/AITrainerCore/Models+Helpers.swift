@@ -81,6 +81,17 @@ extension Meal {
     }
 }
 
+extension StatusKind {
+    /// How a training status reads in the app (ADR-019).
+    public var label: String {
+        switch self {
+        case .onBreak: return "On a break"
+        case .sick: return "Sick"
+        case .injured: return "Injured"
+        }
+    }
+}
+
 extension Exercise {
     /// The movement role in words: the planner's codes (ADR-017) read as names, older roles as they are.
     public var roleLabel: String {

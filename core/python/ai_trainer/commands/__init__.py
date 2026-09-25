@@ -25,7 +25,7 @@ from collections.abc import Callable
 from typing import Any
 
 from ..errors import DomainError
-from . import diet, meals, plan, proposals, records, workout
+from . import diet, meals, plan, proposals, records, status, workout
 from .context import CommandContext
 
 JSON = dict[str, Any]
@@ -44,6 +44,8 @@ HANDLERS: dict[str, Handler] = {
     "correctSet": records.correct_set,
     "resolveConflict": records.resolve_conflict,
     "deleteSession": records.delete_session,
+    "setStatus": status.set_status,
+    "endStatus": status.end_status,
     "deleteMeal": meals.delete_meal,
     "saveMeal": meals.save_meal,
     "requestChange": proposals.request_change,
