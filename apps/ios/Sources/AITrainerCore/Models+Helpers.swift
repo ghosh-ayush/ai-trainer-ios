@@ -96,15 +96,12 @@ extension StatusKind {
     }
 }
 
-extension Exercise {
-    /// The movement role in words: the planner's codes (ADR-017) read as names, older roles as they are.
-    public var roleLabel: String {
-        let names = [
-            "UPH": "Horizontal press", "UPV": "Overhead press", "ULH": "Row", "ULV": "Vertical pull",
-            "KD": "Squat", "HH": "Hip hinge", "SL": "Single-leg", "EF": "Biceps", "EE": "Triceps",
-            "KF": "Leg curl", "CALF": "Calves",
-        ]
-        return names[role] ?? role
+extension ContentLibrary {
+    /// The exercise's movement role in words, as the content bundle names it ("KD" reads "Squat").
+    /// Roles the bundle doesn't name (older content) read as they are; nil for an unknown exercise.
+    public func roleName(of exerciseID: String) -> String? {
+        guard let role = exercise(exerciseID)?.role else { return nil }
+        return roleNames[role] ?? role
     }
 }
 

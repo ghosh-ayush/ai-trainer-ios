@@ -88,8 +88,16 @@ def load_library(permits_fixtures: bool) -> JSON:
 
 
 def public_library(library: JSON) -> JSON:
-    """The ``Library`` record the host displays (names, alternatives, policy version)."""
-    return {key: library[key] for key in ("exercises", "policy", "permitsFixtures")}
+    """The ``Library`` record the host displays (names, alternatives, policy version).
+
+    ``roleNames`` maps each weekly-planner movement role ("KD") to its display name ("Squat"),
+    so the host shows the bundle's words rather than keeping its own table. Content without a
+    weekly planner, or roles without names, give none.
+    """
+    record = {key: library[key] for key in ("exercises", "policy", "permitsFixtures")}
+    roles = (library.get("planner") or {}).get("structures", {}).get("roles", {})
+    record["roleNames"] = {role: definition["name"] for role, definition in roles.items() if "name" in definition}
+    return record
 
 
 def is_enabled(review_status: str, library: JSON) -> bool:

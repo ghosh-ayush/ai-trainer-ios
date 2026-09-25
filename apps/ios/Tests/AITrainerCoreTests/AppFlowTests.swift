@@ -139,6 +139,15 @@ final class AppFlowTests: XCTestCase {
             }
         }
     }
+    /// Movement roles read in the bundle's words. The pinned fixture has no weekly planner, so it
+    /// names no roles and each reads as it is; an unknown exercise has no role at all.
+    func testRoleNamesComeFromTheContentBundle() throws {
+        let library = try service().library
+        let exercise = try XCTUnwrap(library.exercises.first)
+        XCTAssertEqual(library.roleNames, [:])
+        XCTAssertEqual(library.roleName(of: exercise.id), exercise.role)
+        XCTAssertNil(library.roleName(of: "no-such-exercise"))
+    }
     /// ADR-019: a break pauses automatic proposals; "I'm back" resumes them.
     func testABreakPausesAutomaticProposalsUntilImBack() throws {
         let service = try trainedService()

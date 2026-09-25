@@ -1122,6 +1122,7 @@
       "roles": {
         "value": {
           "UPH": {
+            "name": "Horizontal press",
             "muscles": {
               "chest": 1,
               "triceps": 0.5,
@@ -1129,64 +1130,74 @@
             }
           },
           "UPV": {
+            "name": "Overhead press",
             "muscles": {
               "shoulders": 1,
               "triceps": 0.5
             }
           },
           "ULH": {
+            "name": "Row",
             "muscles": {
               "back": 1,
               "biceps": 0.5
             }
           },
           "ULV": {
+            "name": "Vertical pull",
             "muscles": {
               "back": 1,
               "biceps": 0.5
             }
           },
           "KD": {
+            "name": "Squat",
             "muscles": {
               "quadriceps": 1,
               "glutes": 0.5
             }
           },
           "HH": {
+            "name": "Hip hinge",
             "muscles": {
               "hamstrings": 1,
               "glutes": 1
             }
           },
           "SL": {
+            "name": "Single-leg",
             "muscles": {
               "quadriceps": 1,
               "glutes": 0.5
             }
           },
           "EF": {
+            "name": "Biceps",
             "muscles": {
               "biceps": 1
             }
           },
           "EE": {
+            "name": "Triceps",
             "muscles": {
               "triceps": 1
             }
           },
           "KF": {
+            "name": "Leg curl",
             "muscles": {
               "hamstrings": 1
             }
           },
           "CALF": {
+            "name": "Calves",
             "muscles": {
               "calves": 1
             }
           }
         },
         "source": "owner",
-        "rationale": "Each role counts a set fully for its prime movers and half for synergists, following PELLAND26's best-fitting model (Abstract; Low). The hinge counts fully for hamstrings and glutes because squats and leg presses give the hamstrings little stimulus (SCHOENFELD19S, Conclusions), which is why the hinge and knee flexion carry them."
+        "rationale": "Each role counts a set fully for its prime movers and half for synergists, following PELLAND26's best-fitting model (Abstract; Low). The hinge counts fully for hamstrings and glutes because squats and leg presses give the hamstrings little stimulus (SCHOENFELD19S, Conclusions), which is why the hinge and knee flexion carry them. Each role's name is only its display label, like a session's name."
       },
       "fallbacks": {
         "value": {

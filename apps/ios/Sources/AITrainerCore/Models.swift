@@ -220,20 +220,23 @@ public struct TrainingPolicy: Codable, Equatable {
     }
 }
 
-/// The bundled content the core runs against, as the host displays it.
+/// The bundled content the core runs against, as the host displays it. ``roleNames`` gives the display name of each weekly-planner movement role, from the bundle.
 public struct ContentLibrary: Codable, Equatable {
     public var exercises: [Exercise]
     public var policy: TrainingPolicy
     public var permitsFixtures: Bool
+    public var roleNames: [String: String]
 
     public init(
         exercises: [Exercise],
         policy: TrainingPolicy,
-        permitsFixtures: Bool
+        permitsFixtures: Bool,
+        roleNames: [String: String] = [:]
     ) {
         self.exercises = exercises
         self.policy = policy
         self.permitsFixtures = permitsFixtures
+        self.roleNames = roleNames
     }
 }
 

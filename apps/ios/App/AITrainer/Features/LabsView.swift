@@ -39,7 +39,7 @@ struct CameraLabView: View {
     @Environment(\.scenePhase) private var scenePhase
     var body: some View {
         DetailScreen(benchmarkOnly ? "P0 benchmark" : "P2 camera pilot") {
-            CameraPreview(session: camera.session).frame(height: 330)
+            CameraPreview(camera: camera).frame(height: 330)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Stitch.glassStroke))
             Text(camera.message).stitch(.body13).foregroundStyle(Stitch.textSecondary)
