@@ -17,6 +17,7 @@ from ..errors import DomainError
 from ..events import store_plan
 from ..rules.adaptation import replan_program
 from ..rules.eligibility import decide
+from ..rules.free_days import carry_confirmed_loads, new_days_profile, new_days_program
 from .context import CommandContext
 from .plan import WEEKLY_ID_COUNT
 
@@ -89,6 +90,9 @@ def accept(context: CommandContext) -> None:
     if recommendation["request"]["kind"] == "replan":
         _apply_replan(context, recommendation, reevaluated)
         return
+    if recommendation["request"]["kind"] == "changeDays":
+        _apply_new_days(context, recommendation, reevaluated)
+        return
     if reevaluated != recommendation["decision"] or reevaluated.get("after") is None:
         raise DomainError("staleProposal")
     applied_plan = deepcopy(reevaluated["after"])
@@ -113,8 +117,32 @@ def _apply_replan(context: CommandContext, recommendation: JSON, reevaluated: JS
     ids = (context.next_id() for _ in range(WEEKLY_ID_COUNT))
     utc_offset = recommendation["request"].get("utcOffset")
     program = replan_program(state, context.library, context.now, ids, week["id"], utc_offset)
+    program = carry_confirmed_loads(program, state["program"])
     state["previousPrograms"].append(state["program"])
     state["program"] = program
+    state.pop("nextPlanOverride", None)
+    context.mark_context_changed()
+    context.record("recommendation_accepted", reevaluated["reason"])
+    context.expire_proposals()
+    recommendation["status"] = "applied"
+    context.record("recommendation_applied", reevaluated["reason"])
+
+
+def _apply_new_days(context: CommandContext, recommendation: JSON, reevaluated: JSON) -> None:
+    """ADR-025: replace the program with the week for the new free days, and keep those days.
+
+    As for a replan, the decision holds the week without ids, so an unchanged request re-evaluates
+    to an identical decision; confirmed loads carry over to the same exercises.
+    """
+    week = reevaluated.get("week")
+    if reevaluated != recommendation["decision"] or week is None:
+        raise DomainError("staleProposal")
+    state, request = context.state, recommendation["request"]
+    ids = (context.next_id() for _ in range(WEEKLY_ID_COUNT))
+    program = new_days_program(state, context.library, request, week["id"], context.now, ids)
+    state["previousPrograms"].append(state["program"])
+    state["program"] = program
+    state["profile"] = new_days_profile(state["profile"], request)
     state.pop("nextPlanOverride", None)
     context.mark_context_changed()
     context.record("recommendation_accepted", reevaluated["reason"])

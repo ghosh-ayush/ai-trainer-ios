@@ -19,6 +19,8 @@ The app has four tabs: **Today**, **Diet**, **Progress** and **You**.
 - **Weekly plan (ADR-017).** The athlete picks their free weekdays (1 to 7) and minutes. The core
   offers up to three weeks within the bundle's research bounds, previews each by weekday, and
   builds the one the athlete accepts.
+- **Changing free days (ADR-025).** The first choice is only a starting point: new days and minutes
+  get a proposed week, with confirmed loads carried over.
 - **Adapting to training history (ADR-018).** After two full weeks, a week that fits what the
   athlete actually did is proposed: fewer or more sessions, shorter sessions, or their real
   training days.

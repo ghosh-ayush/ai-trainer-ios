@@ -86,6 +86,24 @@ final class AITrainerUITests: XCTestCase {
                       "Today no longer shows the injury")
     }
 
+    /// ADR-025: new free days get a proposed week; Accept on Today applies it, and You shows the days.
+    @MainActor
+    func testChangingFreeDaysProposesAWeekToAccept() throws {
+        onboard()
+        app.tabBars.buttons["YOU"].tap()
+        tapWhenVisible(app.buttons["Change free days and minutes"])
+        tapWhenVisible(app.buttons["Tuesday not free"])
+        XCTAssertTrue(app.buttons["Tuesday free"].waitForExistence(timeout: 5))
+        tapWhenVisible(app.buttons["See weeks for these days"])
+        tapWhenVisible(app.buttons["Propose the suggested week"])
+        let accept = app.buttons["Accept"]
+        XCTAssertTrue(accept.waitForExistence(timeout: 10), "The new week waits on Today for Accept")
+        tapWhenVisible(accept)
+        app.tabBars.buttons["YOU"].tap()
+        let profile = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Mon, Tue, Wed, Fri")).firstMatch
+        XCTAssertTrue(profile.waitForExistence(timeout: 10), "You shows the new free days")
+    }
+
     // MARK: Steps
 
     /// Consent, Monday / Wednesday / Friday, the suggested week, Accept.

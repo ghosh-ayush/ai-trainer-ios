@@ -191,6 +191,7 @@
         "openMoveDay",
         "openPain",
         "openStatus",
+        "openChangeDays",
         "confirmSkip",
         "requestProgression",
         "requestShorten",
@@ -947,6 +948,31 @@
           "required": [
             "kind",
             "utcOffset"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "changeDays"
+            },
+            "freeDays": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Int"
+              }
+            },
+            "minutes": {
+              "$ref": "#/$defs/Int"
+            },
+            "optionID": {
+              "$ref": "#/$defs/String"
+            }
+          },
+          "required": [
+            "kind",
+            "freeDays"
           ],
           "additionalProperties": false
         }

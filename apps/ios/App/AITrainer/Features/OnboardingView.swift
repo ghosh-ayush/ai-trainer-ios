@@ -28,13 +28,7 @@ struct OnboardingView: View {
                 selection("Primary goal", value: $profile.goal, options: ["Hypertrophy", "Strength"])
                 selection("Experience", value: $profile.experience, options: ["Beginner", "Intermediate"])
                 StitchSectionLabel("Free days", meta: freeDaysMeta)
-                HStack(spacing: 6) {
-                    ForEach(0..<7, id: \.self) { day in
-                        Button { toggle(day) } label: { Text(Weekday.initial(day)).lineLimit(1) }
-                            .buttonStyle(.stitch(isFree(day) ? .primary : .secondary, compact: true))
-                            .accessibilityLabel("\(Weekday.name(day)) \(isFree(day) ? "free" : "not free")")
-                    }
-                }
+                WeekdayPicker(freeDays: Binding(get: { profile.freeDays ?? [] }, set: { setFreeDays($0) }))
                 StitchField("Minutes per session", value: "\(profile.minutes) min") {
                     StitchStepperButtons(decrement: { profile.minutes = max(15, profile.minutes - 5) },
                                          increment: { profile.minutes = min(120, profile.minutes + 5) })
@@ -58,12 +52,9 @@ struct OnboardingView: View {
         let count = profile.freeDays?.count ?? 0
         return count == 0 ? "tap the days you can train" : "\(count) day\(count == 1 ? "" : "s") a week"
     }
-    private func isFree(_ day: Int) -> Bool { profile.freeDays?.contains(day) ?? false }
     /// The athlete's free weekdays; the number of days follows them, so the core never guesses which days.
-    private func toggle(_ day: Int) {
-        var days = Set(profile.freeDays ?? [])
-        if days.contains(day) { days.remove(day) } else { days.insert(day) }
-        profile.freeDays = days.isEmpty ? nil : days.sorted()
+    private func setFreeDays(_ days: [Int]) {
+        profile.freeDays = days.isEmpty ? nil : days
         profile.daysPerWeek = max(1, days.count)
     }
     private var consentText: String {
@@ -132,9 +123,9 @@ private struct WeekChoiceSheet: View {
                     StitchCard(tone: index == 0 ? .accent : .default) {
                         Text("\(option.name) · \(option.sessionsPerWeek) day\(option.sessionsPerWeek == 1 ? "" : "s")")
                             .stitch(.displayH3).foregroundStyle(Stitch.textPrimary)
-                        Text(Self.schedule(option)).stitch(.body13).foregroundStyle(Stitch.textSecondary)
+                        Text(WeekOptionText.schedule(option)).stitch(.body13).foregroundStyle(Stitch.textSecondary)
                         ForEach(option.reasons, id: \.self) { reason in
-                            Text("• " + Self.explanation(reason)).stitch(.body13).foregroundStyle(Stitch.textSecondary)
+                            Text("• " + WeekOptionText.explanation(reason)).stitch(.body13).foregroundStyle(Stitch.textSecondary)
                         }
                         Button(index == 0 ? "Preview the suggested week" : "Preview this week") { preview(option) }
                             .buttonStyle(.stitch(index == 0 ? .primary : .secondary))
@@ -150,6 +141,10 @@ private struct WeekChoiceSheet: View {
             chosen = (option.id, program)
         }
     }
+}
+
+/// How a week option reads: its schedule and the core's reason codes in plain words (ADR-017).
+enum WeekOptionText {
     static func schedule(_ option: WeekOption) -> String {
         let days = option.sessions.map { "\(Weekday.short($0.weekday)) \($0.name) \(Int($0.minutes.rounded())) min" }
         return days.joined(separator: " · ") + " — about \(Int(option.weeklyMinutes.rounded())) min a week"

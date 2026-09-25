@@ -73,8 +73,12 @@ def build_definitions() -> dict[str, Schema]:
                     object_of(
                         {
                             "kind": {"const": kind},
-                            **{name: ref(kind_type) for name, kind_type in fields},
-                        }
+                            **{
+                                name.rstrip("?"): field_schema(spec.FieldSpec(name.rstrip("?"), kind_type))
+                                for name, kind_type in fields
+                            },
+                        },
+                        required=["kind", *(name for name, _ in fields if not name.endswith("?"))],
                     )
                     for kind, fields in spec.REQUEST_KINDS.items()
                 ]

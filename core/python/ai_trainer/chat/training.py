@@ -181,7 +181,11 @@ def change_plan(context: ChatContext, exercise_id: str | None) -> Answer:
     if context.words & LIGHTER_WORDS:
         lines.append(no_lighter_rule())
     if context.words & DAY_WORDS:
-        lines.append("Changing your free days, minutes or equipment isn't in the app yet.")
+        lines.append(
+            "You can change your free days and minutes at any time; the app proposes a week that fits, "
+            "and loads you confirmed carry over. Changing equipment isn't in the app yet."
+        )
+        actions.append(action("openChangeDays", "Change my free days"))
     actions.append(action("openLessTime", "Shorter session today"))
     if "planner" in context.library and any(plan.get("weekday") is not None for plan in program_plans(context)):
         actions.append(action("requestReplan", "See if another week fits better"))

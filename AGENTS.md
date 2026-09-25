@@ -140,6 +140,8 @@ xcodebuild test -project apps/ios/App/AITrainer.xcodeproj -scheme AITrainer -sdk
   stay unknown. "Ended early for time" counts only when the athlete chose the "time" reason.
 - A break, illness or injury (ADR-019) pauses only what the app proposes on its own; the athlete's
   own requests still run, the plan never changes, and status days never count as missed sessions.
+- Free days can change at any time (ADR-025), but only as a proposed week the athlete accepts.
+  Confirmed loads carry over to the same exercise on the same equipment; unconfirmed ones stay unknown.
 - `evidence-1` is `disabled`, superseded by `evidence-2` (the weekly planner); only one bundle may
   be `approved` at a time.
 - Dates cross the bridge as binary64 seconds since 2001-01-01 (Foundation reference epoch).

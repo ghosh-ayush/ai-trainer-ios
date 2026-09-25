@@ -82,6 +82,7 @@ ENUMS: dict[str, list[str]] = {
         "openMoveDay",
         "openPain",
         "openStatus",
+        "openChangeDays",
         "confirmSkip",
         "requestProgression",
         "requestShorten",
@@ -463,13 +464,15 @@ INTEGER_BOUNDS: list[tuple[str, str, int, int]] = [
 ]
 STATE_SCHEMA_VERSION = 5  # migrations.py upgrades older saved files
 
-# Training request variants: kind -> ordered (field, type) pairs.
+# Training request variants: kind -> ordered (field, type) pairs. A field whose name ends in ``?``
+# may be left out of that variant.
 REQUEST_KINDS: dict[str, list[tuple[str, str]]] = {
     "progression": [("slotID", "UUID")],
     "shorten": [("minutes", "Int")],
     "substitute": [("slotID", "UUID"), ("alternativeID", "String")],
     "reschedule": [("date", "Date")],
     "replan": [("utcOffset", "Int")],
+    "changeDays": [("freeDays", "[Int]"), ("minutes?", "Int"), ("optionID?", "String")],
 }
 
 
@@ -477,7 +480,8 @@ def request_model() -> ModelSpec:
     """``Request`` as one flat record (for Swift): ``kind`` plus every variant's fields, optional."""
     fields = [FieldSpec("kind", "String")]
     for variant_fields in REQUEST_KINDS.values():
-        for name, type_name in variant_fields:
+        for marked_name, type_name in variant_fields:
+            name = marked_name.rstrip("?")
             if all(existing.name != name for existing in fields):
                 fields.append(FieldSpec(name, type_name, optional=True))
     return ModelSpec("Request", tuple(fields), "One training request. Which fields are set depends on ``kind``.")
@@ -647,7 +651,15 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "Library": SwiftModel("ContentLibrary"),
     "Request": SwiftModel(
         "TrainingRequest",
-        defaults={"slotID": "nil", "minutes": "nil", "alternativeID": "nil", "date": "nil", "utcOffset": "nil"},
+        defaults={
+            "slotID": "nil",
+            "minutes": "nil",
+            "alternativeID": "nil",
+            "date": "nil",
+            "utcOffset": "nil",
+            "freeDays": "nil",
+            "optionID": "nil",
+        },
     ),
     "Slot": SwiftModel("Prescription", defaults={"id": "UUID()", "load": "nil"}, identifiable=True),
     "Plan": SwiftModel(

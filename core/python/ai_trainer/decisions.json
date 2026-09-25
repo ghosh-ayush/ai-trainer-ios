@@ -162,5 +162,25 @@
   "STATUS_PAUSED": [
     "withholdGuidance",
     "Suggestions are paused while you are on a break, sick or injured. Tap I'm back to resume them."
+  ],
+  "NEW_FREE_DAYS": [
+    "proposeChange",
+    "A week for your new free days. Loads you confirmed carry over. Nothing changes until you accept."
+  ],
+  "DAYS_REQUIRED": [
+    "needsInput",
+    "Choose at least one free day."
+  ],
+  "SAME_DAYS": [
+    "keepPlan",
+    "Those are already your free days and minutes, so the week stays."
+  ],
+  "NO_WEEK_FOR_DAYS": [
+    "needsInput",
+    "No week fits those days and minutes. Add a day or more minutes."
+  ],
+  "WEEK_OPTION_MISSING": [
+    "needsInput",
+    "That week is no longer offered for these days. Choose from the new options."
   ]
 }
