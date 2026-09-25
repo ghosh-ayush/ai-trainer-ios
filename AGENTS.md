@@ -130,6 +130,8 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
   logged sessions only (a skipped session or an empty day is a miss), and never applied without Accept.
   Weekday habits need the host's UTC offset (sent with `views` and the replan request); without it they
   stay unknown. "Ended early for time" counts only when the athlete chose the "time" reason.
+- A break, illness or injury (ADR-019) pauses only what the app proposes on its own; the athlete's
+  own requests still run, the plan never changes, and status days never count as missed sessions.
 - `evidence-1` is `disabled`, superseded by `evidence-2` (the weekly planner); only one bundle may
   be `approved` at a time.
 - Dates cross the bridge as binary64 seconds since 2001-01-01 (Foundation reference epoch).

@@ -319,3 +319,73 @@ Consequences:
 - Reasons: `ADHERENCE_REPLAN`, `SHORTER_SESSIONS_REPLAN`, `MORE_SESSIONS_REPLAN`,
   `TRAINING_DAYS_REPLAN`. One proposal explains every drift it found.
 Status: accepted (owner requests, 2026-09-24).
+
+## ADR-019 · 2026-09-24 · Breaks, illness and injury pause what the app proposes
+Why: the owner picked this first from ideas taken from Bevel's Activity Status and Apple's paused
+Activity rings. It also closes a gap in ADR-018: a holiday counted as missed sessions and
+triggered a "smaller week" proposal.
+Consequences:
+- New commands `setStatus` (on a break / sick / injured, with an optional end date) and
+  `endStatus` ("I'm back"). A new status ends the current one. Periods are kept in
+  `statusPeriods`; the state schema goes to 5, and older files start with an empty history.
+- While a status is active:
+  - The app requests nothing on its own: no progression auto-request, no replan. A
+    progression or replan decision returns `STATUS_PAUSED`.
+  - The athlete's own requests still run: shorten, swap and reschedule.
+  - Today shows the status with "I'm back".
+- Status days are removed from the attendance window. A week is judged only on at least the
+  minimum age of time that wasn't a status; otherwise `REPLAN_NEEDS_HISTORY`. Sessions logged
+  during a status still count as done.
+- A status never changes the plan and never diagnoses. Pain still goes through the existing
+  concern flow.
+Status: accepted (owner, 2026-09-24).
+
+## ADR-020 · 2026-09-24 · Muscle rings: this week's logged sets per muscle against the target
+Why: the owner's second pick, borrowed from Apple's Activity rings and Bevel's muscle
+distribution, but counted from logged sets instead of estimated.
+Consequences:
+- `views.rings` (`rings.py`) lists each major muscle with:
+  - `done`: working and extra sets with at least one rep, logged since the athlete's local
+    Monday. They count fully for the exercise's primary muscles and at the synergist credit
+    for the others, exactly as the planner counts (ADR-017).
+  - `planned`: what the accepted week prescribes.
+  - `target`: the bundle's cited weekly target.
+  Warm-ups and zero-rep attempts don't count.
+- The local week needs the host's UTC offset (it already sends `dayStart` and `utcOffset`
+  with `views`). Without it, or without a weekly planner, there are no rings rather than rings
+  for the wrong week.
+- Today shows a 3 × 2 grid of rings. They are display only and never change the plan.
+Status: accepted (owner, 2026-09-24).
+
+## ADR-021 · 2026-09-24 · Faster logging: same as last, last time, plates per side
+Why: the owner's third pick, borrowed from Bevel's Strength Builder.
+Consequences:
+- **Same as last.** The next open working set can repeat the previous set's reps and load in one
+  tap, shown only when that set differed from the plan. Effort is never copied, so RIR stays
+  unknown (rule 2), as with "Done as planned".
+- **Last time.** Each exercise in a workout shows the latest recorded summary from the core's
+  progress view: comparable sessions only, and never the one in progress.
+- **Plates per side.** A new `plateLoad` operation takes the load, the athlete's own bar and their
+  plate sizes, and returns the plates per side, largest first, with an `exact` flag. When a load
+  can't be made it returns the nearest lower total, never a heavier bar. Bar and plates are empty
+  until entered in Settings; the app never assumes equipment. Shown only for barbell exercises
+  loaded as a total.
+- **Not yet:** "Done" buttons on a lock-screen Live Activity. They need a widget-extension
+  target, which Xcode must add (ADR-011); the code follows once the target exists.
+Status: accepted (owner, 2026-09-24).
+
+## ADR-022 · 2026-09-24 · A spoken coach that says only what the records say
+Why: the owner's fourth pick, borrowed from Apple's Workout Buddy, but without a language model,
+because a model invented numbers when tested (ADR-015).
+Consequences:
+- A new `workoutCues` operation (`cues.py`) builds three sentences for the workout in progress:
+  - `afterSet`: the set just done, the rest, and the next set.
+  - `restOver`: the next set.
+  - `next`: the next set, plus what was done last time on a new exercise, from recorded
+    comparable sessions.
+
+  Reps and load come from the plan; an unknown load is spoken as "a load you choose".
+- `SpokenCoach` (AVSpeechSynthesizer) reads the text aloud, ducking other audio, after each
+  logged set and when the rest deadline passes. It is off by default, switched on in Settings,
+  and speaks while the app is on screen. There is no background audio mode.
+Status: accepted (owner, 2026-09-24).

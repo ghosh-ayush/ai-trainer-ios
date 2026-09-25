@@ -77,6 +77,8 @@ final class AppStore: ObservableObject {
     @Published private(set) var today = TodayStatus()
     /// Recorded values per exercise for the Progress tab.
     @Published private(set) var progress: [ExerciseProgress] = []
+    /// This week's logged sets per major muscle against the weekly target (ADR-020); nil when unknown.
+    @Published private(set) var rings: WeekRings?
     /// The Diet tab: targets, what is left today, the weight trend, a suggested adjustment and food ideas.
     @Published private(set) var diet = DietView()
     /// The selected tab, so a card on one tab can open another.
@@ -142,7 +144,12 @@ final class AppStore: ObservableObject {
             Task { @MainActor in
                 let (outcome, refreshed) = delivery.value
                 self.state = refreshed.state
-                if let views = refreshed.views { self.today = views.today; self.progress = views.progress; self.diet = views.diet }
+                if let views = refreshed.views {
+                    self.today = views.today
+                    self.progress = views.progress
+                    self.diet = views.diet
+                    self.rings = views.rings
+                }
                 self.isWorking = false
                 switch outcome {
                 case .success(let value):

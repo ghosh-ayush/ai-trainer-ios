@@ -104,3 +104,28 @@ class LoadStepTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PlateLoadTests(unittest.TestCase):
+    """ADR-021: plates per side from the athlete's own bar and plates."""
+
+    def plates(self, load, bar=20, plates=(25, 20, 15, 10, 5, 2.5, 1.25)):
+        return result("plateLoad", {"load": load, "bar": bar, "plates": list(plates)})
+
+    def test_largest_plates_first_for_an_exact_load(self):
+        self.assertEqual(self.plates(102.5), {"perSide": [25, 15, 1.25], "total": 102.5, "exact": True})
+
+    def test_a_load_that_cannot_be_made_gives_the_nearest_lower_total(self):
+        answer = self.plates(101)
+        self.assertEqual((answer["total"], answer["exact"]), (100, False))
+
+    def test_the_bar_alone_and_a_load_below_it(self):
+        self.assertEqual(self.plates(20)["perSide"], [])
+        self.assertEqual((self.plates(15)["total"], self.plates(15)["exact"]), (20, False))
+
+    def test_pounds_work_the_same_way(self):
+        self.assertEqual(self.plates(225, bar=45, plates=(45, 25, 10, 5, 2.5))["perSide"], [45, 45])
+
+    def test_no_plates_or_a_negative_bar_is_invalid(self):
+        self.assertEqual(call("plateLoad", {"load": 100, "bar": 20, "plates": []})["error"]["code"], "invalid")
+        self.assertEqual(call("plateLoad", {"load": 100, "bar": -1, "plates": [5]})["error"]["code"], "invalid")

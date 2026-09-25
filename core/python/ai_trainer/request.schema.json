@@ -98,6 +98,14 @@
         "unspecified"
       ]
     },
+    "StatusKind": {
+      "type": "string",
+      "enum": [
+        "onBreak",
+        "sick",
+        "injured"
+      ]
+    },
     "DietGoal": {
       "type": "string",
       "enum": [
@@ -1354,11 +1362,154 @@
       ],
       "additionalProperties": false
     },
+    "WorkoutCues": {
+      "type": "object",
+      "properties": {
+        "afterSet": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "restOver": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "next": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "PlateLoad": {
+      "type": "object",
+      "properties": {
+        "perSide": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Number"
+          }
+        },
+        "total": {
+          "$ref": "#/$defs/Number"
+        },
+        "exact": {
+          "$ref": "#/$defs/Bool"
+        }
+      },
+      "required": [
+        "perSide",
+        "total",
+        "exact"
+      ],
+      "additionalProperties": false
+    },
+    "MuscleRing": {
+      "type": "object",
+      "properties": {
+        "muscle": {
+          "$ref": "#/$defs/String"
+        },
+        "done": {
+          "$ref": "#/$defs/Number"
+        },
+        "planned": {
+          "$ref": "#/$defs/Number"
+        },
+        "target": {
+          "$ref": "#/$defs/Number"
+        }
+      },
+      "required": [
+        "muscle",
+        "done",
+        "planned",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "WeekRings": {
+      "type": "object",
+      "properties": {
+        "weekStart": {
+          "$ref": "#/$defs/Date"
+        },
+        "muscles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MuscleRing"
+          }
+        }
+      },
+      "required": [
+        "weekStart",
+        "muscles"
+      ],
+      "additionalProperties": false
+    },
+    "StatusPeriod": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "kind": {
+          "$ref": "#/$defs/StatusKind"
+        },
+        "startedAt": {
+          "$ref": "#/$defs/Date"
+        },
+        "endsAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "endedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "startedAt"
+      ],
+      "additionalProperties": false
+    },
     "State": {
       "type": "object",
       "properties": {
         "schemaVersion": {
-          "const": 4
+          "const": 5
         },
         "athleteID": {
           "$ref": "#/$defs/UUID"
@@ -1502,6 +1653,12 @@
           "items": {
             "$ref": "#/$defs/Date"
           }
+        },
+        "statusPeriods": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StatusPeriod"
+          }
         }
       },
       "required": [
@@ -1522,7 +1679,8 @@
         "recipes",
         "weighIns",
         "dietDecisions",
-        "excludedWeighIns"
+        "excludedWeighIns",
+        "statusPeriods"
       ],
       "additionalProperties": false
     },
@@ -1793,6 +1951,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/Bool"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StatusPeriod"
             },
             {
               "type": "null"
@@ -2094,6 +2262,16 @@
         },
         "diet": {
           "$ref": "#/$defs/DietView"
+        },
+        "rings": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WeekRings"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -2699,6 +2877,49 @@
       ],
       "additionalProperties": false
     },
+    "plateLoadPayload": {
+      "type": "object",
+      "properties": {
+        "load": {
+          "$ref": "#/$defs/Number"
+        },
+        "bar": {
+          "$ref": "#/$defs/Number"
+        },
+        "plates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Number"
+          }
+        }
+      },
+      "required": [
+        "load",
+        "bar",
+        "plates"
+      ],
+      "additionalProperties": false
+    },
+    "workoutCuesPayload": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "permitsFixtures": {
+          "$ref": "#/$defs/Bool"
+        },
+        "now": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "required": [
+        "state",
+        "permitsFixtures",
+        "now"
+      ],
+      "additionalProperties": false
+    },
     "dietOptionsPayload": {
       "type": "object",
       "properties": {
@@ -3034,6 +3255,34 @@
       "required": [
         "id"
       ],
+      "additionalProperties": false
+    },
+    "setStatusArguments": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/StatusKind"
+        },
+        "endsAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "endStatusArguments": {
+      "type": "object",
+      "properties": {},
+      "required": [],
       "additionalProperties": false
     },
     "deleteMealArguments": {
@@ -3635,6 +3884,78 @@
             },
             "arguments": {
               "$ref": "#/$defs/deleteSessionArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "setStatus"
+            },
+            "arguments": {
+              "$ref": "#/$defs/setStatusArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "endStatus"
+            },
+            "arguments": {
+              "$ref": "#/$defs/endStatusArguments"
             },
             "state": {
               "$ref": "#/$defs/State"
@@ -4377,6 +4698,46 @@
         },
         "payload": {
           "$ref": "#/$defs/loadStepsPayload"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "operation": {
+          "const": "plateLoad"
+        },
+        "payload": {
+          "$ref": "#/$defs/plateLoadPayload"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "operation": {
+          "const": "workoutCues"
+        },
+        "payload": {
+          "$ref": "#/$defs/workoutCuesPayload"
         }
       },
       "required": [

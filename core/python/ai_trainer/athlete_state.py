@@ -28,6 +28,36 @@ def active_session(state: JSON) -> JSON | None:
     return None
 
 
+def active_status(state: JSON, now: float) -> JSON | None:
+    """The break, illness or injury in effect at ``now`` (ADR-019): started, not ended, not past its end."""
+    periods: list[JSON] = state.get("statusPeriods", [])
+    for period in reversed(periods):
+        if period["startedAt"] > now or period.get("endedAt") is not None:
+            continue
+        if period.get("endsAt") is not None and period["endsAt"] <= now:
+            continue
+        return period
+    return None
+
+
+def status_seconds(state: JSON, start: float, end: float) -> float:
+    """Seconds of ``[start, end]`` covered by status periods (overlaps counted once)."""
+    spans: list[tuple[float, float]] = []
+    for period in state.get("statusPeriods", []):
+        period_end = min(value for value in (period.get("endedAt"), period.get("endsAt"), end) if value is not None)
+        low, high = max(period["startedAt"], start), min(period_end, end)
+        if high > low:
+            spans.append((low, high))
+    covered = 0.0
+    reach = start
+    for low, high in sorted(spans):
+        low = max(low, reach)
+        if high > low:
+            covered += high - low
+            reach = high
+    return covered
+
+
 def has_active_session(state: JSON) -> bool:
     return active_session(state) is not None
 

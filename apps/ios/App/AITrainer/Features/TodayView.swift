@@ -12,10 +12,12 @@ struct TodayView: View {
     @State private var showPain = false
     @State private var confirmSkip = false
     @State private var openWorkout = false
+    @State private var showStatus = false
     var body: some View {
         ScrollViewReader { proxy in
             TabRoot("Today") {
                 Text(Date.now.formatted(date: .complete, time: .omitted)).stitch(.bodyMedium15).foregroundStyle(Stitch.textSecondary)
+                StatusBanner(onChoose: { showStatus = true })
                 if let session = store.state.activeSession {
                     activeHero(session)
                 } else if let plan = store.state.nextPlan {
@@ -39,6 +41,7 @@ struct TodayView: View {
                         }
                     }
                 }
+                MuscleRingsCard()
                 DietSummaryCard()
                 WhatCouldChangeSection()
             }
@@ -50,6 +53,7 @@ struct TodayView: View {
         .sheet(isPresented: $showLessTime) { LessTimeSheet() }
         .sheet(isPresented: $showMoveDay) { MoveDaySheet() }
         .sheet(isPresented: $showPain) { PainSheet() }
+        .sheet(isPresented: $showStatus) { StatusSheet() }
         .confirmationDialog("Skip this session? Work will not be added to the next session.", isPresented: $confirmSkip, titleVisibility: .visible) {
             Button("Skip session", role: .destructive) { store.perform { try $0.skip() } }
         }
@@ -446,4 +450,94 @@ private struct DietSummaryCard: View {
             .buttonStyle(.plain)
         }
     }
+}
+
+
+/// ADR-019: an active break, illness or injury, or the way to start one. A status pauses what the app
+/// proposes on its own; it never changes the plan and never diagnoses.
+struct StatusBanner: View {
+    @EnvironmentObject private var store: AppStore
+    let onChoose: () -> Void
+    var body: some View {
+        if let status = store.today.status {
+            StitchCard("\(status.kind.label)\(status.endsAt.map { " until \($0.formatted(date: .abbreviated, time: .omitted))" } ?? "")",
+                       body: "Automatic suggestions are paused and these days don't count as missed sessions. You can still train and change today's session yourself.",
+                       tone: .accent)
+            Button("I'm back") { store.perform { try $0.endStatus() } }.buttonStyle(.stitch(.secondary, compact: true))
+        } else if store.state.activeSession == nil, store.state.program != nil {
+            Button("Taking a break, sick or injured?", action: onChoose).buttonStyle(.stitch(.link))
+        }
+    }
+}
+
+/// Choose the status and how long it lasts; "Until I'm back" leaves the end open.
+struct StatusSheet: View {
+    @EnvironmentObject private var store: AppStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var kind: StatusKind = .onBreak
+    @State private var days: Int? = 7
+    private let lengths: [(label: String, days: Int?)] = [("3 days", 3), ("1 week", 7), ("2 weeks", 14), ("Until I'm back", nil)]
+    var body: some View {
+        Group {
+            StitchSectionLabel("What's happening")
+            HStack(spacing: 8) {
+                ForEach(StatusKind.allCases, id: \.self) { option in
+                    Button(option.label) { kind = option }.buttonStyle(.stitch(kind == option ? .primary : .secondary, compact: true))
+                }
+            }
+            StitchSectionLabel("For how long")
+            ForEach(lengths, id: \.label) { length in
+                Button(length.label) { days = length.days }.buttonStyle(.stitch(days == length.days ? .primary : .secondary))
+            }
+            StitchFootnote("Automatic suggestions pause and these days won't count as missed sessions. Nothing about your plan changes. If you're in pain, use \"I'm in pain\" instead; the app doesn't diagnose.")
+            Button("Save") {
+                let endsAt = days.map { Date().addingTimeInterval(Double($0) * 86_400) }
+                store.perform({ try $0.setStatus(kind, endsAt: endsAt) }) { _ in dismiss() }
+            }
+            .buttonStyle(.stitch())
+        }
+        .stitchSheet("Taking a break") { dismiss() }
+    }
+}
+
+
+/// ADR-020: this week's logged sets per major muscle against the weekly target, as rings that
+/// fill as sets are logged. Counted from logged sets only; helper muscles count half.
+struct MuscleRingsCard: View {
+    @EnvironmentObject private var store: AppStore
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 3)
+    var body: some View {
+        if let rings = store.rings {
+            StitchSectionLabel("This week", meta: "sets per muscle")
+            StitchCard {
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(rings.muscles, id: \.muscle) { MuscleRingView(ring: $0) }
+                }
+                Text("Counted from the sets you log from Monday. The target is the research floor for your goal; a helper muscle counts half a set.")
+                    .stitch(.body13).foregroundStyle(Stitch.textSecondary)
+            }
+        }
+    }
+}
+
+struct MuscleRingView: View {
+    let ring: MuscleRing
+    private var fraction: Double { ring.target > 0 ? min(ring.done / ring.target, 1) : 0 }
+    var body: some View {
+        VStack(spacing: 6) {
+            ZStack {
+                Circle().stroke(Stitch.textMuted.opacity(0.25), lineWidth: 7)
+                Circle().trim(from: 0, to: fraction)
+                    .stroke(Stitch.accentPrimary, style: StrokeStyle(lineWidth: 7, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                Text(Self.count(ring.done)).stitch(.bodyMedium13).foregroundStyle(Stitch.textPrimary)
+            }
+            .frame(width: 58, height: 58)
+            Text(ring.muscle.capitalized).stitch(.bodyMedium13).foregroundStyle(Stitch.textPrimary)
+            Text("of \(Self.count(ring.target))").stitch(.body13).foregroundStyle(Stitch.textSecondary)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(ring.muscle.capitalized): \(Self.count(ring.done)) of \(Self.count(ring.target)) sets this week")
+    }
+    static func count(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(0...1))) }
 }

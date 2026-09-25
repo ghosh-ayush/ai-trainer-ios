@@ -106,6 +106,43 @@ final class AppFlowTests: XCTestCase {
             }
         }
     }
+    /// ADR-019: a break pauses automatic proposals; "I'm back" resumes them.
+    func testABreakPausesAutomaticProposalsUntilImBack() throws {
+        let service = try trainedService()
+        try service.setStatus(.onBreak, endsAt: now.addingTimeInterval(7 * 86_400), now: now)
+        let paused = try service.views(now: now.addingTimeInterval(60))
+        XCTAssertEqual(paused.today.status?.kind, .onBreak)
+        XCTAssertNil(paused.today.autoRequest)
+        try service.endStatus(now: now.addingTimeInterval(120))
+        XCTAssertNil(try service.views(now: now.addingTimeInterval(180)).today.status)
+    }
+    /// ADR-020: the pinned fixture has no weekly planner, so there are no rings rather than wrong ones,
+    /// even though the host sends its UTC offset.
+    func testRingsNeedAWeeklyPlanner() throws {
+        let service = try trainedService()
+        XCTAssertNil(try service.views(now: now).rings)
+    }
+    /// ADR-021: plates per side come from the core, largest first, and say when a load can't be made.
+    func testPlatesPerSideFromTheAthletesOwnPlates() throws {
+        let service = try trainedService()
+        let exact = try service.plates(load: 102.5, bar: 20, plates: [25, 20, 15, 10, 5, 2.5, 1.25])
+        XCTAssertEqual(exact.perSide, [25, 15, 1.25])
+        XCTAssertTrue(exact.exact)
+        let closest = try service.plates(load: 101, bar: 20, plates: [25, 20, 15, 10, 5, 2.5, 1.25])
+        XCTAssertEqual(closest.total, 100)
+        XCTAssertFalse(closest.exact)
+    }
+    /// ADR-022: the spoken coach's words come from the core, built from the plan and logged sets.
+    func testSpokenCuesDescribeTheSetJustLoggedAndTheNextOne() throws {
+        let service = try trainedService()
+        XCTAssertNil(try service.workoutCues(now: now).next)  // no workout, nothing to say
+        try service.start(now: now)
+        let session = try XCTUnwrap(service.repository.snapshot.activeSession)
+        try service.saveSet(sessionID: session.id, slotID: session.plan.slots[0].id, index: 0, load: 100, reps: 8, rir: nil, now: now)
+        let cues = try service.workoutCues(now: now.addingTimeInterval(30))
+        XCTAssertTrue(cues.afterSet?.hasPrefix("Set 1 of") ?? false, cues.afterSet ?? "none")
+        XCTAssertTrue(cues.restOver?.hasPrefix("Rest's over.") ?? false)
+    }
     func testDomainErrorsArriveAsTypedSwiftErrors() throws {
         let service = try trainedService()
         XCTAssertThrowsError(try service.acceptRecommendation(id: UUID())) { XCTAssertEqual($0 as? TrainerError, .notFound) }
@@ -172,7 +209,7 @@ final class AppFlowTests: XCTestCase {
         object["dietDecisions"] = nil
         storage.data = try JSONSerialization.data(withJSONObject: object)
         let migrated = try StateRepository(persistence: storage, core: core).snapshot
-        XCTAssertEqual(migrated.schemaVersion, 4)
+        XCTAssertEqual(migrated.schemaVersion, 5)
         XCTAssertEqual(migrated.weighIns, [])
         XCTAssertEqual(migrated.recommendations.first?.request, .progression(slot.id))
     }

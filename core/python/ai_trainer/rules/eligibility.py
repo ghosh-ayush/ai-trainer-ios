@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..athlete_state import has_active_session, next_plan
+from ..athlete_state import active_status, has_active_session, next_plan
 from ..content import exercises_by_id, is_enabled, policy_is_enabled
 from ..errors import DomainError
 from ..messages import Decision, decision
@@ -22,6 +22,10 @@ from .adjustments import build_substitution, propose_reschedule, propose_shorter
 from .progression import propose_progression
 
 JSON = dict[str, Any]
+
+
+# Requests the app makes on its own; the athlete's own requests (shorten, swap, reschedule) still run.
+APP_INITIATED = ("progression", "replan")
 
 
 def decide(state: JSON, request: JSON, library: JSON, now: float) -> Decision:
@@ -36,6 +40,8 @@ def decide(state: JSON, request: JSON, library: JSON, now: float) -> Decision:
         return decision("POLICY_NOT_APPROVED")
 
     kind = request["kind"]
+    if kind in APP_INITIATED and active_status(state, now) is not None:
+        return decision("STATUS_PAUSED")  # ADR-019: the app does not propose while the athlete is away
     slot = _find_slot(plan, request.get("slotID"))
 
     if kind == "progression":

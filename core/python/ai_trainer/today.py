@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from .athlete_state import next_plan
+from .athlete_state import active_status, next_plan
 from .content import exercises_by_id
 from .queries import comparable_sessions
 from .rules.adaptation import replan_due
@@ -147,8 +147,11 @@ def today_status(state: JSON, library: JSON, now: float, utc_offset: int | None 
         if status is not None:
             slots.append(status)
     proposals = [_proposal(rec, plan, exercises) for rec in pending]
-    today: JSON = {"slots": slots, "proposals": proposals, "autoRequest": auto_request}
-    if auto_request is None and not pending and _replan_to_offer(state, plan, library, now, utc_offset):
+    paused = active_status(state, now)
+    today: JSON = {"slots": slots, "proposals": proposals, "autoRequest": None if paused else auto_request}
+    if paused is not None:
+        today["status"] = paused  # ADR-019: nothing is proposed automatically while away
+    elif auto_request is None and not pending and _replan_to_offer(state, plan, library, now, utc_offset):
         today["autoReplan"] = True
     return today
 
