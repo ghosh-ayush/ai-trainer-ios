@@ -105,6 +105,15 @@ final class AppStore: ObservableObject {
         return false
         #endif
     }
+    /// Debug-only: UI tests launch with `--ui-testing` to start from an empty in-memory state, so
+    /// they never read or write the athlete's saved file. Release builds ignore the flag.
+    static var isUITesting: Bool {
+        #if DEBUG
+        return ProcessInfo.processInfo.arguments.contains("--ui-testing")
+        #else
+        return false
+        #endif
+    }
     init() {
         let defaults = UserDefaults.standard
         let includeInBackup = defaults.object(forKey: Self.includeInDeviceBackupKey) as? Bool ?? true
@@ -117,12 +126,18 @@ final class AppStore: ObservableObject {
             return
         }
         do {
-            let root = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-            let filePersistence = try FilePersistence(url: root.appendingPathComponent("AITrainer/state.json"),
-                                                      excludedFromBackup: !includeInBackup)
-            let repository = try StateRepository(persistence: filePersistence, core: core)
+            let repository: StateRepository
+            if Self.isUITesting {
+                repository = try StateRepository(persistence: MemoryPersistence(), core: core)
+                persistence = nil
+            } else {
+                let root = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+                let filePersistence = try FilePersistence(url: root.appendingPathComponent("AITrainer/state.json"),
+                                                          excludedFromBackup: !includeInBackup)
+                repository = try StateRepository(persistence: filePersistence, core: core)
+                persistence = filePersistence
+            }
             service = TrainerService(repository: repository, library: library, core: core)
-            persistence = filePersistence
             startupFailure = nil
             state = repository.snapshot
             perform { _ in }  // computes Today and Progress off the main thread
