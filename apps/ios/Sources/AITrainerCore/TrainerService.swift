@@ -153,6 +153,15 @@ public final class TrainerService {
                                             dayStart: calendar.startOfDay(for: now),
                                             utcOffset: calendar.timeZone.secondsFromGMT(for: now)))
     }
+    /// What the spoken coach says for the workout in progress (ADR-022); empty without one.
+    public func workoutCues(now: Date = Date()) throws -> WorkoutCues {
+        struct Cues: Encodable {
+            let state: AthleteState
+            let permitsFixtures: Bool
+            let now: Date
+        }
+        return try core.call("workoutCues", Cues(state: repository.snapshot, permitsFixtures: library.permitsFixtures, now: now))
+    }
     /// Plates for each side of a barbell at `load`, from the athlete's own bar and plates (ADR-021).
     public func plates(load: Double, bar: Double, plates: [Double]) throws -> PlateLoad {
         struct Plates: Encodable {

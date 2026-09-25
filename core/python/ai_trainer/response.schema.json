@@ -1362,6 +1362,43 @@
       ],
       "additionalProperties": false
     },
+    "WorkoutCues": {
+      "type": "object",
+      "properties": {
+        "afterSet": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "restOver": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "next": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
     "PlateLoad": {
       "type": "object",
       "properties": {
@@ -2860,6 +2897,26 @@
         "load",
         "bar",
         "plates"
+      ],
+      "additionalProperties": false
+    },
+    "workoutCuesPayload": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "permitsFixtures": {
+          "$ref": "#/$defs/Bool"
+        },
+        "now": {
+          "$ref": "#/$defs/Date"
+        }
+      },
+      "required": [
+        "state",
+        "permitsFixtures",
+        "now"
       ],
       "additionalProperties": false
     },
@@ -4516,6 +4573,9 @@
             },
             {
               "$ref": "#/$defs/PlateLoad"
+            },
+            {
+              "$ref": "#/$defs/WorkoutCues"
             },
             {
               "$ref": "#/$defs/DietOptions"

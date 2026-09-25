@@ -373,3 +373,19 @@ Consequences:
 - **Not yet:** "Done" buttons on a lock-screen Live Activity. They need a widget-extension
   target, which Xcode must add (ADR-011); the code follows once the target exists.
 Status: accepted (owner, 2026-09-24).
+
+## ADR-022 · 2026-09-24 · A spoken coach that says only what the records say
+Why: the owner's fourth pick, borrowed from Apple's Workout Buddy, but without a language model,
+because a model invented numbers when tested (ADR-015).
+Consequences:
+- A new `workoutCues` operation (`cues.py`) builds three sentences for the workout in progress:
+  - `afterSet`: the set just done, the rest, and the next set.
+  - `restOver`: the next set.
+  - `next`: the next set, plus what was done last time on a new exercise, from recorded
+    comparable sessions.
+
+  Reps and load come from the plan; an unknown load is spoken as "a load you choose".
+- `SpokenCoach` (AVSpeechSynthesizer) reads the text aloud, ducking other audio, after each
+  logged set and when the rest deadline passes. It is off by default, switched on in Settings,
+  and speaks while the app is on screen. There is no background audio mode.
+Status: accepted (owner, 2026-09-24).

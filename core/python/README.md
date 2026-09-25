@@ -21,6 +21,7 @@ ai_trainer/
 ├── migrations.py          upgrades saved state files to the current state schema version
 ├── queries.py             comparable_sessions, working_logs, evidence_from
 ├── nutrition.py           validate_nutrients, scale_nutrients
+├── cues.py                ADR-022: the spoken coach's sentences, from the plan and logged sets
 ├── rings.py               ADR-020: this week's logged sets per major muscle against the target
 ├── spoken_sets.py         read_set: the on-device model's draft of a set, checked against the athlete's words
 ├── rules/

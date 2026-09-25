@@ -17,6 +17,8 @@ struct WorkoutView: View {
     @State private var showFinish = false
     @State private var showPain = false
     @State private var showWords = false
+    @AppStorage(SpokenCoachSettings.key) private var spokenCoach = false
+    @State private var coach = SpokenCoach()
     var body: some View {
         Group {
             if let session = store.state.activeSession {
@@ -24,8 +26,16 @@ struct WorkoutView: View {
                     DetailScreen("Workout") { sessionContent(session) }
                         // After each save, bring the next set still to log into view.
                         .onChange(of: session.logs.count) {
+                            speak(\.afterSet)
                             guard let next = Self.nextUnloggedSet(in: session) else { return }
                             withAnimation { proxy.scrollTo(Self.rowID(slot: next.slot.id, index: next.index), anchor: .center) }
+                        }
+                        // ADR-022: when the rest timer runs out, say the next set.
+                        .task(id: session.restEndsAt) {
+                            guard spokenCoach, let ends = session.restEndsAt, ends > Date() else { return }
+                            try? await Task.sleep(for: .seconds(ends.timeIntervalSinceNow))
+                            guard !Task.isCancelled else { return }
+                            speak(\.restOver)
                         }
                 }
             } else {
@@ -112,6 +122,14 @@ struct WorkoutView: View {
     }
     private func loadText(_ slot: Prescription) -> String {
         slot.load.map { "\(number($0)) \(slot.equipment.unit.rawValue)" } ?? "load unknown"
+    }
+    /// ADR-022: fetch the core's cue off the main thread and say it, when the spoken coach is on.
+    private func speak(_ cue: KeyPath<WorkoutCues, String?>) {
+        guard spokenCoach, let service = store.service else { return }
+        Task {
+            let text = await Task.detached(priority: .userInitiated) { (try? service.workoutCues())?[keyPath: cue] }.value
+            if let text { coach.say(text) }
+        }
     }
     /// ADR-021: repeat the previous set's reps and load. Effort is never copied, so RIR stays unknown.
     private func logSameAsLast(session: WorkoutSession, slot: Prescription, index: Int, previous: SetLog) {

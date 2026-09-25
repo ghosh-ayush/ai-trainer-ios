@@ -23,6 +23,7 @@ struct YouView: View {
                 StitchCard("\(profile.goal) · \(profile.experience) · \(profile.daysPerWeek) days/week",
                            body: "\(profile.minutes) min sessions · \(profile.preferredUnit.rawValue) · \(equipmentText(profile)). Editing arrives with program review (TB-10).")
             }
+            SpokenCoachSection()
             BarAndPlatesSection()
             StitchSectionLabel("Data & privacy")
             StitchCard {
@@ -245,5 +246,20 @@ enum PlateSettings {
             .compactMap { Double($0) }
             .filter { $0 > 0 }
         return plates.isEmpty ? nil : (bar, plates)
+    }
+}
+
+
+enum SpokenCoachSettings {
+    static let key = "spokenCoach"
+}
+
+/// ADR-022: the spoken coach reads out each set, the rest and the next set during a workout.
+struct SpokenCoachSection: View {
+    @AppStorage(SpokenCoachSettings.key) private var spokenCoach = false
+    var body: some View {
+        StitchSectionLabel("Spoken coach", meta: "during workouts")
+        StitchToggleField("Read out sets and rest", isOn: $spokenCoach, on: "On", off: "Off")
+        StitchFootnote("Says what you just did, the rest, and the next set, using your plan and the sets you log. It never makes up a number. Works while the app is open; music dips while it speaks.")
     }
 }

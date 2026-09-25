@@ -132,6 +132,17 @@ final class AppFlowTests: XCTestCase {
         XCTAssertEqual(closest.total, 100)
         XCTAssertFalse(closest.exact)
     }
+    /// ADR-022: the spoken coach's words come from the core, built from the plan and logged sets.
+    func testSpokenCuesDescribeTheSetJustLoggedAndTheNextOne() throws {
+        let service = try trainedService()
+        XCTAssertNil(try service.workoutCues(now: now).next)  // no workout, nothing to say
+        try service.start(now: now)
+        let session = try XCTUnwrap(service.repository.snapshot.activeSession)
+        try service.saveSet(sessionID: session.id, slotID: session.plan.slots[0].id, index: 0, load: 100, reps: 8, rir: nil, now: now)
+        let cues = try service.workoutCues(now: now.addingTimeInterval(30))
+        XCTAssertTrue(cues.afterSet?.hasPrefix("Set 1 of") ?? false, cues.afterSet ?? "none")
+        XCTAssertTrue(cues.restOver?.hasPrefix("Rest's over.") ?? false)
+    }
     func testDomainErrorsArriveAsTypedSwiftErrors() throws {
         let service = try trainedService()
         XCTAssertThrowsError(try service.acceptRecommendation(id: UUID())) { XCTAssertEqual($0 as? TrainerError, .notFound) }

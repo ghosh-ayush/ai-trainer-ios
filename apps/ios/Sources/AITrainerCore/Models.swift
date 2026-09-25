@@ -853,6 +853,23 @@ public struct DietDecision: Codable, Equatable, Identifiable {
     }
 }
 
+/// What the spoken coach says (ADR-022), built from the plan and logged sets only. Empty without a workout.
+public struct WorkoutCues: Codable, Equatable {
+    public var afterSet: String?
+    public var restOver: String?
+    public var next: String?
+
+    public init(
+        afterSet: String? = nil,
+        restOver: String? = nil,
+        next: String? = nil
+    ) {
+        self.afterSet = afterSet
+        self.restOver = restOver
+        self.next = next
+    }
+}
+
 /// Plates for each side of a barbell from the athlete's own bar and plates (ADR-021).
 public struct PlateLoad: Codable, Equatable {
     public var perSide: [Double]

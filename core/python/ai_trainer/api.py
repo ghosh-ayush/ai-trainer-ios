@@ -17,6 +17,7 @@ from typing import Any
 from . import contracts
 from .commands import reduce_state
 from .content import load_library, public_library
+from .cues import workout_cues
 from .diet_view import diet_options, diet_preview, diet_view
 from .equipment import load_steps, plate_load
 from .errors import DomainError
@@ -109,6 +110,8 @@ def dispatch(envelope: JSON) -> Any:
         }
     if operation == "loadSteps":
         return load_steps(payload["base"], payload["step"])
+    if operation == "workoutCues":
+        return workout_cues(payload["state"], load_library(payload["permitsFixtures"]), payload["now"]) or {}
     if operation == "plateLoad":
         return plate_load(payload["load"], payload["bar"], payload["plates"])
     if operation == "dietOptions":
