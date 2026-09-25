@@ -48,6 +48,7 @@ apps/ios/App/                    SwiftUI app, native services and the Xcode proj
 apps/ios/Sources/AITrainerCore/   Generated Swift models, service facade, storage, design system, on-device readers
 apps/ios/PythonBridge/           CPython C API bridge (GIL and memory ownership)
 apps/ios/Tests/                  Swift tests through the real embedded interpreter
+apps/ios/App/AITrainerUITests/   UI tests that drive the real app (XCUITest)
 apps/ios/Vendor/                 Ignored, checksum-pinned CPython build artifact
 core/python/ai_trainer/          Domain core: rules, state commands, views, chat, contract spec, migrations
   bundles/<id>/                  Cited training content (evidence-2 approved, evidence-1 disabled, fixture-1 test data)
@@ -126,12 +127,21 @@ xcodebuild -project apps/ios/App/AITrainer.xcodeproj -scheme AITrainer \
 scripts/smoke_ios.sh BOOTED_SIMULATOR_UUID
 ```
 
+UI tests drive the real app through onboarding, set logging and chat (ADR-024). Each test launches
+with the Debug-only `--ui-testing` flag, which starts from an empty in-memory state:
+
+```sh
+xcodebuild test -project apps/ios/App/AITrainer.xcodeproj -scheme AITrainer -sdk iphonesimulator \
+  -destination 'id=BOOTED_SIMULATOR_UUID' -only-testing:AITrainerUITests \
+  -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO
+```
+
 The Debug-only smoke mode uses an in-memory repository and writes
 `Documents/core-smoke-result.json` in the simulator app container without touching saved athlete
 data.
 
 CI runs four jobs: `changes`, then `python` (tests, ruff, mypy and a check that generated files are
-current), `swift-tests`, and `simulator` (Debug build, smoke test and a Release build). The two
+current), `swift-tests`, and `simulator` (Debug build, smoke test, UI tests and a Release build). The two
 macOS jobs are skipped for documentation-only changes.
 
 ## Architecture

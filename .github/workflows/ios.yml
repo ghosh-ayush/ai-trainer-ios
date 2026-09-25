@@ -74,7 +74,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.ios == 'true' || github.ref == 'refs/heads/master'
     runs-on: macos-15
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - name: Start booting an iPhone simulator
@@ -97,6 +97,14 @@ jobs:
         run: |
           xcrun simctl bootstatus "$SIMULATOR_ID" -b
           scripts/smoke_ios.sh "$SIMULATOR_ID"
+      - name: UI tests on the simulator
+        # Onboarding, set logging and chat, driven through the real app. `--ui-testing` starts
+        # each test from an empty in-memory state.
+        env:
+          SIMULATOR_ID: ${{ steps.simulator.outputs.id }}
+        run: |
+          set -o pipefail
+          xcodebuild test -project apps/ios/App/AITrainer.xcodeproj -scheme AITrainer -configuration Debug -sdk iphonesimulator -destination "platform=iOS Simulator,id=$SIMULATOR_ID" -derivedDataPath DerivedData -only-testing:AITrainerUITests -parallel-testing-enabled NO -resultBundlePath ui-tests.xcresult CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO | tee ios-ui-tests.log
       - name: Build Release simulator (one architecture on pull requests, all architectures on master)
         env:
           SIMULATOR_ID: ${{ steps.simulator.outputs.id }}
@@ -115,3 +123,8 @@ jobs:
         with:
           name: ios-build-logs
           path: ios-*.log
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ui-test-results
+          path: ui-tests.xcresult
