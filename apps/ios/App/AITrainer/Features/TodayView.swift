@@ -15,6 +15,7 @@ struct TodayView: View {
     @State private var showStatus = false
     @State private var showChat = false
     @State private var showChangeDays = false
+    @State private var showSwapSession = false
     /// The conversation with the app, kept while the app runs so reopening chat continues it (ADR-023).
     @State private var chatEntries: [ChatEntry] = []
     var body: some View {
@@ -62,6 +63,7 @@ struct TodayView: View {
         .sheet(isPresented: $showMoveDay) { MoveDaySheet() }
         .sheet(isPresented: $showPain) { PainSheet() }
         .sheet(isPresented: $showStatus) { StatusSheet() }
+        .sheet(isPresented: $showSwapSession) { SwapSessionSheet() }
         .sheet(isPresented: $showChangeDays) {
             if let profile = store.state.profile { ChangeDaysSheet(profile: profile) }
         }
@@ -107,6 +109,9 @@ struct TodayView: View {
             HStack(spacing: 8) {
                 Button("Skip") { confirmSkip = true }.buttonStyle(.stitch(.secondary, compact: true))
                 Button("I'm in pain") { showPain = true }.buttonStyle(.stitch(.destructive, compact: true))
+            }
+            if (store.state.program?.plans.count ?? 0) > 1, !plan.modified {
+                Button("Do a different session today") { showSwapSession = true }.buttonStyle(.stitch(.secondary))
             }
             Button("Free days changed? Update them") { showChangeDays = true }.buttonStyle(.stitch(.link))
         }
@@ -561,4 +566,59 @@ struct MuscleRingView: View {
         .accessibilityLabel("\(ring.muscle.capitalized): \(Self.count(ring.done)) of \(Self.count(ring.target)) sets this week")
     }
     static func count(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(0...1))) }
+}
+
+/// ADR-026: another session of the week for today. Each option shows, before choosing, what it
+/// would ask of muscles trained recently (the cited back-to-back limit, and the app's own 72-hour
+/// notice). Choosing proposes the swap; nothing changes until Accept on Today.
+struct SwapSessionSheet: View {
+    @EnvironmentObject private var store: AppStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var previews: [UUID: Decision] = [:]
+
+    private var others: [SessionPlan] {
+        guard let next = store.state.nextPlan else { return [] }
+        return (store.state.program?.plans ?? []).filter { $0.id != next.id }
+    }
+
+    var body: some View {
+        Group {
+            if let next = store.state.nextPlan {
+                Text("Instead of \(next.name). The session you skip moves to the chosen one's day, so the week keeps all its sessions.")
+                    .stitch(.body15).foregroundStyle(Stitch.textSecondary)
+            }
+            StitchSectionLabel("Choose a session", meta: "\(others.count) in your week")
+            ForEach(others, id: \.id) { plan in
+                StitchCard {
+                    Text([plan.name, plan.weekday.map(Weekday.name)].compactMap { $0 }.joined(separator: " · "))
+                        .stitch(.displayH3).foregroundStyle(Stitch.textPrimary)
+                    Text(plan.slots.map { store.name($0.exerciseID) }.joined(separator: " · "))
+                        .stitch(.body13).foregroundStyle(Stitch.textSecondary)
+                    if let preview = previews[plan.id] {
+                        Text(preview.explanation).stitch(.body13)
+                            .foregroundStyle(preview.explanation.contains("Heads-up") ? Stitch.warnPrimary : Stitch.textSecondary)
+                    }
+                    Button("Do this today") { choose(plan) }.buttonStyle(.stitch(.secondary))
+                }
+            }
+        }
+        .stitchSheet("A different session") { dismiss() }
+        .task { loadPreviews() }
+    }
+
+    private func request(for plan: SessionPlan) -> TrainingRequest {
+        .swapSession(plan.id, utcOffset: TimeZone.current.secondsFromGMT())
+    }
+
+    private func loadPreviews() {
+        for plan in others {
+            let request = request(for: plan)
+            store.read({ try $0.preview(request) }, then: { decision in previews[plan.id] = decision }, failed: { _ in })
+        }
+    }
+
+    private func choose(_ plan: SessionPlan) {
+        store.request(request(for: plan))
+        dismiss()
+    }
 }

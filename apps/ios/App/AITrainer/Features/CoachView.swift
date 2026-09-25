@@ -48,6 +48,7 @@ enum ChatRoute: Identifiable {
     case pain
     case status
     case changeDays
+    case swapSession
 
     var id: String {
         switch self {
@@ -58,6 +59,7 @@ enum ChatRoute: Identifiable {
         case .pain: return "pain"
         case .status: return "status"
         case .changeDays: return "changeDays"
+        case .swapSession: return "swapSession"
         }
     }
 }
@@ -191,6 +193,7 @@ struct CoachChatSheet: View {
         case .status: StatusSheet()
         case .changeDays:
             if let profile = store.state.profile { ChangeDaysSheet(profile: profile) }
+        case .swapSession: SwapSessionSheet()
         }
     }
 
@@ -280,6 +283,8 @@ struct CoachChatSheet: View {
             route = .status
         case .openChangeDays:
             route = .changeDays
+        case .openSwapSession:
+            route = .swapSession
         case .confirmSkip:
             confirmSkip = true
         case .requestProgression:

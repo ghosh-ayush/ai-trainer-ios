@@ -21,6 +21,9 @@ The app has four tabs: **Today**, **Diet**, **Progress** and **You**.
   builds the one the athlete accepts.
 - **Changing free days (ADR-025).** The first choice is only a starting point: new days and minutes
   get a proposed week, with confirmed loads carried over.
+- **A different session today (ADR-026).** Swap in another session of the week. You're warned
+  first when a muscle trained yesterday would go over the cited back-to-back limit, and shown any
+  muscle trained in the last 72 hours (the app's own notice, labelled as uncited).
 - **Adapting to training history (ADR-018).** After two full weeks, a week that fits what the
   athlete actually did is proposed: fewer or more sessions, shorter sessions, or their real
   training days.

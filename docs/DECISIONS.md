@@ -475,3 +475,32 @@ Consequences: the contract adds the `changeDays` request and the `openChangeDays
 Request variants can now mark a field optional (`minutes?`) and use list types. The version stays
 1.0 and the stored state is unchanged.
 Status: accepted (owner, 2026-09-25).
+
+## ADR-026 · 2026-09-25 · A different session today, with recovery notes before choosing
+Why: the owner wants to train another body part today instead of the next session, and to be warned
+first if a muscle hasn't recovered. They asked for 72 hours. The research found no qualifying study
+for 72 hours, or for the common 48 hours, between sessions for the same muscle
+(`docs/research/training-frequency-evidence.md` §5). Given that, the owner chose both options:
+the cited limit as a warning, and 72 hours as the app's own notice.
+Decision:
+- **A new request, `swapSession`** (`planID`, optional `utcOffset`), is the athlete's own request, so
+  a break does not pause it. It proposes the chosen session (`SESSION_SWAP`). Accepting re-evaluates
+  it to an identical decision, then swaps the two sessions' places and weekdays: the chosen one
+  becomes today's, and the one it replaces takes the chosen one's day. The week keeps every
+  session. `ALREADY_NEXT`, `SESSION_MISSING` and `TEMPORARY_CHANGE_ACTIVE` explain why not.
+- **Recovery notes are read from logged sets only** (rule 4), with helper muscles counted at the
+  planner's credit (ADR-017):
+  - *Warning (cited):* a muscle trained yesterday or earlier today, which the chosen session would
+    give more than `consecutiveDayCap` sets (3; the planner's back-to-back limit, built on GOMES19
+    and CARNEIRO24).
+  - *Notice (the app's own rule):* muscles trained in the last `recoveryNoticeHours` (72), labelled
+    as having no study behind them. The value is an owner decision in the bundle, with a rationale
+    built from the cited designs (PEDERSEN22, LASEVICIUS19, SCHOENFELD19V), IUSCA21 and
+    MORANNAVARRO17.
+  - Neither note blocks the choice; the athlete decides.
+- **The Today sheet** previews every other session with its notes, using the core's read-only
+  `decide` (`TrainerService.preview`) before anything is proposed. Chat offers the same sheet.
+Consequences: the contract adds the `swapSession` request and the `openSwapSession` chat action.
+evidence-2 gains `planner.weekly.recoveryNoticeHours`, and its review sheet is regenerated. The
+version stays 1.0 and the stored state is unchanged.
+Status: accepted (owner, 2026-09-25).

@@ -142,6 +142,9 @@ xcodebuild test -project apps/ios/App/AITrainer.xcodeproj -scheme AITrainer -sdk
   own requests still run, the plan never changes, and status days never count as missed sessions.
 - Free days can change at any time (ADR-025), but only as a proposed week the athlete accepts.
   Confirmed loads carry over to the same exercise on the same equipment; unconfirmed ones stay unknown.
+- A different session today (ADR-026) swaps two sessions' days on Accept. Its 72-hour notice is the
+  owner's own value with no study behind it, and is labelled so; only the back-to-back limit is cited.
+  Neither note blocks the athlete's choice.
 - `evidence-1` is `disabled`, superseded by `evidence-2` (the weekly planner); only one bundle may
   be `approved` at a time.
 - Dates cross the bridge as binary64 seconds since 2001-01-01 (Foundation reference epoch).

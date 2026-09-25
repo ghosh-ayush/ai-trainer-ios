@@ -182,5 +182,21 @@
   "WEEK_OPTION_MISSING": [
     "needsInput",
     "That week is no longer offered for these days. Choose from the new options."
+  ],
+  "SESSION_SWAP": [
+    "proposeChange",
+    "Do this session today; the one it replaces moves to its day. Nothing changes until you accept."
+  ],
+  "TEMPORARY_CHANGE_ACTIVE": [
+    "needsInput",
+    "Today's session already has a temporary change. Finish it or discard the change first."
+  ],
+  "SESSION_MISSING": [
+    "needsInput",
+    "That session isn't in your week any more."
+  ],
+  "ALREADY_NEXT": [
+    "keepPlan",
+    "That is already your next session."
   ]
 }
