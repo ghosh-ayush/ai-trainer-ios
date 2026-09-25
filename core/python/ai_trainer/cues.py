@@ -19,6 +19,7 @@ from typing import Any
 from .athlete_state import active_session, has_working_set
 from .content import exercises_by_id
 from .queries import comparable_sessions, working_logs
+from .wording import join_words
 
 JSON = dict[str, Any]
 
@@ -84,7 +85,7 @@ def _last_time(state: JSON, slot: JSON, now: float) -> str | None:
         logs = working_logs(session, slot)
         if not logs:
             continue
-        reps = _join([str(log["reps"]) for log in logs])
+        reps = join_words([str(log["reps"]) for log in logs])
         loads = {log.get("load") for log in logs}
         if len(loads) == 1 and None not in loads:
             load = next(iter(loads))
@@ -115,9 +116,3 @@ def _duration(seconds: int) -> str:
         return f"{seconds} seconds"
     text = f"{minutes} minute{'s' if minutes != 1 else ''}"
     return text + (f" {rest} seconds" if rest else "")
-
-
-def _join(items: list[str]) -> str:
-    if len(items) < 2:
-        return "".join(items)
-    return ", ".join(items[:-1]) + " and " + items[-1]

@@ -400,7 +400,8 @@ Decision: split reading from answering, as for sets in words.
   one topic from a fixed list (`ChatTopic`), and any exercise, minutes or days. Measured on
   2026-09-25 with 40 sample messages on the Mac: 37 topics right, about one second each, and it
   filled unsaid fields (15 minutes and 3 days for "why is my squat not going up?").
-- **The core grounds the draft** (`chat.py`, operation `chat`), with the same rules as `readSet`:
+- **The core grounds the draft** (`chat.py`, since split into the `chat/` package; operation `chat`),
+  with the same rules as `readSet`:
   - a number counts only if the athlete's words contain it ("2 hours", "half an hour" and
     "2 weeks" are read as minutes and days);
   - an exercise counts only if the athlete said a word of its name, and a shared word ("press")
