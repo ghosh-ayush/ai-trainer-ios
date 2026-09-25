@@ -15,8 +15,9 @@ import math
 from typing import Any
 
 from . import contracts
+from .chat import chat_reply
 from .commands import reduce_state
-from .content import load_library, public_library
+from .content import active_bundle_raw, load_library, public_library
 from .cues import workout_cues
 from .diet_view import diet_options, diet_preview, diet_view
 from .equipment import load_steps, plate_load
@@ -123,6 +124,18 @@ def dispatch(envelope: JSON) -> Any:
     if operation == "readSet":
         library = load_library(payload["permitsFixtures"])
         return read_set(payload["state"], payload["text"], payload["draft"], library)
+    if operation == "chat":
+        library = load_library(payload["permitsFixtures"])
+        return chat_reply(
+            payload["state"],
+            payload["text"],
+            payload["draft"],
+            library,
+            active_bundle_raw(),
+            payload["now"],
+            payload.get("dayStart"),
+            payload.get("utcOffset"),
+        )
     raise DomainError("unsupported", "Unknown operation.")
 
 

@@ -13,6 +13,9 @@ struct TodayView: View {
     @State private var confirmSkip = false
     @State private var openWorkout = false
     @State private var showStatus = false
+    @State private var showChat = false
+    /// The conversation with the app, kept while the app runs so reopening chat continues it (ADR-023).
+    @State private var chatEntries: [ChatEntry] = []
     var body: some View {
         ScrollViewReader { proxy in
             TabRoot("Today") {
@@ -47,6 +50,10 @@ struct TodayView: View {
             }
             .scrollToNewProposal(store.state.recommendations, proxy: proxy)
         }
+        .overlay(alignment: .bottomTrailing) {
+            ChatHeadButton { showChat = true }.padding(.trailing, 16).padding(.bottom, 16)
+        }
+        .sheet(isPresented: $showChat) { CoachChatSheet(entries: $chatEntries) }
         .navigationDestination(isPresented: $openWorkout) { WorkoutView() }
         .sheet(item: $loadSlot) { LoadSheet(slot: $0) }
         .sheet(item: $swapSlot) { SwapSheet(slot: $0) }
@@ -356,13 +363,17 @@ struct LoadSheet: View {
 struct LessTimeSheet: View {
     @EnvironmentObject private var store: AppStore
     @Environment(\.dismiss) private var dismiss
-    @State private var minutes = 35
+    @State private var minutes: Int
+    /// - Parameter minutes: a starting value, such as the minutes the athlete said in chat.
+    init(minutes: Int? = nil) {
+        _minutes = State(initialValue: min(120, max(5, minutes ?? 35)))
+    }
     var body: some View {
         Group {
             StitchField("Available minutes", value: "\(minutes)") {
                 StitchStepperButtons(decrement: { minutes = max(5, minutes - 5) }, increment: { minutes = min(120, minutes + 5) })
             }
-            Text("Optional slots can be removed. The fixture will not compress required work, warm-up, or rest.")
+            Text("Optional exercises can be removed for this session. Required work, warm-up and rest are never compressed.")
                 .stitch(.body15).foregroundStyle(Stitch.textSecondary)
             Button("Preview shorter session") { store.request(.shorten(minutes)); dismiss() }.buttonStyle(.stitch())
         }

@@ -389,3 +389,41 @@ Consequences:
   logged set and when the rest deadline passes. It is off by default, switched on in Settings,
   and speaks while the app is on screen. There is no background audio mode.
 Status: accepted (owner, 2026-09-24).
+
+## ADR-023 · 2026-09-25 · Chat with the app: the model reads, the core answers
+Why: the owner asked for a chat head to converse with the app ("why is my squat not going up?",
+"my knee hurts, lighter legs this week"), answered only from their own records and the research,
+with any plan change still a proposal they accept. AGENTS.md keeps language models out of the
+decision path, and ADR-015 showed Apple's on-device model supplies numbers nobody said.
+Decision: split reading from answering, as for sets in words.
+- **The model reads only.** `OnDeviceChatReader` asks Apple's on-device model for a `ChatDraft`:
+  one topic from a fixed list (`ChatTopic`), and any exercise, minutes or days. Measured on
+  2026-09-25 with 40 sample messages on the Mac: 37 topics right, about one second each, and it
+  filled unsaid fields (15 minutes and 3 days for "why is my squat not going up?").
+- **The core grounds the draft** (`chat.py`, operation `chat`), with the same rules as `readSet`:
+  - a number counts only if the athlete's words contain it ("2 hours", "half an hour" and
+    "2 weeks" are read as minutes and days);
+  - an exercise counts only if the athlete said a word of its name, and a shared word ("press")
+    asks which one;
+  - pain words always get the pain answer, whatever topic the model chose;
+  - anything dropped is named in `ignored`, and the reply says how the message was read.
+- **The core writes every line** from the athlete's records (logged sets), the decision the app
+  would make now (the same `decide` call a proposal uses), and the active bundle's cited values
+  with their notes, certainty and sources (`content.active_bundle_raw`). Test content says it
+  rests on no research. The model writes nothing the athlete sees.
+- **Answers change nothing.** Each offers actions: open the existing Today sheets (load, swap,
+  less time, move day, pain, status), request a proposal (progression, shorter session, another
+  week) or run a command the athlete could run on Today (pause an exercise for pain, mark a break,
+  I'm back). Each needs its own tap, and plan changes stay Recommendations that need Accept.
+- **No invented rules.** A lighter week has no cited rule, so chat says so instead of making one.
+  The pain answer says the app cannot assess pain, and suggests a clinician when pain is severe or
+  does not settle; that is safety copy, not a training value.
+- **Where the model cannot run**, chat still works through questions to tap (the core's own
+  starters), which skip the model. If the model fails on a typed message, the message still goes
+  to the core as "something else", so pain words are still caught.
+- The conversation stays in memory while the app runs and is never saved.
+Consequences: a chat head on Today opens the chat sheet (`CoachView.swift`). The contract adds
+`ChatTopic`, `ChatActionKind`, `ChatDraft`, `ChatAction`, `ChatSource` and `ChatReply`; the version
+stays 1.0 and the stored state is unchanged. Two decision messages no longer say "this fixture" on
+real content.
+Status: accepted (owner, 2026-09-25).

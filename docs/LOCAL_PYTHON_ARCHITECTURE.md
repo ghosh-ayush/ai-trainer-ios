@@ -15,6 +15,7 @@ SwiftUI features -> TrainerService (native persistence facade)
 Camera -> AVFoundation/Vision -> RepCounterSDK -> native observation UI
 HealthKit -> native read-only provenance DTOs -> unassessed recovery response
 Athlete's words -> FoundationModels (on device) -> SpokenSet draft -> readSet preview -> Save -> saveSet
+Chat message -> FoundationModels (on device) -> ChatDraft -> chat reply (core-written) -> tapped action
 ```
 
 CPython 3.13.11, packaged by BeeWare `3.13-b13`, runs in the app process. The
@@ -48,12 +49,16 @@ lifecycle; `content.py` loads the bundled exercises, policy and program template
 ## Contracts and deterministic state
 
 `core/python/ai_trainer/{request,response}.schema.json` (generated from `contract_spec.py`)
-define version **1.0**. There are fourteen operations: `stateCommand` (every mutation),
+define version **1.0**. There are sixteen operations: `stateCommand` (every mutation),
 `decide` (read-only preview), `initialProgram`, `library`, `migrateState`, `nutrients`,
 `recovery`, and two read-only view models for the P1 screens — `views` (Today's slot
 needs-states, proposal titles and the one slot to auto-request, plus Progress's recorded
 values per exercise, in one pass) and `loadSteps` (available loads around a confirmed load) — and
 `readSet`, which checks the on-device model's draft of a set against the athlete's words (ADR-015).
+The workout screen adds `plateLoad` (plates per side, ADR-021) and `workoutCues` (the spoken coach's
+sentences, ADR-022). `chat` (ADR-023) answers a chat message: it grounds the on-device model's
+`ChatDraft` in the athlete's words, and writes every line from their records, the decision a
+proposal would use and the active bundle's cited values, returning the sources alongside.
 `weekOptions` (ADR-017) returns up to three distinct weeks for the athlete's free weekdays and
 minutes, and `initialProgram` / `acceptInitialPlan` take the chosen `optionID`. The diet screens
 use `dietOptions`, `dietPreview` and `foods` (ADR-016). Requests

@@ -161,17 +161,25 @@ final class AppStore: ObservableObject {
             }
         }
     }
-    /// Runs a read-only core call (food search, diet preview) on the core queue without the refresh
-    /// and tap-gating of `perform`; `then` receives the answer on the main actor, errors show the alert.
-    func read<Value>(_ query: @escaping (TrainerService) throws -> Value, then: @escaping (Value) -> Void) {
+    /// Runs a read-only core call (food search, diet preview, chat) on the core queue without the refresh
+    /// and tap-gating of `perform`; `then` receives the answer on the main actor. An error goes to
+    /// `failed` when given (a screen that shows it itself), otherwise to the alert.
+    func read<Value>(_ query: @escaping (TrainerService) throws -> Value, then: @escaping (Value) -> Void,
+                     failed: ((Error) -> Void)? = nil) {
         guard let service else { return }
-        let job = CoreJob(value: (service: service, query: query, then: then))
+        let job = CoreJob(value: (service: service, query: query, then: then, failed: failed))
         coreQueue.async {
             let outcome = CoreJob(value: Result { try job.value.query(job.value.service) })
             Task { @MainActor in
                 switch outcome.value {
-                case .success(let value): job.value.then(value)
-                case .failure(let error): self.errorMessage = error.localizedDescription
+                case .success(let value):
+                    job.value.then(value)
+                case .failure(let error):
+                    if let failed = job.value.failed {
+                        failed(error)
+                    } else {
+                        self.errorMessage = error.localizedDescription
+                    }
                 }
             }
         }
