@@ -51,6 +51,7 @@ ENUMS: dict[str, list[str]] = {
     "Outcome": ["keepPlan", "proposeChange", "needsInput", "unassessed", "withholdGuidance"],
     "RecommendationStatus": ["proposed", "applied", "rejected", "expired"],
     "Omission": ["time", "equipment", "userChoice", "pain", "interruption", "unspecified"],
+    "StatusKind": ["onBreak", "sick", "injured"],
     "DietGoal": ["fatLoss", "muscleGain", "maintenance", "endurance"],
     "DietPattern": ["omnivore", "vegetarian", "vegan"],
     "ActivityLevel": ["inactive", "lowActive", "active", "veryActive"],
@@ -243,12 +244,19 @@ MODELS: list[ModelSpec] = [
         "An accepted or rejected diet suggestion, kept as history.",
     ),
     _model(
+        "StatusPeriod",
+        "id:UUID kind:StatusKind startedAt:Date endsAt?:Date endedAt?:Date",
+        "A period the athlete marked as on a break, sick or injured. While active, automatic proposals and "
+        "plan adaptation pause, and its days do not count as missed (ADR-019).",
+    ),
+    _model(
         "State",
         "schemaVersion:Int athleteID:UUID revision:Int contextRevision:Int profile?:Profile program?:Program "
         "nextPlanOverride?:Plan previousPrograms:[Program] sessions:[Session] recommendations:[Recommendation] "
         "painExclusions:[String] audits:[Audit] conflicts:[Conflict] operations:[UUID] events:[Event] meals:[Meal] "
         "mealAudits:[MealAudit] recipes:[Recipe] dietProfile?:DietProfile weighIns:[WeighIn] "
-        "dietTargets?:DietTargets dietDecisions:[DietDecision] excludedWeighIns:[Date]",
+        "dietTargets?:DietTargets dietDecisions:[DietDecision] excludedWeighIns:[Date] "
+        "statusPeriods:[StatusPeriod]",
         "Everything the app persists. One file, one athlete.",
     ),
     _model(
@@ -277,7 +285,7 @@ MODELS: list[ModelSpec] = [
     ),
     _model(
         "TodayStatus",
-        "slots:[SlotStatus] proposals:[ProposalCard] autoRequest?:UUID autoReplan?:Bool",
+        "slots:[SlotStatus] proposals:[ProposalCard] autoRequest?:UUID autoReplan?:Bool status?:StatusPeriod",
         "Read-only Today view model. ``autoRequest`` names one slot whose progression the host may request; "
         "``autoReplan`` says the host may request a week that fits recent attendance (ADR-018).",
     ),
@@ -376,7 +384,7 @@ INTEGER_BOUNDS: list[tuple[str, str, int, int]] = [
     ("Slot", "workingSets", 1, 1000),
     ("Policy", "requiredExposures", 1, 1000),
 ]
-STATE_SCHEMA_VERSION = 4  # migrations.py upgrades older saved files
+STATE_SCHEMA_VERSION = 5  # migrations.py upgrades older saved files
 
 # Training request variants: kind -> ordered (field, type) pairs.
 REQUEST_KINDS: dict[str, list[tuple[str, str]]] = {
@@ -434,6 +442,8 @@ COMMANDS: dict[str, str] = {
     "correctSet": "sessionID:UUID logID:UUID expectedRevision:Int load?:Number reps:Int rir?:Int",
     "resolveConflict": "id:UUID useIncoming:Bool",
     "deleteSession": "id:UUID",
+    "setStatus": "status:StatusKind endsAt?:Date",
+    "endStatus": "",
     "deleteMeal": "id:UUID",
     "saveMeal": "meal:Meal asRecipe:Bool",
     "requestChange": "request:Request",
@@ -504,6 +514,7 @@ SWIFT_ENUMS: dict[str, tuple[str, bool]] = {  # schema enum -> (Swift name, Case
     "Outcome": ("DecisionOutcome", False),
     "RecommendationStatus": ("RecommendationStatus", False),
     "Omission": ("OmissionReason", True),
+    "StatusKind": ("StatusKind", True),
     "DietGoal": ("DietGoal", True),
     "DietPattern": ("DietPattern", True),
     "ActivityLevel": ("ActivityLevel", True),
@@ -630,7 +641,7 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "State": SwiftModel(
         "AthleteState",
         defaults={
-            "schemaVersion": "4",
+            "schemaVersion": "5",
             "athleteID": "UUID()",
             "revision": "0",
             "contextRevision": "0",
@@ -653,6 +664,7 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
             "dietTargets": "nil",
             "dietDecisions": "[]",
             "excludedWeighIns": "[]",
+            "statusPeriods": "[]",
         },
         sets=frozenset({"painExclusions", "operations"}),
     ),
@@ -717,10 +729,12 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "SlotStatus": SwiftModel("SlotStatus", defaults={"action": "nil"}),
     "ProposalCard": SwiftModel("ProposalCard", defaults={"slotID": "nil"}),
     "TodayStatus": SwiftModel(
-        "TodayStatus", defaults={"slots": "[]", "proposals": "[]", "autoRequest": "nil", "autoReplan": "nil"}
+        "TodayStatus",
+        defaults={"slots": "[]", "proposals": "[]", "autoRequest": "nil", "autoReplan": "nil", "status": "nil"},
     ),
     "ProgressEntry": SwiftModel("ProgressEntry"),
     "ExerciseProgress": SwiftModel("ExerciseProgress", defaults={"load": "nil"}),
+    "StatusPeriod": SwiftModel("StatusPeriod", defaults={"endsAt": "nil", "endedAt": "nil"}, identifiable=True),
     "WeekSession": SwiftModel("WeekSession"),
     "WeekOption": SwiftModel("WeekOption", identifiable=True),
     "Views": SwiftModel("CoreViews", defaults={"today": "TodayStatus()", "progress": "[]", "diet": "DietView()"}),

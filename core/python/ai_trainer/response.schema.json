@@ -98,6 +98,14 @@
         "unspecified"
       ]
     },
+    "StatusKind": {
+      "type": "string",
+      "enum": [
+        "onBreak",
+        "sick",
+        "injured"
+      ]
+    },
     "DietGoal": {
       "type": "string",
       "enum": [
@@ -1354,11 +1362,51 @@
       ],
       "additionalProperties": false
     },
+    "StatusPeriod": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UUID"
+        },
+        "kind": {
+          "$ref": "#/$defs/StatusKind"
+        },
+        "startedAt": {
+          "$ref": "#/$defs/Date"
+        },
+        "endsAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "endedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "startedAt"
+      ],
+      "additionalProperties": false
+    },
     "State": {
       "type": "object",
       "properties": {
         "schemaVersion": {
-          "const": 4
+          "const": 5
         },
         "athleteID": {
           "$ref": "#/$defs/UUID"
@@ -1502,6 +1550,12 @@
           "items": {
             "$ref": "#/$defs/Date"
           }
+        },
+        "statusPeriods": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StatusPeriod"
+          }
         }
       },
       "required": [
@@ -1522,7 +1576,8 @@
         "recipes",
         "weighIns",
         "dietDecisions",
-        "excludedWeighIns"
+        "excludedWeighIns",
+        "statusPeriods"
       ],
       "additionalProperties": false
     },
@@ -1793,6 +1848,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/Bool"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StatusPeriod"
             },
             {
               "type": "null"
@@ -3036,6 +3101,34 @@
       ],
       "additionalProperties": false
     },
+    "setStatusArguments": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/StatusKind"
+        },
+        "endsAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "endStatusArguments": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
     "deleteMealArguments": {
       "type": "object",
       "properties": {
@@ -3635,6 +3728,78 @@
             },
             "arguments": {
               "$ref": "#/$defs/deleteSessionArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "setStatus"
+            },
+            "arguments": {
+              "$ref": "#/$defs/setStatusArguments"
+            },
+            "state": {
+              "$ref": "#/$defs/State"
+            },
+            "permitsFixtures": {
+              "$ref": "#/$defs/Bool"
+            },
+            "now": {
+              "$ref": "#/$defs/Date"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/UUID"
+              },
+              "minItems": 10
+            }
+          },
+          "required": [
+            "command",
+            "arguments",
+            "state",
+            "permitsFixtures",
+            "now",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "command": {
+              "const": "endStatus"
+            },
+            "arguments": {
+              "$ref": "#/$defs/endStatusArguments"
             },
             "state": {
               "$ref": "#/$defs/State"

@@ -319,3 +319,23 @@ Consequences:
 - Reasons: `ADHERENCE_REPLAN`, `SHORTER_SESSIONS_REPLAN`, `MORE_SESSIONS_REPLAN`,
   `TRAINING_DAYS_REPLAN`. One proposal explains every drift it found.
 Status: accepted (owner requests, 2026-09-24).
+
+## ADR-019 · 2026-09-24 · Breaks, illness and injury pause what the app proposes
+Why: the owner picked this first from ideas taken from Bevel's Activity Status and Apple's paused
+Activity rings. It also closes a gap in ADR-018: a holiday counted as missed sessions and
+triggered a "smaller week" proposal.
+Consequences:
+- New commands `setStatus` (on a break / sick / injured, with an optional end date) and
+  `endStatus` ("I'm back"). A new status ends the current one. Periods are kept in
+  `statusPeriods`; the state schema goes to 5, and older files start with an empty history.
+- While a status is active:
+  - The app requests nothing on its own: no progression auto-request, no replan. A
+    progression or replan decision returns `STATUS_PAUSED`.
+  - The athlete's own requests still run: shorten, swap and reschedule.
+  - Today shows the status with "I'm back".
+- Status days are removed from the attendance window. A week is judged only on at least the
+  minimum age of time that wasn't a status; otherwise `REPLAN_NEEDS_HISTORY`. Sessions logged
+  during a status still count as done.
+- A status never changes the plan and never diagnoses. Pain still goes through the existing
+  concern flow.
+Status: accepted (owner, 2026-09-24).

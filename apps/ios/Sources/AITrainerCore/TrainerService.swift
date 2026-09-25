@@ -19,6 +19,8 @@ public final class TrainerService {
         var exerciseID: String?; var excluded: Bool?; var expectedRevision: Int?; var id: UUID?
         var useIncoming: Bool?; var meal: Meal?; var asRecipe: Bool?; var request: TrainingRequest?
         var optionID: String?
+        var status: StatusKind?
+        var endsAt: Date?
     }
     private struct Payload<CommandArguments: Encodable>: Encodable {
         let command: String; let state: AthleteState; let arguments: CommandArguments
@@ -93,6 +95,16 @@ public final class TrainerService {
     }
     public func exclude(exerciseID: String, excluded: Bool) throws {
         try command("exclude", Arguments(exerciseID: exerciseID, excluded: excluded))
+    }
+
+    // MARK: Status (ADR-019)
+    /// Marks a break, illness or injury. Automatic proposals pause and its days never count as missed.
+    public func setStatus(_ status: StatusKind, endsAt: Date? = nil, now: Date = Date()) throws {
+        try command("setStatus", Arguments(status: status, endsAt: endsAt), now: now)
+    }
+    /// "I'm back": ends the active status now.
+    public func endStatus(now: Date = Date()) throws {
+        try command("endStatus", now: now)
     }
 
     // MARK: Records

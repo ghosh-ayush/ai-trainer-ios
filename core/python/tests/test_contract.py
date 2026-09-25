@@ -114,7 +114,7 @@ class MigrationTests(unittest.TestCase):
 
     def test_v1_stored_request_becomes_explicit(self):
         migrated = result("migrateState", {"state": self.saved_v1()})
-        self.assertEqual(migrated["schemaVersion"], 4)
+        self.assertEqual(migrated["schemaVersion"], 5)
         self.assertEqual(
             migrated["recommendations"][0]["request"],
             {"kind": "substitute", "slotID": uid(1), "alternativeID": "machine_press"},
@@ -126,7 +126,7 @@ class MigrationTests(unittest.TestCase):
         del state["weighIns"]
         del state["dietDecisions"]
         migrated = result("migrateState", {"state": state})
-        self.assertEqual((migrated["schemaVersion"], migrated["weighIns"], migrated["dietDecisions"]), (4, [], []))
+        self.assertEqual((migrated["schemaVersion"], migrated["weighIns"], migrated["dietDecisions"]), (5, [], []))
         self.assertNotIn("dietProfile", migrated)
 
     def test_early_v3_diet_files_keep_a_positive_screen(self):
@@ -151,10 +151,17 @@ class MigrationTests(unittest.TestCase):
         state = golden_request()["payload"]["state"]
         state["schemaVersion"] = 3
         migrated = result("migrateState", {"state": state})
-        self.assertEqual(migrated["schemaVersion"], 4)
+        self.assertEqual(migrated["schemaVersion"], 5)
         self.assertNotIn("freeDays", migrated["profile"])  # unknown stays unknown (ADR-017)
         self.assertNotIn("minutesByDay", migrated["profile"])
         self.assertTrue(all("weekday" not in plan for plan in migrated["program"]["plans"]))
+
+    def test_v4_file_gains_an_empty_status_history(self):
+        state = golden_request()["payload"]["state"]
+        state["schemaVersion"] = 4
+        del state["statusPeriods"]
+        migrated = result("migrateState", {"state": state})
+        self.assertEqual((migrated["schemaVersion"], migrated["statusPeriods"]), (5, []))
 
     def test_current_state_passes_through_unchanged(self):
         state = golden_request()["payload"]["state"]
@@ -162,7 +169,7 @@ class MigrationTests(unittest.TestCase):
 
     def test_newer_or_corrupt_state_fails_closed(self):
         newer = golden_request()["payload"]["state"]
-        newer["schemaVersion"] = 5
+        newer["schemaVersion"] = 6
         self.assertEqual(call("migrateState", {"state": newer})["error"]["code"], "unsupported")
         corrupt = golden_request()["payload"]["state"]
         del corrupt["sessions"]

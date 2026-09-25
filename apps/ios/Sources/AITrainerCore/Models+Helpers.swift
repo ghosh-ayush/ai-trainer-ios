@@ -81,6 +81,17 @@ extension Meal {
     }
 }
 
+extension StatusKind {
+    /// How a training status reads in the app (ADR-019).
+    public var label: String {
+        switch self {
+        case .onBreak: return "On a break"
+        case .sick: return "Sick"
+        case .injured: return "Injured"
+        }
+    }
+}
+
 /// Names for the core's weekdays, 0-6 with Monday = 0 (ADR-017).
 public enum Weekday {
     public static let shortNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]

@@ -106,6 +106,16 @@ final class AppFlowTests: XCTestCase {
             }
         }
     }
+    /// ADR-019: a break pauses automatic proposals; "I'm back" resumes them.
+    func testABreakPausesAutomaticProposalsUntilImBack() throws {
+        let service = try trainedService()
+        try service.setStatus(.onBreak, endsAt: now.addingTimeInterval(7 * 86_400), now: now)
+        let paused = try service.views(now: now.addingTimeInterval(60))
+        XCTAssertEqual(paused.today.status?.kind, .onBreak)
+        XCTAssertNil(paused.today.autoRequest)
+        try service.endStatus(now: now.addingTimeInterval(120))
+        XCTAssertNil(try service.views(now: now.addingTimeInterval(180)).today.status)
+    }
     func testDomainErrorsArriveAsTypedSwiftErrors() throws {
         let service = try trainedService()
         XCTAssertThrowsError(try service.acceptRecommendation(id: UUID())) { XCTAssertEqual($0 as? TrainerError, .notFound) }
@@ -172,7 +182,7 @@ final class AppFlowTests: XCTestCase {
         object["dietDecisions"] = nil
         storage.data = try JSONSerialization.data(withJSONObject: object)
         let migrated = try StateRepository(persistence: storage, core: core).snapshot
-        XCTAssertEqual(migrated.schemaVersion, 4)
+        XCTAssertEqual(migrated.schemaVersion, 5)
         XCTAssertEqual(migrated.weighIns, [])
         XCTAssertEqual(migrated.recommendations.first?.request, .progression(slot.id))
     }
