@@ -347,6 +347,7 @@ struct ChatReplyView: View {
             ForEach(Array(reply.actions.enumerated()), id: \.offset) { _, action in
                 Button(action.title) { onAction(action) }
                     .buttonStyle(.stitch(action.kind == .reportPain ? .destructive : .secondary, compact: true))
+                    .accessibilityIdentifier("chat.\(action.kind.rawValue)")  // for UI tests; VoiceOver reads the title
             }
             if !reply.sources.isEmpty {
                 Button(showSources ? "Hide sources" : "Sources (\(reply.sources.count))") { showSources.toggle() }
