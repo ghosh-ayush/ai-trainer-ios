@@ -30,7 +30,7 @@ struct OnboardingView: View {
                 StitchSectionLabel("Free days", meta: freeDaysMeta)
                 HStack(spacing: 6) {
                     ForEach(0..<7, id: \.self) { day in
-                        Button(Weekday.short(day)) { toggle(day) }
+                        Button { toggle(day) } label: { Text(Weekday.initial(day)).lineLimit(1) }
                             .buttonStyle(.stitch(isFree(day) ? .primary : .secondary, compact: true))
                             .accessibilityLabel("\(Weekday.name(day)) \(isFree(day) ? "free" : "not free")")
                     }

@@ -81,11 +81,27 @@ extension Meal {
     }
 }
 
+extension Exercise {
+    /// The movement role in words: the planner's codes (ADR-017) read as names, older roles as they are.
+    public var roleLabel: String {
+        let names = [
+            "UPH": "Horizontal press", "UPV": "Overhead press", "ULH": "Row", "ULV": "Vertical pull",
+            "KD": "Squat", "HH": "Hip hinge", "SL": "Single-leg", "EF": "Biceps", "EE": "Triceps",
+            "KF": "Leg curl", "CALF": "Calves",
+        ]
+        return names[role] ?? role
+    }
+}
+
 /// Names for the core's weekdays, 0-6 with Monday = 0 (ADR-017).
 public enum Weekday {
+    public static let initials = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
     public static let shortNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     public static let names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
+    public static func initial(_ day: Int) -> String {
+        initials.indices.contains(day) ? initials[day] : "\(day + 1)"
+    }
     public static func short(_ day: Int) -> String {
         shortNames.indices.contains(day) ? shortNames[day] : "Day \(day + 1)"
     }
