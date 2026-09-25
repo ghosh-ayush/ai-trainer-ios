@@ -421,12 +421,19 @@
         },
         "permitsFixtures": {
           "$ref": "#/$defs/Bool"
+        },
+        "roleNames": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/String"
+          }
         }
       },
       "required": [
         "exercises",
         "policy",
-        "permitsFixtures"
+        "permitsFixtures",
+        "roleNames"
       ],
       "additionalProperties": false
     },

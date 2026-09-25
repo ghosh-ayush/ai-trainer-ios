@@ -173,8 +173,9 @@ MODELS: list[ModelSpec] = [
     ),
     _model(
         "Library",
-        "exercises:[Exercise] policy:Policy permitsFixtures:Bool",
-        "The bundled content the core runs against, as the host displays it.",
+        "exercises:[Exercise] policy:Policy permitsFixtures:Bool roleNames:{String}",
+        "The bundled content the core runs against, as the host displays it. ``roleNames`` gives the "
+        "display name of each weekly-planner movement role, from the bundle.",
     ),
     _model(
         "Slot",
@@ -644,7 +645,7 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
         "Exercise", defaults={"review": ".fixture", "contentVersion": '"fixture-1"'}, identifiable=True
     ),
     "Policy": SwiftModel("TrainingPolicy"),
-    "Library": SwiftModel("ContentLibrary"),
+    "Library": SwiftModel("ContentLibrary", defaults={"roleNames": "[:]"}),
     "Request": SwiftModel(
         "TrainingRequest",
         defaults={"slotID": "nil", "minutes": "nil", "alternativeID": "nil", "date": "nil", "utcOffset": "nil"},

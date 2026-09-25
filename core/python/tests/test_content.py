@@ -276,5 +276,23 @@ class BundleSelectionTests(unittest.TestCase):
         self.assertEqual((manifest["review"], manifest.get("supersededBy")), ("disabled", "evidence-2"))
 
 
+class RoleNameTests(unittest.TestCase):
+    """The host shows movement roles in the bundle's words, not a table of its own."""
+
+    def test_every_planner_role_of_the_shipped_bundle_has_a_name(self):
+        _, raw = content.all_bundles()["evidence-2"]
+        plain = content.resolve(raw)
+        library = {**{key: plain[key] for key in ("exercises", "policy", "planner")}, "permitsFixtures": False}
+        names = content.public_library(library)["roleNames"]
+        self.assertEqual(set(names), set(plain["planner"]["structures"]["roles"]))
+        self.assertEqual((names["KD"], names["HH"], names["UPH"]), ("Squat", "Hip hinge", "Horizontal press"))
+        roles_in_use = {exercise["role"] for exercise in plain["exercises"]}
+        self.assertTrue(roles_in_use <= set(names), "every exercise's role has a name")
+
+    def test_content_without_a_weekly_planner_names_no_roles(self):
+        library = result("library", {"permitsFixtures": True})
+        self.assertEqual(library["roleNames"], {})
+
+
 if __name__ == "__main__":
     unittest.main()
