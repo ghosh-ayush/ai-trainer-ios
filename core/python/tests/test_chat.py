@@ -169,9 +169,29 @@ class AnswersFromRecordsTests(unittest.TestCase):
         reply = ask(athlete, "why is my bench not going up?", topic="exerciseProgress", exercise=BENCH)
         expected = athlete.decide(progression(athlete.slot["id"]))["explanation"]
         self.assertIn(expected, reply["lines"])
-        self.assertTrue(reply["lines"][0].startswith("Last time: "))
-        self.assertIn("100 lb × 10 / 10 / 10 · RIR 2", reply["lines"][0])
+        self.assertEqual(reply["lines"][0], f"Good news: {BENCH} is ready to move up.")  # the direct answer first
+        self.assertTrue(reply["lines"][1].startswith("Last time: "))
+        self.assertIn("100 lb × 10 / 10 / 10 · RIR 2", reply["lines"][1])
         self.assertEqual(action(reply, "requestProgression")["slotID"], athlete.slot["id"])
+
+    def test_a_follow_up_keeps_the_exercise_named_just_before(self):
+        athlete = Athlete.qualified()
+        payload = {
+            "state": athlete.state,
+            "text": "and why is that?",
+            "draft": {"topic": "exerciseProgress"},
+            "permitsFixtures": True,
+            "now": NOW,
+            "earlier": "how is my bench going",
+        }
+        self.assertEqual(result("chat", payload)["reading"], f"How {BENCH} is going")
+        payload["earlier"] = "what's my week"
+        self.assertEqual(result("chat", payload)["reading"], "How your training is going")
+
+    def test_the_headline_follows_the_decision(self):
+        state, library, bundle = evidence_athlete()
+        reply = ask_real(state, library, bundle, "why is my squat not going up", topic="exerciseProgress")
+        self.assertEqual(reply["lines"][0], "Goblet squat is waiting on you before it can move up.")
 
     def test_no_load_yet_offers_the_load_sheet(self):
         state, library, bundle = evidence_athlete()

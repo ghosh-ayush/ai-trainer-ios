@@ -34,14 +34,16 @@ The app has four tabs: **Today**, **Diet**, **Progress** and **You**.
   (ADR-020), and a chat head.
 - **Workout.** "Same as last", last time's numbers, plates per side (ADR-021), an optional spoken
   coach (ADR-022), and logging a set in words with Apple's on-device model (ADR-015).
-- **Chat (ADR-023).** Ask about progress, the week, time, pain or where the numbers come from.
-  The on-device model only sorts the message into a topic; the core writes every answer from the
-  athlete's records and the cited content, and nothing changes until a button is tapped.
+- **Chat (ADR-023, ADR-027).** Ask anything about progress, the week, time, pain or where the
+  numbers come from, with follow-ups. The core works out every fact from the athlete's records and
+  the cited content; Apple's on-device model rewords it conversationally, and the core refuses any
+  wording that adds a number or exercise. Pain answers keep the app's exact wording, the facts are
+  one tap away, and nothing changes until a button is tapped.
 - **Diet (ADR-016).** Daily targets from a cited diet bundle, withheld for anyone the policy
   excludes, foods from the bundled USDA table, weight-trend suggestions, and vegetarian, vegan
   and cuisine options.
 
-Apple's on-device model is used only to read words, never to decide. Typed chat and set logging
+Apple's on-device model reads words and rewords the core's answers; it never decides. Typed chat and set logging
 need Apple Intelligence; chat also works by tapping questions. Camera rep counting and HealthKit
 recovery are Debug-only labs, and recovery stays `unassessed` because no cited readiness rule
 fits the data HealthKit provides (`docs/research/readiness-evidence.md`).

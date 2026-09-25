@@ -16,6 +16,7 @@ from typing import Any
 
 from . import contracts
 from .chat import chat_reply
+from .chat.voice import check_wording
 from .commands import reduce_state
 from .content import active_bundle_raw, load_library, public_library
 from .cues import workout_cues
@@ -135,7 +136,11 @@ def dispatch(envelope: JSON) -> Any:
             payload["now"],
             payload.get("dayStart"),
             payload.get("utcOffset"),
+            payload.get("earlier"),
         )
+    if operation == "checkChatWording":
+        library = load_library(payload["permitsFixtures"])
+        return check_wording(payload["reply"], payload["wording"], payload["message"], library, payload.get("earlier"))
     raise DomainError("unsupported", "Unknown operation.")
 
 

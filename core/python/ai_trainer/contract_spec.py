@@ -451,6 +451,13 @@ MODELS: list[ModelSpec] = [
         "A study or official report an answer rests on, from the active content bundle.",
     ),
     _model(
+        "ChatWording",
+        "text:String accepted:Bool dropped:[String]",
+        "Whether the model's rewording of a chat answer may be shown (ADR-027). ``text`` is the wording "
+        "when every number and exercise in it is grounded in the facts or the athlete's words; otherwise "
+        "``accepted`` is false and ``dropped`` names what failed.",
+    ),
+    _model(
         "ChatReply",
         "topic:ChatTopic reading:String lines:[String] actions:[ChatAction] sources:[ChatSource] ignored:[String]",
         "The core's answer to one chat message. ``reading`` says how the message was understood; "
@@ -510,7 +517,12 @@ OPERATIONS: list[tuple[str, str]] = [
     ("dietPreview", "state:State profile:DietProfile now:Date"),
     ("foods", "query:String pattern?:DietPattern limit:Int"),
     ("readSet", "state:State text:String draft:SpokenSet permitsFixtures:Bool"),
-    ("chat", "state:State text:String draft:ChatDraft permitsFixtures:Bool now:Date dayStart?:Date utcOffset?:Int"),
+    (
+        "chat",
+        "state:State text:String draft:ChatDraft permitsFixtures:Bool now:Date dayStart?:Date utcOffset?:Int "
+        "earlier?:String",
+    ),
+    ("checkChatWording", "reply:ChatReply wording:String message:String permitsFixtures:Bool earlier?:String"),
 ]
 
 # State commands: name -> arguments spec. Order matters for the generated union.
@@ -570,6 +582,7 @@ RESULT_TYPES: dict[str, str] = {
     "foods": "[FoodItem]",
     "readSet": "SetReading",
     "chat": "ChatReply",
+    "checkChatWording": "ChatWording",
 }
 
 # --------------------------------------------------------------------------- #
@@ -863,4 +876,5 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     ),
     "ChatSource": SwiftModel("ChatSource", defaults={"doi": "nil", "pmid": "nil"}),
     "ChatReply": SwiftModel("ChatReply"),
+    "ChatWording": SwiftModel("ChatWording"),
 }

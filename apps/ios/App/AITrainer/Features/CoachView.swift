@@ -31,7 +31,8 @@ struct ChatHeadButton: View {
 struct ChatEntry: Identifiable {
     enum Content {
         case athlete(String)
-        case reply(ChatReply)
+        /// The core's answer, and the model's checked rewording of it when there is one (ADR-027).
+        case reply(ChatReply, voice: String?)
         case note(String)
     }
     let id = UUID()
@@ -74,6 +75,7 @@ struct CoachChatSheet: View {
     @Binding var entries: [ChatEntry]
     @State private var text = ""
     @State private var isReading = false
+    @State private var busyLabel = "Reading…"
     @State private var starters: [ChatAction] = []
     @State private var route: ChatRoute?
     @State private var confirmSkip = false
@@ -91,7 +93,7 @@ struct CoachChatSheet: View {
                         if isReading {
                             HStack(spacing: 8) {
                                 ProgressView().tint(Stitch.accentPrimary)
-                                Text("Reading…").stitch(.body13).foregroundStyle(Stitch.textMuted)
+                                Text(busyLabel).stitch(.body13).foregroundStyle(Stitch.textMuted)
                             }
                             .id("reading")
                         }
@@ -148,39 +150,42 @@ struct CoachChatSheet: View {
                     .padding(.vertical, 10)
                     .glass(radius: 16, fill: Stitch.glassSurface2)
             }
-        case .reply(let reply):
-            ChatReplyView(reply: reply, onAction: perform)
+        case .reply(let reply, let voice):
+            ChatReplyView(reply: reply, voice: voice, onAction: perform)
         case .note(let message):
             StitchFootnote(message)
         }
     }
 
+    /// The text field is always shown; where Apple's model can't run it is disabled and says why.
     @ViewBuilder private var inputBar: some View {
-        if OnDeviceChatReader.isAvailable {
+        let canType = OnDeviceChatReader.isAvailable
+        VStack(alignment: .leading, spacing: 6) {
+            if let reason = OnDeviceChatReader.unavailableReason {
+                StitchFootnote(reason)
+            }
             HStack(spacing: 8) {
-                TextField("Ask about your training", text: $text)
+                TextField(canType ? "Ask about your training" : "Typing needs Apple Intelligence", text: $text)
                     .stitch(.body15)
                     .foregroundStyle(Stitch.textPrimary)
                     .submitLabel(.send)
                     .onSubmit(send)
+                    .disabled(!canType)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
                     .glass(radius: 20, fill: Stitch.glassSurface)
                 Button(action: send) {
                     Image(systemName: "arrow.up.circle.fill").font(.system(size: 32))
                 }
-                .foregroundStyle(canSend ? Stitch.accentPrimary : Stitch.textDisabled)
-                .disabled(!canSend)
+                .foregroundStyle(canSend && canType ? Stitch.accentPrimary : Stitch.textDisabled)
+                .disabled(!canSend || !canType)
                 .accessibilityLabel("Send")
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(Stitch.glassChrome)
-            .overlay(alignment: .top) { Stitch.strokeHairline.frame(height: 1) }
-        } else {
-            StitchFootnote("Typing a question needs Apple Intelligence on this iPhone. Tap a question instead.")
-                .padding(16)
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(Stitch.glassChrome)
+        .overlay(alignment: .top) { Stitch.strokeHairline.frame(height: 1) }
     }
 
     @ViewBuilder private func routeView(_ route: ChatRoute) -> some View {
@@ -211,36 +216,70 @@ struct CoachChatSheet: View {
         }, failed: { _ in })
     }
 
+    /// The athlete's message before the latest one, so a follow-up is read and answered in context.
+    private var earlierMessage: String? {
+        let asked = entries.compactMap { entry -> String? in
+            if case .athlete(let message) = entry.content { return message }
+            return nil
+        }
+        return asked.count >= 2 ? asked[asked.count - 2] : nil
+    }
+
     /// A typed message: the on-device model reads it, then the core answers.
     private func send() {
         let message = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !message.isEmpty, !isReading else { return }
         text = ""
         entries.append(ChatEntry(content: .athlete(message)))
+        busyLabel = "Reading…"
         isReading = true
         let names = store.service?.chatExerciseNames ?? []
+        let earlier = earlierMessage
         Task { @MainActor in
             do {
-                let draft = try await OnDeviceChatReader.draft(from: message, exerciseNames: names)
-                answer(message, draft: draft)
+                let draft = try await OnDeviceChatReader.draft(from: message, exerciseNames: names, earlier: earlier)
+                answer(message, draft: draft, earlier: earlier)
             } catch {
                 // The core still reads pain words and offers its questions, so an answer comes anyway.
                 note(Self.unreadable(error))
-                answer(message, draft: ChatDraft(topic: .other))
+                answer(message, draft: ChatDraft(topic: .other), earlier: earlier)
             }
         }
     }
 
-    /// Sends `message` with `draft` to the core and shows its answer.
-    private func answer(_ message: String, draft: ChatDraft) {
+    /// Sends `message` with `draft` to the core, then has the model reword the answer (ADR-027).
+    private func answer(_ message: String, draft: ChatDraft, earlier: String?) {
+        busyLabel = "Reading…"
         isReading = true
-        store.read({ try $0.chat(text: message, draft: draft) }, then: { reply in
-            isReading = false
-            entries.append(ChatEntry(content: .reply(reply)))
+        store.read({ try $0.chat(text: message, draft: draft, earlier: earlier) }, then: { reply in
+            reword(reply, message: message, earlier: earlier)
         }, failed: { error in
             isReading = false
             note(error.localizedDescription)
         })
+    }
+
+    /// The model's rewording, shown only if the core accepts it; pain answers keep the app's wording.
+    private func reword(_ reply: ChatReply, message: String, earlier: String?) {
+        guard reply.topic != .pain, OnDeviceChatReader.isAvailable else {
+            show(reply, voice: nil)
+            return
+        }
+        busyLabel = "Writing…"
+        Task { @MainActor in
+            guard let wording = try? await OnDeviceChatWriter.reply(to: message, facts: reply, earlier: earlier) else {
+                show(reply, voice: nil)
+                return
+            }
+            store.read({ try $0.checkChatWording(reply: reply, wording: wording, message: message, earlier: earlier) },
+                       then: { checked in show(reply, voice: checked.accepted ? checked.text : nil) },
+                       failed: { _ in show(reply, voice: nil) })
+        }
+    }
+
+    private func show(_ reply: ChatReply, voice: String?) {
+        isReading = false
+        entries.append(ChatEntry(content: .reply(reply, voice: voice)))
     }
 
     /// Why the model's reading is missing. The model's own error only helps while developing.
@@ -264,7 +303,7 @@ struct CoachChatSheet: View {
         case .ask:
             guard let message = action.message, let draft = action.draft, !isReading else { return }
             entries.append(ChatEntry(content: .athlete(message)))
-            answer(message, draft: draft)
+            answer(message, draft: draft, earlier: earlierMessage)
         case .openToday:
             leave(to: .today)
         case .openDiet:
@@ -332,14 +371,26 @@ struct CoachChatSheet: View {
 /// actions to tap and the sources behind it.
 struct ChatReplyView: View {
     let reply: ChatReply
+    /// The model's checked rewording (ADR-027); nil shows the app's facts as written.
+    let voice: String?
     let onAction: (ChatAction) -> Void
     @State private var showSources = false
+    @State private var showFacts = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Read as · \(reply.reading)").stitch(.monoLabel).textCase(.uppercase).foregroundStyle(Stitch.textMuted)
-            ForEach(Array(reply.lines.enumerated()), id: \.offset) { _, line in
-                Text(line).stitch(.body15).foregroundStyle(Stitch.textPrimary).fixedSize(horizontal: false, vertical: true)
+            if let voice {
+                Text(voice).stitch(.body15).foregroundStyle(Stitch.textPrimary).fixedSize(horizontal: false, vertical: true)
+                Button(showFacts ? "Hide the app's exact answer" : "The app's exact answer") { showFacts.toggle() }
+                    .buttonStyle(.stitch(.link))
+            }
+            if voice == nil || showFacts {
+                ForEach(Array(reply.lines.enumerated()), id: \.offset) { _, line in
+                    Text(line).stitch(voice == nil ? .body15 : .body13)
+                        .foregroundStyle(voice == nil ? Stitch.textPrimary : Stitch.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             if !reply.ignored.isEmpty {
                 StitchFootnote("Left out because you didn't say it: \(ignoredText).")

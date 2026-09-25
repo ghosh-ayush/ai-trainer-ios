@@ -39,6 +39,7 @@ class ChatContext:
         now: float,
         day_start: float | None,
         utc_offset: int | None,
+        earlier: str | None = None,
     ) -> None:
         self.state = state
         self.library = library
@@ -49,6 +50,8 @@ class ChatContext:
         self.text = text.casefold()
         self.words = spoken_words(text)
         self.numbers = spoken_numbers(text)
+        # The athlete's previous message, so a follow-up ("and bench?", "why?") keeps its exercise.
+        self.earlier_words = spoken_words(earlier) if earlier else set()
         self.exercises = exercises_by_id(library)
         self.session = active_session(state)
         self.plan = self.session["plan"] if self.session is not None else next_plan(state)
@@ -89,19 +92,30 @@ class ChatContext:
         mentioned exercises; otherwise one heard exercise wins alone. The model's pick is ignored
         when the athlete said no word of it.
         """
-        heard = [key for key in self.names if self._distinctive(key) & self.words]
-        mentioned = [key for key in self.names if self._name_words(self.names[key]) & self.words]
+        exercise, candidates, dropped = self._grounded_in(self.words, named)
+        if exercise is None and not candidates and self.earlier_words:
+            # A follow-up names no exercise: the one the athlete named just before still counts.
+            exercise, candidates, dropped_earlier = self._grounded_in(self.earlier_words, named)
+            dropped = dropped and dropped_earlier
+        if dropped:
+            ignored.append("exercise")
+        return exercise, candidates
+
+    def _grounded_in(self, words: set[str], named: str | None) -> tuple[str | None, list[str], bool]:
+        """``(exercise, ambiguous candidates, whether the model's pick was dropped)`` for ``words``."""
+        heard = [key for key in self.names if self._distinctive(key) & words]
+        mentioned = [key for key in self.names if self._name_words(self.names[key]) & words]
+        dropped = False
         if named is not None:
             picked = next((key for key in self.names if fold(self.names[key]) == fold(named)), None)
             if picked is not None and picked in mentioned and (picked in heard or len(mentioned) == 1):
-                return picked, []
-            if picked is None or picked not in mentioned:
-                ignored.append("exercise")
+                return picked, [], False
+            dropped = picked is None or picked not in mentioned
         if len(heard) == 1:
-            return heard[0], []
+            return heard[0], [], dropped
         if len(mentioned) == 1:
-            return mentioned[0], []
-        return None, heard or mentioned
+            return mentioned[0], [], dropped
+        return None, heard or mentioned, dropped
 
     def grounded_number(
         self, value: int | None, heard: set[float], bounds: tuple[int, int], field: str, ignored: list[str]

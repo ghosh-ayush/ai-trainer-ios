@@ -24,12 +24,34 @@ public enum OnDeviceChatReader {
         return false
     }
 
-    /// The model's reading of the athlete's `text`. `exerciseNames` are the plan's exercises; the
-    /// model may only name one of them, or none.
-    public static func draft(from text: String, exerciseNames: [String]) async throws -> ChatDraft {
+    /// Why typing is unavailable, in words the athlete can act on; nil when the model can run.
+    public static var unavailableReason: String? {
         #if canImport(FoundationModels)
         if #available(iOS 26.0, macOS 26.0, *) {
-            return try await OnDeviceChatModel.draft(from: text, exerciseNames: exerciseNames)
+            switch SystemLanguageModel.default.availability {
+            case .available:
+                return nil
+            case .unavailable(.appleIntelligenceNotEnabled):
+                return "Turn on Apple Intelligence in Settings to type questions. Until then, tap one above."
+            case .unavailable(.modelNotReady):
+                return "Apple's on-device model is still downloading. Until it's ready, tap a question above."
+            case .unavailable(.deviceNotEligible):
+                return "This iPhone can't run Apple's on-device model, so tap a question above."
+            case .unavailable:
+                return "Apple's on-device model isn't available right now, so tap a question above."
+            }
+        }
+        #endif
+        return "Typing needs iOS 26 or later with Apple Intelligence. Tap a question above."
+    }
+
+    /// The model's reading of the athlete's `text`. `exerciseNames` are the plan's exercises; the
+    /// model may only name one of them, or none. `earlier` is the athlete's previous message, so a
+    /// follow-up ("and bench?", "why?") is read in context.
+    public static func draft(from text: String, exerciseNames: [String], earlier: String? = nil) async throws -> ChatDraft {
+        #if canImport(FoundationModels)
+        if #available(iOS 26.0, macOS 26.0, *) {
+            return try await OnDeviceChatModel.draft(from: text, exerciseNames: exerciseNames, earlier: earlier)
         }
         #endif
         throw TrainerError.unsupported
@@ -65,10 +87,11 @@ private enum OnDeviceChatModel {
         Copy numbers exactly as said. Never guess a value the athlete did not say.
         """
 
-    static func draft(from text: String, exerciseNames: [String]) async throws -> ChatDraft {
+    static func draft(from text: String, exerciseNames: [String], earlier: String?) async throws -> ChatDraft {
         let schema = try GenerationSchema(root: root(exerciseNames: exerciseNames), dependencies: [])
         let session = LanguageModelSession(instructions: instructions)
-        let response = try await session.respond(to: text, schema: schema,
+        let prompt = earlier.map { "Earlier in this chat the athlete asked: \"\($0)\"\nNow they write: \"\(text)\"" } ?? text
+        let response = try await session.respond(to: prompt, schema: schema,
                                                  options: GenerationOptions(samplingMode: .greedy))
         let content = response.content
         let topicName = try content.value(String.self, forProperty: "topic")
