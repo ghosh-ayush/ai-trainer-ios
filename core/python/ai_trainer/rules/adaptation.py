@@ -30,7 +30,7 @@ from typing import Any
 
 from ..athlete_state import status_seconds
 from ..messages import Decision, decision
-from .week_plans import WEEKDAY_NAMES
+from ..wording import WEEKDAY_SHORT, join_words
 from .week_program import option_summaries, program_from_options, week_options
 
 JSON = dict[str, Any]
@@ -265,23 +265,16 @@ def _explanation(summary: JSON, drift: list[str], adjust: JSON, week: JSON) -> s
         count = len(summary["timeLimitedMinutes"])
         sentences.append(f"{count} sessions ended early for time; they lasted about {adjust['minutesCap']} minutes.")
     if "days" in drift or adjust.get("habitDays"):
-        names = _join([WEEKDAY_NAMES[day] for day in adjust.get("habitDays", [])])
+        names = join_words([WEEKDAY_SHORT[day] for day in adjust.get("habitDays", [])])
         if names:
             sentences.append(f"You have mostly trained on {names}.")
     days = week["sessionsPerWeek"]
-    schedule = ", ".join(WEEKDAY_NAMES[session["weekday"]] for session in week["sessions"])
+    schedule = ", ".join(WEEKDAY_SHORT[session["weekday"]] for session in week["sessions"])
     sentences.append(
         f"{week['name']} on {days} day{'s' if days != 1 else ''} ({schedule}) fits what you have been doing "
         "and keeps each muscle's weekly work where your time allows."
     )
     return " ".join(sentences)
-
-
-def _join(items: list[str]) -> str:
-    """``A``, ``A and B``, ``A, B and C``."""
-    if len(items) < 2:
-        return "".join(items)
-    return ", ".join(items[:-1]) + " and " + items[-1]
 
 
 def _end_of_day(now: float) -> float:

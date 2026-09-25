@@ -28,6 +28,7 @@ from .athlete_state import active_session, has_working_set
 from .commands.workout import MAX_REPS, MAX_RIR
 from .content import exercises_by_id
 from .errors import require
+from .wording import fold
 
 JSON = dict[str, Any]
 
@@ -95,7 +96,7 @@ def read_set(state: JSON, text: str, draft: JSON, library: JSON) -> JSON:
     if slot is None:
         return _ask(f"Which exercise was that? Today: {today}.", ignored)
     name = names[slot["id"]]
-    if draft.get("exercise") is not None and _fold(draft["exercise"]) != _fold(name):
+    if draft.get("exercise") is not None and fold(draft["exercise"]) != fold(name):
         ignored.append("exercise")
 
     reps = values.get("reps")
@@ -192,7 +193,7 @@ def _pick_slot(session: JSON, named: str | None, heard_words: set[str], names: d
     heard = [slot for slot in slots if _distinctive_words(slot, slots, names) & heard_words]
     if named is not None:
         for slot in heard:
-            if _fold(names[slot["id"]]) == _fold(named):
+            if fold(names[slot["id"]]) == fold(named):
                 return slot
     if len(heard) == 1:
         return heard[0]
@@ -268,10 +269,6 @@ def _singular(word: str) -> str:
     if word.endswith("s") and not word.endswith("ss"):
         return word[:-1]
     return word
-
-
-def _fold(text: str) -> str:
-    return text.strip().casefold()
 
 
 def _ask(question: str, ignored: list[str]) -> JSON:

@@ -29,11 +29,11 @@ from itertools import combinations
 from typing import Any
 
 from ..errors import DomainError
+from ..wording import WEEKDAY_SHORT
 
 JSON = dict[str, Any]
 
 DAYS_PER_WEEK = 7
-WEEKDAY_NAMES = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
 
 def week_candidates(
@@ -305,5 +305,5 @@ def _primary_muscles(role: str, structures: JSON) -> list[str]:
 
 def _candidate_id(split_id: str, layout: tuple[tuple[int, str], ...]) -> str:
     """A stable, readable id such as ``upperLower:Mon-upper,Tue-lower``."""
-    parts = [f"{WEEKDAY_NAMES[day]}-{session_type}" for day, session_type in layout]
+    parts = [f"{WEEKDAY_SHORT[day]}-{session_type}" for day, session_type in layout]
     return f"{split_id}:{','.join(parts)}"
