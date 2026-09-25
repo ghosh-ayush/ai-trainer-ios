@@ -427,3 +427,23 @@ Consequences: a chat head on Today opens the chat sheet (`CoachView.swift`). The
 stays 1.0 and the stored state is unchanged. Two decision messages no longer say "this fixture" on
 real content.
 Status: accepted (owner, 2026-09-25).
+
+## ADR-024 · 2026-09-25 · UI tests drive the real app
+Why: rules are tested in Python and the service layer in Swift, but nothing tested the screens.
+Screen problems (weekday labels cutting off, raw movement codes on slot cards) were found only by
+hand in the simulator.
+Decision: an `AITrainerUITests` XCUITest target, created in Xcode (ADR-011), in the shared
+`AITrainer` scheme. Its folder is synchronised, so new test files need no project edit.
+- Each test launches the app with `--ui-testing`. In Debug that makes `AppStore` use an in-memory
+  repository, so a test starts from onboarding and never reads or writes saved athlete data;
+  Release builds ignore the flag.
+- The first tests cover onboarding on free days to an accepted week, the weekday picker,
+  logging a set (and that "Same as last" appears only after a set that differed from the plan),
+  and chat: a tapped question, the pain answer, marking an injury and "I'm back".
+- Tests find controls by their visible labels or accessibility labels, and scroll to them.
+  Truncated text cannot be seen through accessibility, so the weekday test attaches a screenshot
+  for review instead of asserting that labels fit.
+- CI's `simulator` job runs them after the smoke test, serially, and uploads the result bundle
+  (with screenshots) when a test fails.
+Consequences: the simulator job takes about two minutes longer; its time limit is 40 minutes.
+Status: accepted (owner, 2026-09-25).

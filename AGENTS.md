@@ -56,6 +56,7 @@ core/python/ai_trainer/   domain rules, state commands, content bundle, migratio
 core/python/tests/        Python behaviour + contract tests (fast; run these constantly)
 shared/fixtures/v1/       golden request/response fixtures
 apps/ios/App/             SwiftUI app + AITrainer.xcodeproj (Xcode owns it; see ADR-011)
+apps/ios/App/AITrainerUITests/  UI tests driving the real app (folder-synchronised: new files join automatically)
 apps/ios/Sources/AITrainerCore/   Swift DTOs, transport to Python, persistence, perception
 apps/ios/PythonBridge/    C bridge to CPython (rarely changes)
 apps/ios/Vendor/          gitignored: Python.xcframework from scripts/setup_python.sh
@@ -80,6 +81,9 @@ python3 scripts/content_review_sheet.py <bundle-id>  # after ANY change to a con
 python3 scripts/build_food_data.py <dir> # rebuild data/foods.json from unzipped USDA FDC downloads
 open apps/ios/App/AITrainer.xcodeproj    # scheme AITrainer, Debug, iPhone simulator
 scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
+xcodebuild test -project apps/ios/App/AITrainer.xcodeproj -scheme AITrainer -sdk iphonesimulator \
+  -destination 'id=<SIM_UUID>' -only-testing:AITrainerUITests -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO
+                                         # UI tests (ADR-024); each launches with --ui-testing
 ```
 
 ## Workflow
