@@ -42,6 +42,7 @@ def migrate_state(state: JSON) -> JSON:
         state = _v2_to_v3(state)
     if state.get("schemaVersion") == 3:
         state = _repair_early_v3(state)
+        state = _v3_to_v4(state)
     if state.get("schemaVersion") != CURRENT_STATE_VERSION:
         raise DomainError("unsupported", "Saved state was written by a newer app version.")
     contracts.validate(state, contracts.REQUEST["$defs"]["State"])
@@ -65,6 +66,16 @@ def _v2_to_v3(state: JSON) -> JSON:
     state.setdefault("dietDecisions", [])
     state.setdefault("excludedWeighIns", [])
     state["schemaVersion"] = 3
+    return state
+
+
+def _v3_to_v4(state: JSON) -> JSON:
+    """Weekly plans (ADR-017) add optional ``Profile.freeDays``/``minutesByDay`` and ``Plan.weekday``.
+
+    Nothing is filled in: an older profile never said which weekdays are free, so they stay unknown
+    until the athlete picks them.
+    """
+    state["schemaVersion"] = 4
     return state
 
 

@@ -13,7 +13,7 @@ ai_trainer/
 ├── contracts.py           bounded JSON-Schema validator + bundled request/response schemas
 ├── errors.py              DomainError(code, message) + require()
 ├── messages.py            decision(reason, …) builder; reason → outcome/explanation table
-├── decisions.json         the 32 reason codes and their user-facing explanations
+├── decisions.json         the reason codes and their user-facing explanations
 ├── athlete_state.py       read-only accessors: next_plan, active_session, comparison_key, …
 ├── events.py              record_event, expire_proposals, store_plan
 ├── content.py             loads the content bundle; ReviewStatus gating: is_enabled, exercises_by_id
@@ -26,7 +26,11 @@ ai_trainer/
 │   ├── eligibility.py     decide(): spec §5.2 gate order, then routes to a rule
 │   ├── progression.py     TB-04 double progression on comparable evidence
 │   ├── adjustments.py     TB-02/03/06 reschedule · shorten · curated substitution
-│   └── program.py         TB-01 initial program selection
+│   ├── program.py         TB-01 initial program selection (one-session template, or the weekly planner)
+│   ├── selection.py       exercise for a role, per-goal prescription (shared by both program paths)
+│   ├── week_plans.py      ADR-017: every week the guardrails allow on the athlete's free days
+│   ├── plan_ranking.py    ADR-017: orders valid weeks for one athlete, with reason codes
+│   └── week_program.py    ADR-017: distinct options, and the Program the chosen one becomes
 └── commands/
     ├── __init__.py        reduce_state(payload): command → handler table
     ├── context.py         CommandContext: state copy, arguments, now, id supply, event helper

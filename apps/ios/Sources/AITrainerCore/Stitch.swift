@@ -248,7 +248,7 @@ public struct StitchButtonStyle: ButtonStyle {
             .stitch(compact ? .bodyMedium13 : .displayH3)
             .lineLimit(2).multilineTextAlignment(.center).minimumScaleFactor(0.8)
             .foregroundStyle(foreground)
-            .padding(.horizontal, 16)
+            .padding(.horizontal, compact ? 8 : 16)
             .frame(maxWidth: .infinity, minHeight: kind == .link ? 40 : 48)
             .background(background, in: shape)
             .overlay { if kind == .secondary || kind == .destructive || !isEnabled { shape.strokeBorder(Stitch.glassStroke) } }

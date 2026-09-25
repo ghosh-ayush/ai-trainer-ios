@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable
 
 from ..athlete_state import has_active_session, next_plan
 from ..errors import require
 from ..events import store_plan
 from ..rules.program import REQUIRED_ID_COUNT, initial_program
 from .context import CommandContext
+
+# A weekly plan (ADR-017) needs one id for the program and one per plan and slot: at most six
+# sessions of up to nine slots is 61. The host sends at least this many plus a few for events.
+WEEKLY_ID_COUNT = 64
 
 
 def accept_initial_plan(context: CommandContext) -> None:
@@ -19,8 +24,12 @@ def accept_initial_plan(context: CommandContext) -> None:
     """
     state = context.state
     profile = context.arguments["profile"]
-    program_ids = [context.next_id() for _ in range(REQUIRED_ID_COUNT)]
-    program = initial_program(profile, context.library, context.now, program_ids)
+    if "planner" in context.library:
+        # Taken lazily: a week uses only as many ids as it has plans and slots.
+        program_ids: Iterable[str] = (context.next_id() for _ in range(WEEKLY_ID_COUNT))
+    else:
+        program_ids = [context.next_id() for _ in range(REQUIRED_ID_COUNT)]
+    program = initial_program(profile, context.library, context.now, program_ids, context.arguments.get("optionID"))
     require(not has_active_session(state), "invalid", "End the active session before changing programs.")
     if state.get("program"):
         state["previousPrograms"].append(state["program"])

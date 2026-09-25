@@ -123,6 +123,15 @@ scripts/smoke_ios.sh <BOOTED_SIM_UUID>   # after a Debug build
   never assumed. "4+" RIR is recorded as 4.
 - "Log a set in words" appears only where Apple's on-device model runs. `readSet` drops any
   number the athlete did not say, even one the model returned, and nothing saves until Save (ADR-015).
+- Weekly plans (ADR-017) never guess weekdays: onboarding starts with no free day selected, and a
+  migrated profile keeps `freeDays` absent. Seven free days give at most six sessions (no qualifying
+  7-day trial); the cap is a cited owner decision in the bundle, not code.
+- A week that fits recent training (ADR-018) is proposed only after the week has run 14 days, from
+  logged sessions only (a skipped session or an empty day is a miss), and never applied without Accept.
+  Weekday habits need the host's UTC offset (sent with `views` and the replan request); without it they
+  stay unknown. "Ended early for time" counts only when the athlete chose the "time" reason.
+- `evidence-1` is `disabled`, superseded by `evidence-2` (the weekly planner); only one bundle may
+  be `approved` at a time.
 - Dates cross the bridge as binary64 seconds since 2001-01-01 (Foundation reference epoch).
 - Swift has no validators of its own: set and nutrient rules run in Python when a command is
   saved, so a malformed set is rejected by `saveSet`, not by a Swift `validate()`.

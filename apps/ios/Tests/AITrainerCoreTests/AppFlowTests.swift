@@ -56,6 +56,15 @@ final class AppFlowTests: XCTestCase {
         XCTAssertNil(saved.rir)
         XCTAssertEqual(service.repository.snapshot.activeSession?.restEndsAt, now.addingTimeInterval(120))
     }
+    /// ADR-018: a replan request (kind only, no fields) crosses the contract. The pinned fixture has no
+    /// weekly planner, so the core says so and nothing is stored.
+    func testReplanRequestIsUnderstoodAndNeedsAWeeklyPlanner() throws {
+        let service = try trainedService()
+        let decision = try service.request(.replan(utcOffset: 0), now: now)
+        XCTAssertEqual(decision.reason, "REPLAN_UNAVAILABLE")
+        XCTAssertNil(decision.week)
+        XCTAssertTrue(service.repository.snapshot.recommendations.allSatisfy { $0.request.kind != "replan" })
+    }
     /// The model's draft stands in for `OnDeviceSetReader`: an RIR the athlete never said is dropped,
     /// and nothing is recorded until the preview is saved as a normal set.
     func testWordsBecomeAPreviewThatSavesOnlyWhenConfirmed() throws {
@@ -163,7 +172,7 @@ final class AppFlowTests: XCTestCase {
         object["dietDecisions"] = nil
         storage.data = try JSONSerialization.data(withJSONObject: object)
         let migrated = try StateRepository(persistence: storage, core: core).snapshot
-        XCTAssertEqual(migrated.schemaVersion, 3)
+        XCTAssertEqual(migrated.schemaVersion, 4)
         XCTAssertEqual(migrated.weighIns, [])
         XCTAssertEqual(migrated.recommendations.first?.request, .progression(slot.id))
     }

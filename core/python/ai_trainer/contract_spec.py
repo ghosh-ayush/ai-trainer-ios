@@ -117,8 +117,10 @@ MODELS: list[ModelSpec] = [
         "Profile",
         "adultConfirmed:Bool supportedScopeConfirmed:Bool goal:String experience:String daysPerWeek:Int "
         "minutes:Int equipment:[String] preferredUnit:Unit timeZone:String excludedExercises:[String] "
-        "preferredExercises:[String]",
-        "What the athlete told us at onboarding. No body metrics, no estimated strength.",
+        "preferredExercises:[String] freeDays?:[Int] minutesByDay?:{Int}",
+        "What the athlete told us at onboarding. No body metrics, no estimated strength. ``freeDays`` are "
+        "weekdays 0-6 (Monday = 0) and ``minutesByDay`` maps a weekday to that day's minutes; both stay "
+        "absent until the athlete gives them (ADR-017).",
     ),
     _model(
         "Equipment",
@@ -150,8 +152,10 @@ MODELS: list[ModelSpec] = [
     ),
     _model(
         "Plan",
-        "id:UUID revision:Int name:String slots:[Slot] modified:Bool scheduledDate?:Date warmUpMinutes:Int",
-        "One session's accepted prescriptions. ``modified`` marks a temporary shortened/substituted copy.",
+        "id:UUID revision:Int name:String slots:[Slot] modified:Bool scheduledDate?:Date warmUpMinutes:Int "
+        "weekday?:Int",
+        "One session's accepted prescriptions. ``modified`` marks a temporary shortened/substituted copy. "
+        "``weekday`` (0-6, Monday = 0) is the day a weekly plan (ADR-017) puts this session on.",
     ),
     _model(
         "Program",
@@ -180,8 +184,9 @@ MODELS: list[ModelSpec] = [
     _model("Evidence", "id:UUID revision:Int", "A set log id/revision a decision relied on."),
     _model(
         "Decision",
-        "outcome:Outcome reason:String explanation:String after?:Plan evidence:[Evidence]",
-        "The Training Brain's answer. ``after`` is the proposed plan for ``proposeChange`` outcomes.",
+        "outcome:Outcome reason:String explanation:String after?:Plan evidence:[Evidence] week?:WeekOption",
+        "The Training Brain's answer. ``after`` is the proposed plan for ``proposeChange`` outcomes; ``week`` is "
+        "the proposed week for a ``replan`` (ADR-018), built into a program only when accepted.",
     ),
     # -> Request (a tagged union over REQUEST_KINDS) is inserted here by the schema generator.
     _model(
@@ -272,8 +277,9 @@ MODELS: list[ModelSpec] = [
     ),
     _model(
         "TodayStatus",
-        "slots:[SlotStatus] proposals:[ProposalCard] autoRequest?:UUID",
-        "Read-only Today view model. ``autoRequest`` names one slot whose progression the host may request.",
+        "slots:[SlotStatus] proposals:[ProposalCard] autoRequest?:UUID autoReplan?:Bool",
+        "Read-only Today view model. ``autoRequest`` names one slot whose progression the host may request; "
+        "``autoReplan`` says the host may request a week that fits recent attendance (ADR-018).",
     ),
     _model("ProgressEntry", "sessionID:UUID date:Date summary:String", "One recorded session as logged."),
     _model(
@@ -334,6 +340,18 @@ MODELS: list[ModelSpec] = [
         "A read-only HealthKit sample with provenance. Never a readiness score.",
     ),
     _model(
+        "WeekSession",
+        "weekday:Int name:String minutes:Number exercises:Int sets:Int",
+        "One session of a weekly option: its day, session type, estimated minutes and working sets.",
+    ),
+    _model(
+        "WeekOption",
+        "id:String split:String name:String days:[Int] sessions:[WeekSession] sessionsPerWeek:Int "
+        "weeklyMinutes:Number volume:String score:Number reasons:[String]",
+        "One week the athlete may choose (ADR-017). ``volume`` is ``full`` or ``reduced`` (time-limited); "
+        "``reasons`` are codes the host explains. Choosing it is still a proposal the athlete accepts.",
+    ),
+    _model(
         "SpokenSet",
         "exercise?:String reps?:Int load?:Number rir?:Int",
         "What the on-device language model read from the athlete's words. Only a draft: "
@@ -358,7 +376,7 @@ INTEGER_BOUNDS: list[tuple[str, str, int, int]] = [
     ("Slot", "workingSets", 1, 1000),
     ("Policy", "requiredExposures", 1, 1000),
 ]
-STATE_SCHEMA_VERSION = 3  # migrations.py upgrades older saved files
+STATE_SCHEMA_VERSION = 4  # migrations.py upgrades older saved files
 
 # Training request variants: kind -> ordered (field, type) pairs.
 REQUEST_KINDS: dict[str, list[tuple[str, str]]] = {
@@ -366,6 +384,7 @@ REQUEST_KINDS: dict[str, list[tuple[str, str]]] = {
     "shorten": [("minutes", "Int")],
     "substitute": [("slotID", "UUID"), ("alternativeID", "String")],
     "reschedule": [("date", "Date")],
+    "replan": [("utcOffset", "Int")],
 }
 
 
@@ -385,12 +404,13 @@ def request_model() -> ModelSpec:
 
 OPERATIONS: list[tuple[str, str]] = [
     ("decide", "state:State request:Request permitsFixtures:Bool now:Date"),
-    ("initialProgram", "profile:Profile permitsFixtures:Bool now:Date ids:[UUID]"),
+    ("initialProgram", "profile:Profile permitsFixtures:Bool now:Date ids:[UUID] optionID?:String"),
+    ("weekOptions", "profile:Profile permitsFixtures:Bool"),
     ("library", "permitsFixtures:Bool"),
     ("migrateState", "state:Object"),
     ("nutrients", "nutrients:Nutrients servings:Number"),
     ("recovery", "observations:[RecoveryObservation]"),
-    ("views", "state:State permitsFixtures:Bool now:Date dayStart?:Date"),
+    ("views", "state:State permitsFixtures:Bool now:Date dayStart?:Date utcOffset?:Int"),
     ("loadSteps", "base:Number step:Number"),
     ("dietOptions", "now:Date"),
     ("dietPreview", "state:State profile:DietProfile now:Date"),
@@ -400,7 +420,7 @@ OPERATIONS: list[tuple[str, str]] = [
 
 # State commands: name -> arguments spec. Order matters for the generated union.
 COMMANDS: dict[str, str] = {
-    "acceptInitialPlan": "profile:Profile",
+    "acceptInitialPlan": "profile:Profile optionID?:String",
     "configureLoad": "slotID:UUID load?:Number options:[Number]",
     "start": "checkIn:CheckIn",
     "skip": "checkIn:CheckIn",
@@ -438,6 +458,7 @@ RESULT_MODELS: list[ModelSpec] = [
 RESULT_TYPES: dict[str, str] = {
     "decide": "Decision",
     "initialProgram": "Program",
+    "weekOptions": "[WeekOption]",
     "library": "Library",
     "migrateState": "State",
     "nutrients": "Nutrients",
@@ -517,6 +538,8 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
             "timeZone": "TimeZone.current.identifier",
             "excludedExercises": "[]",
             "preferredExercises": "[]",
+            "freeDays": "nil",
+            "minutesByDay": "nil",
         },
         sets=frozenset({"equipment", "excludedExercises", "preferredExercises"}),
     ),
@@ -527,12 +550,20 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "Policy": SwiftModel("TrainingPolicy"),
     "Library": SwiftModel("ContentLibrary"),
     "Request": SwiftModel(
-        "TrainingRequest", defaults={"slotID": "nil", "minutes": "nil", "alternativeID": "nil", "date": "nil"}
+        "TrainingRequest",
+        defaults={"slotID": "nil", "minutes": "nil", "alternativeID": "nil", "date": "nil", "utcOffset": "nil"},
     ),
     "Slot": SwiftModel("Prescription", defaults={"id": "UUID()", "load": "nil"}, identifiable=True),
     "Plan": SwiftModel(
         "SessionPlan",
-        defaults={"id": "UUID()", "revision": "1", "modified": "false", "scheduledDate": "nil", "warmUpMinutes": "5"},
+        defaults={
+            "id": "UUID()",
+            "revision": "1",
+            "modified": "false",
+            "scheduledDate": "nil",
+            "warmUpMinutes": "5",
+            "weekday": "nil",
+        },
         identifiable=True,
     ),
     "Program": SwiftModel(
@@ -575,7 +606,7 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
         identifiable=True,
     ),
     "Evidence": SwiftModel("Evidence", identifiable=True),
-    "Decision": SwiftModel("Decision", defaults={"after": "nil", "evidence": "[]"}),
+    "Decision": SwiftModel("Decision", defaults={"after": "nil", "evidence": "[]", "week": "nil"}),
     "Recommendation": SwiftModel(
         "Recommendation", defaults={"id": "UUID()", "status": ".proposed", "rejectionReason": "nil"}, identifiable=True
     ),
@@ -599,7 +630,7 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "State": SwiftModel(
         "AthleteState",
         defaults={
-            "schemaVersion": "3",
+            "schemaVersion": "4",
             "athleteID": "UUID()",
             "revision": "0",
             "contextRevision": "0",
@@ -685,9 +716,13 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "CatalogEvidence": SwiftModel("CatalogEvidence", defaults={"doi": "nil", "pmid": "nil"}),
     "SlotStatus": SwiftModel("SlotStatus", defaults={"action": "nil"}),
     "ProposalCard": SwiftModel("ProposalCard", defaults={"slotID": "nil"}),
-    "TodayStatus": SwiftModel("TodayStatus", defaults={"slots": "[]", "proposals": "[]", "autoRequest": "nil"}),
+    "TodayStatus": SwiftModel(
+        "TodayStatus", defaults={"slots": "[]", "proposals": "[]", "autoRequest": "nil", "autoReplan": "nil"}
+    ),
     "ProgressEntry": SwiftModel("ProgressEntry"),
     "ExerciseProgress": SwiftModel("ExerciseProgress", defaults={"load": "nil"}),
+    "WeekSession": SwiftModel("WeekSession"),
+    "WeekOption": SwiftModel("WeekOption", identifiable=True),
     "Views": SwiftModel("CoreViews", defaults={"today": "TodayStatus()", "progress": "[]", "diet": "DietView()"}),
     "SpokenSet": SwiftModel("SpokenSet", defaults={"exercise": "nil", "reps": "nil", "load": "nil", "rir": "nil"}),
     "SetPreview": SwiftModel("SetPreview", defaults={"load": "nil", "rir": "nil"}),

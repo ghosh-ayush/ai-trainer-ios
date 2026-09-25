@@ -1,0 +1,375 @@
+{
+  "id": "evidence-2",
+  "version": "evidence-2",
+  "review": "approved",
+  "evidenceBasis": "evidence-1 (docs/research/resistance-training-evidence.md) plus weekly planning for 1-7 free days (ADR-017) from docs/research/training-frequency-evidence.md and exercise selection for eleven movement roles from docs/research/exercise-evidence.json. Every value is cited with a locator and a certainty grade, or recorded as an owner decision with a rationale built from cited sources.",
+  "sources": {
+    "ACSM09": {
+      "citation": "American College of Sports Medicine. Progression Models in Resistance Training for Healthy Adults (Position Stand). Med Sci Sports Exerc. 2009;41(3):687-708.",
+      "doi": "10.1249/MSS.0b013e3181915670",
+      "design": "positionStand",
+      "fullTextRead": true
+    },
+    "ACSM26": {
+      "citation": "Currier BS, D'Souza AC, Fiatarone Singh MA, et al. American College of Sports Medicine Position Stand. Resistance Training Prescription for Muscle Function, Hypertrophy, and Physical Performance in Healthy Adults: An Overview of Reviews. Med Sci Sports Exerc. 2026;58(4):851-872.",
+      "doi": "10.1249/MSS.0000000000003897",
+      "design": "positionStand",
+      "fullTextRead": true
+    },
+    "BAZVALLE22": {
+      "citation": "Baz-Valle E, Balsalobre-Fernández C, Alix-Fages C, Santos-Concejero J. A Systematic Review of The Effects of Different Resistance Training Volumes on Muscle Hypertrophy. J Hum Kinet. 2022;81:199–210.",
+      "doi": "10.2478/hukin-2022-0017",
+      "design": "metaAnalysis",
+      "fullTextRead": true,
+      "pmid": "35291645"
+    },
+    "BLOOMQUIST2013": {
+      "citation": "Bloomquist K, Langberg H, Karlsen S, Madsgaard S, Boesen M, Raastad T. Effect of range of motion in heavy load squatting on muscle and tendon adaptations. Eur J Appl Physiol. 2013;113(8):2133-42.",
+      "doi": "10.1007/s00421-013-2642-7",
+      "pmid": "23604798",
+      "design": "randomisedTrial",
+      "fullTextRead": true
+    },
+    "BOURNE2017": {
+      "citation": "Bourne MN, Duhig SJ, Timmins RG, Williams MD, Opar DA, Al Najjar A, Kerr GK, Shield AJ. Impact of the Nordic hamstring and hip extension exercises on hamstring architecture and morphology: implications for injury prevention. Br J Sports Med. 2017;51(5):469-477.",
+      "doi": "10.1136/bjsports-2016-096130",
+      "pmid": "27660368",
+      "design": "randomisedTrial",
+      "fullTextRead": true
+    },
+    "CAMPOS2020": {
+      "citation": "Campos YAC, Vianna JM, Guimaraes MP, Oliveira JLD, Hernandez-Mosqueira C, da Silva SF, Marchetti PH. Different shoulder exercises affect the activation of deltoid portions in resistance-trained individuals. J Hum Kinet. 2020;75:5-14.",
+      "doi": "10.2478/hukin-2020-0033",
+      "pmid": "33312291",
+      "design": "crossoverTrial",
+      "fullTextRead": true
+    },
+    "CARNEIRO24": {
+      "citation": "Carneiro MAS, Nunes PRP, Souza MVC, Assumpção CO, Orsatti FL. Full-body resistance training promotes greater fat mass loss than a split-body routine in well-trained males: A randomized trial. Eur J Sport Sci. 2024;24(6):846–854.",
+      "doi": "10.1002/ejsc.12104",
+      "design": "randomisedTrial",
+      "fullTextRead": true,
+      "pmid": "38874955"
+    },
+    "COLQUHOUN18": {
+      "citation": "Colquhoun RJ, Gai CM, Aguilar D, et al. Training Volume, Not Frequency, Indicative of Maximal Strength Adaptations to Resistance Training. J Strength Cond Res. 2018;32(5):1207–1213.",
+      "doi": "10.1519/JSC.0000000000002414",
+      "design": "randomisedTrial",
+      "fullTextRead": false,
+      "pmid": "29324578"
+    },
+    "CURRIER23": {
+      "citation": "Currier BS, et al. Resistance training prescription for muscle strength and hypertrophy in healthy adults: a systematic review and Bayesian network meta-analysis. Br J Sports Med. 2023;57(18):1211–1220.",
+      "doi": "10.1136/bjsports-2023-106807",
+      "design": "metaAnalysis",
+      "fullTextRead": true,
+      "pmid": "37414459"
+    },
+    "DANKEL17F": {
+      "citation": "Dankel SJ, Mattocks KT, Jessee MB, Buckner SL, Mouser JG, Counts BR, et al. Frequency: The Overlooked Resistance Training Variable for Inducing Muscle Hypertrophy? Sports Med. 2017;47(5):799–805.",
+      "doi": "10.1007/s40279-016-0640-8",
+      "design": "narrativeReview",
+      "fullTextRead": false,
+      "pmid": "27752983"
+    },
+    "DELGADO2019": {
+      "citation": "Delgado J, Drinkwater EJ, Banyard HG, Haff GG, Nosaka K. Comparison between back squat, Romanian deadlift, and barbell hip thrust for leg and hip muscle activities during hip extension. J Strength Cond Res. 2019;33(10):2595-2601.",
+      "doi": "10.1519/JSC.0000000000003290",
+      "pmid": "31356511",
+      "design": "crossoverTrial",
+      "fullTextRead": false
+    },
+    "EARP2023": {
+      "citation": "Earp JE, Angelino D, Hatfield DL, Colantuono V, Jackson ER, Morgan KD, et al. Differing hypertrophy patterns from open and closed kinetic chain training affect quadriceps femoris center of mass and moment of inertia. Front Physiol. 2023;14:1074705.",
+      "doi": "10.3389/fphys.2023.1074705",
+      "pmid": "36998986",
+      "design": "randomisedTrial",
+      "fullTextRead": true
+    },
+    "FISHER2013": {
+      "citation": "Fisher J, Bruce-Low S, Smith D. A randomized trial to consider the effect of Romanian deadlift exercise on the development of lumbar extension strength. Phys Ther Sport. 2013;14(3):139-45. Epub 2012 Aug 16.",
+      "doi": "10.1016/j.ptsp.2012.04.001",
+      "pmid": "23867152",
+      "design": "randomisedTrial",
+      "fullTextRead": false
+    },
+    "FRANCO21": {
+      "citation": "Franco CMC, Carneiro MAS, de Sousa JFR, Gomes GK, Orsatti FL. Influence of High- and Low-Frequency Resistance Training on Lean Body Mass and Muscle Strength Gains in Untrained Men. J Strength Cond Res. 2021;35(8):2089–2094.",
+      "doi": "10.1519/JSC.0000000000003145",
+      "design": "randomisedTrial",
+      "fullTextRead": false,
+      "pmid": "31009427"
+    },
+    "GENTIL2015": {
+      "citation": "Gentil P, Soares S, Bottaro M. Single vs. multi-joint resistance exercises: effects on muscle strength and hypertrophy. Asian J Sports Med. 2015;6(2):e24057.",
+      "doi": "10.5812/asjsm.24057",
+      "pmid": "26446291",
+      "design": "randomisedTrial",
+      "fullTextRead": true
+    },
+    "GOMES19": {
+      "citation": "Gomes GK, Franco CM, Nunes PRP, Orsatti FL. High-Frequency Resistance Training Is Not More Effective Than Low-Frequency Resistance Training in Increasing Muscle Mass and Strength in Well-Trained Men. J Strength Cond Res. 2019;33(Suppl 1):S130–S139.",
+      "doi": "10.1519/JSC.0000000000002559",
+      "design": "randomisedTrial",
+      "fullTextRead": false,
+      "pmid": "29489727"
+    },
+    "GRGIC18R": {
+      "citation": "Grgic J, Schoenfeld BJ, Skrepnik M, Davies TB, Mikulic P. Effects of Rest Interval Duration in Resistance Training on Measures of Muscular Strength: A Systematic Review. Sports Med. 2018;48(1):137-151.",
+      "doi": "10.1007/s40279-017-0788-x",
+      "design": "systematicReview",
+      "fullTextRead": false
+    },
+    "HANDA2005": {
+      "citation": "Handa T, Kato H, Hasegawa S, Okada J, Kato K. Comparative electromyographical investigation of the biceps brachii, latissimus dorsi, and trapezius muscles during five pull exercises. Jpn J Phys Fitness Sports Med. 2005;54(2):159-68.",
+      "doi": "10.7600/jspfsm.54.159",
+      "design": "crossoverTrial",
+      "fullTextRead": true
+    },
+    "HAUGEN2023": {
+      "citation": "Haugen ME, Vårvik FT, Larsen S, Haugen AS, van den Tillaar R, Bjørnsen T. Effect of free-weight vs. machine-based strength training on maximal strength, hypertrophy and jump performance - a systematic review and meta-analysis. BMC Sports Sci Med Rehabil. 2023;15(1):103.",
+      "doi": "10.1186/s13102-023-00713-4",
+      "pmid": "37582807",
+      "design": "metaAnalysis",
+      "fullTextRead": true
+    },
+    "HAUGEN23": {
+      "citation": "Haugen ME, Varvik FT, Larsen S, et al. Effect of free-weight vs. machine-based strength training on maximal strength, hypertrophy and jump performance: a systematic review and meta-analysis. BMC Sports Sci Med Rehabil. 2023;15:103.",
+      "doi": "10.1186/s13102-023-00713-4",
+      "design": "metaAnalysis",
+      "fullTextRead": true
+    },
+    "HERNNDEZBELMONTE2023": {
+      "citation": "Hernández-Belmonte A, Martínez-Cava A, Buendía-Romero Á, Franco-López F, Pallarés JG. Free-weight and machine-based training are equally effective on strength and hypertrophy: challenging a traditional myth. Med Sci Sports Exerc. 2023;55(12):2316-27.",
+      "doi": "10.1249/MSS.0000000000003271",
+      "pmid": "37535335",
+      "design": "randomisedTrial",
+      "fullTextRead": false
+    },
+    "IUSCA21": {
+      "citation": "Schoenfeld BJ, Fisher JP, Grgic J, Haun CT, Helms ER, Phillips SM, Steele J, Vigotsky AD. Resistance Training Recommendations to Maximize Muscle Hypertrophy in an Athletic Population: Position Stand of the IUSCA. Int J Strength Cond. 2021;1(1).",
+      "doi": "10.47206/ijsc.v1i1.81",
+      "design": "positionStand",
+      "fullTextRead": true
+    },
+    "IVERSEN21": {
+      "citation": "Iversen VM, Norum M, Schoenfeld BJ, Fimland MS. No Time to Lift? Designing Time-Efficient Training Programs for Strength and Hypertrophy: A Narrative Review. Sports Med. 2021;51(10):2079-2095.",
+      "doi": "10.1007/s40279-021-01490-1",
+      "design": "narrativeReview",
+      "fullTextRead": true
+    },
+    "KIKUCHI2017": {
+      "citation": "Kikuchi N, Nakazato K. Low-load bench press and push-up induce similar muscle hypertrophy and strength gain. J Exerc Sci Fit. 2017;15(1):37-42.",
+      "doi": "10.1016/j.jesf.2017.06.003",
+      "pmid": "29541130",
+      "design": "randomisedTrial",
+      "fullTextRead": true
+    },
+    "KINOSHITA2023": {
+      "citation": "Kinoshita M, Maeo S, Kobayashi Y, Eihara Y, Ono M, Sato M, et al. Triceps surae muscle hypertrophy is greater after standing versus seated calf-raise training. Front Physiol. 2023;14:1272106.",
+      "doi": "10.3389/fphys.2023.1272106",
+      "pmid": "38156065",
+      "design": "nonRandomisedTrial",
+      "fullTextRead": true
+    },
+    "KINOSHITA2026": {
+      "citation": "Kinoshita M, Maeo S, Kobayashi Y, Eihara Y, Nishizawa N, Kusagawa Y, et al. Hypertrophic effects of single- versus multi-joint exercise: a direct comparison between knee extension and leg press. Med Sci Sports Exerc. 2026;58(7):1566-1580.",
+      "doi": "10.1249/MSS.0000000000003957",
+      "pmid": "41630124",
+      "design": "nonRandomisedTrial",
+      "fullTextRead": true
+    },
+    "KRIEGER09": {
+      "citation": "Krieger JW. Single versus multiple sets of resistance exercise: a meta-regression. J Strength Cond Res. 2009;23(6):1890-1901.",
+      "doi": "10.1519/JSC.0b013e3181b370be",
+      "design": "metaAnalysis",
+      "fullTextRead": false
+    },
+    "KRIEGER10": {
+      "citation": "Krieger JW. Single vs. multiple sets of resistance exercise for muscle hypertrophy: a meta-analysis. J Strength Cond Res. 2010;24(4):1150-1159.",
+      "doi": "10.1519/JSC.0b013e3181d4d436",
+      "design": "metaAnalysis",
+      "fullTextRead": false
+    },
+    "LARSEN2026": {
+      "citation": "Larsen S, Sandvik Kristiansen B, Østerås Sandberg N, Bao Fredriksen A, van den Tillaar R, Wolf M, et al. The effects of shoulder extension angle on elbow flexor hypertrophy in the cable curl exercise. Front Physiol. 2026;17:1750722.",
+      "doi": "10.3389/fphys.2026.1750722",
+      "pmid": "41988507",
+      "design": "randomisedTrial",
+      "fullTextRead": true
+    },
+    "LASEVICIUS19": {
+      "citation": "Lasevicius T, Schoenfeld BJ, Grgic J, Laurentino G, Tavares LD, Tricoli V. Similar Muscular Adaptations in Resistance Training Performed Two Versus Three Days Per Week. J Hum Kinet. 2019;68:135–143.",
+      "doi": "10.2478/hukin-2019-0062",
+      "design": "randomisedTrial",
+      "fullTextRead": true,
+      "pmid": "31531139"
+    },
+    "LOPEZ21": {
+      "citation": "Lopez P, Radaelli R, Taaffe DR, et al. Resistance Training Load Effects on Muscle Hypertrophy and Strength Gain: Systematic Review and Network Meta-analysis. Med Sci Sports Exerc. 2021;53(6):1206-1216.",
+      "doi": "10.1249/MSS.0000000000002585",
+      "design": "metaAnalysis",
+      "fullTextRead": true
+    },
+    "MAEO2021": {
+      "citation": "Maeo S, Huang M, Wu Y, Sakurai H, Kusagawa Y, Sugiyama T, et al. Greater hamstrings muscle hypertrophy but similar damage protection after training at long versus short muscle lengths. Med Sci Sports Exerc. 2021;53(4):825-837.",
+      "doi": "10.1249/MSS.0000000000002523",
+      "pmid": "33009197",
+      "design": "randomisedTrial",
+      "fullTextRead": true
+    },
+    "MAEO2023": {
+      "citation": "Maeo S, Wu Y, Huang M, Sakurai H, Kusagawa Y, Sugiyama T, et al. Triceps brachii hypertrophy is substantially greater after elbow extension training performed in the overhead versus neutral arm position. Eur J Sport Sci. 2023;23(7):1240-50.",
+      "doi": "10.1080/17461391.2022.2100279",
+      "pmid": "35819335",
+      "design": "nonRandomisedTrial",
+      "fullTextRead": false
+    },
+    "MCCRARY15": {
+      "citation": "McCrary JM, Ackermann BJ, Halaki M. A systematic review of the effects of upper body warm-up on performance and injury. Br J Sports Med. 2015;49(14):935-942.",
+      "doi": "10.1136/bjsports-2014-094228",
+      "design": "systematicReview",
+      "fullTextRead": false
+    },
+    "MORANNAVARRO17": {
+      "citation": "Morán-Navarro R, Pérez CE, Mora-Rodríguez R, et al. Time course of recovery following resistance training leading or not to failure. Eur J Appl Physiol. 2017;117(12):2387–2399.",
+      "doi": "10.1007/s00421-017-3725-7",
+      "design": "crossoverTrial",
+      "fullTextRead": false,
+      "pmid": "28965198"
+    },
+    "NETO2020": {
+      "citation": "Neto WK, Soares EG, Vieira TL, Aguiar R, Chola TA, Sampaio VL, Gama EF. Gluteus maximus activation during common strength and hypertrophy exercises: a systematic review. J Sports Sci Med. 2020;19(1):195-203.",
+      "pmid": "32132843",
+      "design": "systematicReview",
+      "fullTextRead": true
+    },
+    "NUZZO24": {
+      "citation": "Nuzzo JL, Pinto MD, Nosaka K, Steele J. Maximal Number of Repetitions at Percentages of the One Repetition Maximum: A Meta-Regression and Moderator Analysis of Sex, Age, Training Status, and Exercise. Sports Med. 2024;54(2):303-321.",
+      "doi": "10.1007/s40279-023-01937-7",
+      "design": "metaAnalysis",
+      "fullTextRead": true
+    },
+    "NUZZO24MD": {
+      "citation": "Nuzzo JL, Pinto MD, Kirk BJC, Nosaka K. Resistance Exercise Minimal Dose Strategies for Increasing Muscle Strength in the General Population: an Overview. Sports Med. 2024;54(5):1139–1162.",
+      "doi": "10.1007/s40279-024-02009-0",
+      "design": "narrativeReview",
+      "fullTextRead": true,
+      "pmid": "38509414"
+    },
+    "OGASAWARA2012": {
+      "citation": "Ogasawara R, Thiebaud RS, Loenneke JP, Loftin M, Abe T. Time course for arm and chest muscle thickness changes following bench press training. Interv Med Appl Sci. 2012;4(4):217-20.",
+      "doi": "10.1556/IMAS.4.2012.4.7",
+      "pmid": "24265879",
+      "design": "nonRandomisedTrial",
+      "fullTextRead": true
+    },
+    "PEDERSEN22": {
+      "citation": "Pedersen H, Fimland MS, Schoenfeld BJ, Iversen VM, Cumming KT, Jensen S, et al. A randomized trial on the efficacy of split-body versus full-body resistance training in non-resistance trained women. BMC Sports Sci Med Rehabil. 2022;14(1):87.",
+      "doi": "10.1186/s13102-022-00481-7",
+      "design": "randomisedTrial",
+      "fullTextRead": true,
+      "pmid": "35568897"
+    },
+    "PELLAND26": {
+      "citation": "Pelland JC, Remmert JF, Robinson ZP, Hinson SR, Zourdos MC. The Resistance Training Dose Response: Meta-Regressions Exploring the Effects of Weekly Volume and Frequency on Muscle Hypertrophy and Strength Gains. Sports Med. 2026;56(2):481–505.",
+      "doi": "10.1007/s40279-025-02344-w",
+      "design": "metaAnalysis",
+      "fullTextRead": false,
+      "pmid": "41343037"
+    },
+    "PLOTKIN2023": {
+      "citation": "Plotkin DL, Rodas MA, Vigotsky AD, McIntosh MC, Breeze E, Ubrik R, et al. Hip thrust and back squat training elicit similar gluteus muscle hypertrophy and transfer similarly to the deadlift. Front Physiol. 2023;14:1279170.",
+      "doi": "10.3389/fphys.2023.1279170",
+      "pmid": "37877099",
+      "design": "randomisedTrial",
+      "fullTextRead": true
+    },
+    "RAMOSCAMPO24": {
+      "citation": "Ramos-Campo DJ, Benito-Peinado PJ, Andreu-Caravaca L, Rojo-Tirado MA, Rubio-Arias JÁ. Efficacy of Split Versus Full-Body Resistance Training on Strength and Muscle Growth: A Systematic Review With Meta-Analysis. J Strength Cond Res. 2024;38(7):1330–1340.",
+      "doi": "10.1519/JSC.0000000000004774",
+      "design": "metaAnalysis",
+      "fullTextRead": false,
+      "pmid": "38595233"
+    },
+    "RIBEIRO15": {
+      "citation": "Ribeiro AS, Schoenfeld BJ, Silva DR, et al. Effect of Two- Versus Three-Way Split Resistance Training Routines on Body Composition and Muscular Strength in Bodybuilders: A Pilot Study. Int J Sport Nutr Exerc Metab. 2015;25(6):559–565.",
+      "doi": "10.1123/ijsnem.2015-0077",
+      "design": "randomisedTrial",
+      "fullTextRead": false,
+      "pmid": "26008801"
+    },
+    "SAETERBAKKEN2013": {
+      "citation": "Saeterbakken AH, Fimland MS. Effects of body position and loading modality on muscle activity and strength in shoulder presses. J Strength Cond Res. 2013;27(7):1824-31.",
+      "doi": "10.1519/JSC.0b013e318276b873",
+      "pmid": "23096062",
+      "design": "crossoverTrial",
+      "fullTextRead": false
+    },
+    "SARIC19": {
+      "citation": "Saric J, Lisica D, Orlic I, Grgic J, Krieger JW, Vuk S, Schoenfeld BJ. Resistance Training Frequencies of 3 and 6 Times Per Week Produce Similar Muscular Adaptations in Resistance-Trained Men. J Strength Cond Res. 2019;33(Suppl 1):S122–S129.",
+      "doi": "10.1519/JSC.0000000000002909",
+      "design": "randomisedTrial",
+      "fullTextRead": false,
+      "pmid": "30363041"
+    },
+    "SCHOENFELD15": {
+      "citation": "Schoenfeld BJ, Ratamess NA, Peterson MD, Contreras B, Tiryaki-Sonmez G. Influence of Resistance Training Frequency on Muscular Adaptations in Well-Trained Men. J Strength Cond Res. 2015;29(7):1821–1829.",
+      "doi": "10.1519/JSC.0000000000000970",
+      "design": "randomisedTrial",
+      "fullTextRead": false,
+      "pmid": "25932981"
+    },
+    "SCHOENFELD17V": {
+      "citation": "Schoenfeld BJ, Ogborn D, Krieger JW. Dose-response relationship between weekly resistance training volume and increases in muscle mass. J Sports Sci. 2017;35(11):1073–1082.",
+      "doi": "10.1080/02640414.2016.1210197",
+      "design": "metaAnalysis",
+      "fullTextRead": false,
+      "pmid": "27433992"
+    },
+    "SCHOENFELD19S": {
+      "citation": "Schoenfeld BJ, Grgic J, Haun C, Itagaki T, Helms ER. Calculating Set-Volume for the Limb Muscles with the Performance of Multi-Joint Exercises: Implications for Resistance Training Prescription. Sports (Basel). 2019;7(7):177.",
+      "doi": "10.3390/sports7070177",
+      "pmid": "31336594",
+      "design": "narrativeReview",
+      "fullTextRead": true
+    },
+    "SCHOENFELD19V": {
+      "citation": "Schoenfeld BJ, Contreras B, Krieger J, Grgic J, Delcastillo K, Belliard R, Alto A. Resistance Training Volume Enhances Muscle Hypertrophy but Not Strength in Trained Men. Med Sci Sports Exerc. 2019;51(1):94–103.",
+      "doi": "10.1249/MSS.0000000000001764",
+      "design": "randomisedTrial",
+      "fullTextRead": true,
+      "pmid": "30153194"
+    },
+    "SCHOENFELD2018": {
+      "citation": "Schoenfeld BJ, Vigotsky A, Contreras B, Golden S, Alto A, Larson R, et al. Differential effects of attentional focus strategies during long-term resistance training. Eur J Sport Sci. 2018;18(5):705-12.",
+      "doi": "10.1080/17461391.2018.1447020",
+      "pmid": "29533715",
+      "design": "randomisedTrial",
+      "fullTextRead": true
+    },
+    "SIGNORILE2002": {
+      "citation": "Signorile JF, Zink AJ, Szwed SP. A comparative electromyographical investigation of muscle utilization patterns using various hand positions during the lat pull-down. J Strength Cond Res. 2002 Nov;16(4):539-46.",
+      "doi": "10.1519/1533-4287(2002)016<0539:ACEIOM>2.0.CO;2",
+      "pmid": "12423182",
+      "design": "crossoverTrial",
+      "fullTextRead": false
+    },
+    "SINGER24": {
+      "citation": "Singer A, Wolf M, Generoso L, et al. Give it a rest: a systematic review with Bayesian meta-analysis on the effect of inter-set rest interval duration on muscle hypertrophy. Front Sports Act Living. 2024;6:1429789.",
+      "doi": "10.3389/fspor.2024.1429789",
+      "design": "metaAnalysis",
+      "fullTextRead": true
+    },
+    "STASINAKI2018": {
+      "citation": "Stasinaki AN, Zaras N, Methenitis S, Tsitkanou S, Krase A, Kavvoura A, et al. Triceps brachii muscle strength and architectural adaptations with resistance training exercises at short or long fascicle length. J Funct Morphol Kinesiol. 2018;3(2):28.",
+      "doi": "10.3390/jfmk3020028",
+      "design": "nonRandomisedTrial",
+      "fullTextRead": true
+    }
+  },
+  "verification": {
+    "method": "Automated evidence gate (content.bundle_problems). The frequency research was independently re-checked against the papers by a second research agent (46 sources: 22 confirmed, 23 corrected, 1 partly checkable; log at the end of docs/research/training-frequency-evidence.md). The exercise citations were independently re-checked by a second agent against docs/research/exercise-evidence.json and the papers.",
+    "verifiedOn": "2026-09-24"
+  }
+}

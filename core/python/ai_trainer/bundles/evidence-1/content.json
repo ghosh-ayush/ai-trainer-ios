@@ -6,12 +6,21 @@
       "role": "press",
       "equipmentKind": "dumbbell",
       "basis": "perHand",
-      "alternatives": ["machine_press", "bench"],
-      "review": "approved",
+      "alternatives": [
+        "machine_press",
+        "bench"
+      ],
+      "review": "disabled",
       "contentVersion": "evidence-1",
       "sources": [
-        {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body push region)"},
-        {"source": "IVERSEN21", "locator": "Abstract (at least one upper-body push)"}
+        {
+          "source": "ACSM26",
+          "locator": "Discussion, limitations paragraph (upper-body push region)"
+        },
+        {
+          "source": "IVERSEN21",
+          "locator": "Abstract (at least one upper-body push)"
+        }
       ]
     },
     {
@@ -20,14 +29,29 @@
       "role": "press",
       "equipmentKind": "barbell",
       "basis": "total",
-      "alternatives": ["machine_press", "db_floor_press"],
-      "review": "approved",
+      "alternatives": [
+        "machine_press",
+        "db_floor_press"
+      ],
+      "review": "disabled",
       "contentVersion": "evidence-1",
       "sources": [
-        {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body push region)"},
-        {"source": "IVERSEN21", "locator": "Abstract (at least one upper-body push)"},
-        {"source": "OGASAWARA2012", "locator": "Results; Table I; Fig. 1. PMC3831787 full text; docs/research/exercise-evidence.json finding OGASAWARA2012-1 (hypertrophy, chest, triceps)"},
-        {"source": "KIKUCHI2017", "locator": "Results 3.1; Discussion paragraph 2 (percent changes); docs/research/exercise-evidence.json finding KIKUCHI2017-1 (hypertrophy, chest, triceps)"}
+        {
+          "source": "ACSM26",
+          "locator": "Discussion, limitations paragraph (upper-body push region)"
+        },
+        {
+          "source": "IVERSEN21",
+          "locator": "Abstract (at least one upper-body push)"
+        },
+        {
+          "source": "OGASAWARA2012",
+          "locator": "Results; Table I; Fig. 1. PMC3831787 full text; docs/research/exercise-evidence.json finding OGASAWARA2012-1 (hypertrophy, chest, triceps)"
+        },
+        {
+          "source": "KIKUCHI2017",
+          "locator": "Results 3.1; Discussion paragraph 2 (percent changes); docs/research/exercise-evidence.json finding KIKUCHI2017-1 (hypertrophy, chest, triceps)"
+        }
       ]
     },
     {
@@ -36,13 +60,24 @@
       "role": "press",
       "equipmentKind": "machine",
       "basis": "machineSetting",
-      "alternatives": ["db_floor_press"],
-      "review": "approved",
+      "alternatives": [
+        "db_floor_press"
+      ],
+      "review": "disabled",
       "contentVersion": "evidence-1",
       "sources": [
-        {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body push region)"},
-        {"source": "HAUGEN23", "locator": "Abstract; Discussion (machines and free weights give similar gains)"},
-        {"source": "HAUGEN2023", "locator": "Results (direct-strength sub-analyses, Fig. B); docs/research/exercise-evidence.json finding HAUGEN2023-3 (strength, chest)"}
+        {
+          "source": "ACSM26",
+          "locator": "Discussion, limitations paragraph (upper-body push region)"
+        },
+        {
+          "source": "HAUGEN23",
+          "locator": "Abstract; Discussion (machines and free weights give similar gains)"
+        },
+        {
+          "source": "HAUGEN2023",
+          "locator": "Results (direct-strength sub-analyses, Fig. B); docs/research/exercise-evidence.json finding HAUGEN2023-3 (strength, chest)"
+        }
       ]
     },
     {
@@ -51,12 +86,20 @@
       "role": "pull",
       "equipmentKind": "dumbbell",
       "basis": "perHand",
-      "alternatives": ["cable_row"],
-      "review": "approved",
+      "alternatives": [
+        "cable_row"
+      ],
+      "review": "disabled",
       "contentVersion": "evidence-1",
       "sources": [
-        {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body pull region)"},
-        {"source": "IVERSEN21", "locator": "Abstract (at least one upper-body pull)"}
+        {
+          "source": "ACSM26",
+          "locator": "Discussion, limitations paragraph (upper-body pull region)"
+        },
+        {
+          "source": "IVERSEN21",
+          "locator": "Abstract (at least one upper-body pull)"
+        }
       ]
     },
     {
@@ -65,12 +108,20 @@
       "role": "pull",
       "equipmentKind": "machine",
       "basis": "machineSetting",
-      "alternatives": ["db_row"],
-      "review": "approved",
+      "alternatives": [
+        "db_row"
+      ],
+      "review": "disabled",
       "contentVersion": "evidence-1",
       "sources": [
-        {"source": "ACSM26", "locator": "Discussion, limitations paragraph (upper-body pull region)"},
-        {"source": "HAUGEN23", "locator": "Abstract; Discussion (machines and free weights give similar gains)"}
+        {
+          "source": "ACSM26",
+          "locator": "Discussion, limitations paragraph (upper-body pull region)"
+        },
+        {
+          "source": "HAUGEN23",
+          "locator": "Abstract; Discussion (machines and free weights give similar gains)"
+        }
       ]
     },
     {
@@ -79,12 +130,20 @@
       "role": "squat",
       "equipmentKind": "dumbbell",
       "basis": "total",
-      "alternatives": ["leg_press"],
-      "review": "approved",
+      "alternatives": [
+        "leg_press"
+      ],
+      "review": "disabled",
       "contentVersion": "evidence-1",
       "sources": [
-        {"source": "ACSM26", "locator": "Discussion, limitations paragraph (lower-body push region)"},
-        {"source": "IVERSEN21", "locator": "Abstract (one leg-press or squat pattern)"}
+        {
+          "source": "ACSM26",
+          "locator": "Discussion, limitations paragraph (lower-body push region)"
+        },
+        {
+          "source": "IVERSEN21",
+          "locator": "Abstract (one leg-press or squat pattern)"
+        }
       ]
     },
     {
@@ -93,14 +152,28 @@
       "role": "squat",
       "equipmentKind": "machine",
       "basis": "machineSetting",
-      "alternatives": ["goblet_squat"],
-      "review": "approved",
+      "alternatives": [
+        "goblet_squat"
+      ],
+      "review": "disabled",
       "contentVersion": "evidence-1",
       "sources": [
-        {"source": "IVERSEN21", "locator": "Abstract (one leg-press or squat pattern)"},
-        {"source": "HAUGEN23", "locator": "Abstract; Discussion (machines and free weights give similar gains)"},
-        {"source": "KINOSHITA2026", "locator": "Results, Experiment 1; Table 1 (ALL); Conclusions; docs/research/exercise-evidence.json finding KINOSHITA2026-6 (hypertrophy, quadriceps, glutes, adductors, hamstrings)"},
-        {"source": "KINOSHITA2026", "locator": "Results, Experiment 1; Table 1; docs/research/exercise-evidence.json finding KINOSHITA2026-2 (hypertrophy, quadriceps)"}
+        {
+          "source": "IVERSEN21",
+          "locator": "Abstract (one leg-press or squat pattern)"
+        },
+        {
+          "source": "HAUGEN23",
+          "locator": "Abstract; Discussion (machines and free weights give similar gains)"
+        },
+        {
+          "source": "KINOSHITA2026",
+          "locator": "Results, Experiment 1; Table 1 (ALL); Conclusions; docs/research/exercise-evidence.json finding KINOSHITA2026-6 (hypertrophy, quadriceps, glutes, adductors, hamstrings)"
+        },
+        {
+          "source": "KINOSHITA2026",
+          "locator": "Results, Experiment 1; Table 1; docs/research/exercise-evidence.json finding KINOSHITA2026-2 (hypertrophy, quadriceps)"
+        }
       ]
     },
     {
@@ -110,17 +183,20 @@
       "equipmentKind": "dumbbell",
       "basis": "perHand",
       "alternatives": [],
-      "review": "approved",
+      "review": "disabled",
       "contentVersion": "evidence-1",
       "sources": [
-        {"source": "ACSM09", "locator": "Table 2, p. 700 (include single- and multi-joint exercises; Evidence A)"}
+        {
+          "source": "ACSM09",
+          "locator": "Table 2, p. 700 (include single- and multi-joint exercises; Evidence A)"
+        }
       ]
     }
   ],
   "policy": {
     "id": "DP_EVIDENCE_01",
     "version": "evidence-1",
-    "review": "approved",
+    "review": "disabled",
     "requiredExposures": {
       "value": 2,
       "source": "ACSM09",
@@ -155,7 +231,10 @@
     "id": "FULL_BODY_EVIDENCE_01",
     "name": "Full body",
     "supportedGoals": {
-      "value": ["Hypertrophy", "Strength"],
+      "value": [
+        "Hypertrophy",
+        "Strength"
+      ],
       "source": "ACSM26",
       "locator": "Title and Abstract; Table 6 (strength and hypertrophy columns)",
       "certainty": "moderate"
@@ -185,7 +264,11 @@
       "rationale": "Sources favour a few exercise-specific warm-up sets over a general warm-up (IVERSEN21, 'Warm-up' section; MCCRARY15) and give no minutes. Two light sets of the first exercise, 2 x (8 reps x 4 s + 60 s) = about 3 minutes, plus 1 minute of set-up."
     },
     "requiredRoles": {
-      "value": ["press", "pull", "squat"],
+      "value": [
+        "press",
+        "pull",
+        "squat"
+      ],
       "source": "IVERSEN21",
       "locator": "Abstract; Practical Applications",
       "certainty": "low",

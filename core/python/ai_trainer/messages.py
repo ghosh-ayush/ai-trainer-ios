@@ -24,11 +24,13 @@ def decision(
     after: dict[str, Any] | None = None,
     evidence: list[dict[str, Any]] | None = None,
     explanation: str | None = None,
+    week: dict[str, Any] | None = None,
 ) -> Decision:
     """Build a Decision record for ``reason``.
 
     ``after`` is the proposed plan (only for ``proposeChange`` outcomes);
-    ``evidence`` lists the set-log ids/revisions the decision relied on.
+    ``evidence`` lists the set-log ids/revisions the decision relied on;
+    ``week`` is the proposed week of a replan (ADR-018), which holds no ids.
     """
     outcome, default_text = MESSAGES[reason]
     result: Decision = {
@@ -39,4 +41,6 @@ def decision(
     }
     if after is not None:
         result["after"] = after
+    if week is not None:
+        result["week"] = week
     return result

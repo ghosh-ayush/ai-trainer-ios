@@ -199,6 +199,32 @@
           "items": {
             "$ref": "#/$defs/String"
           }
+        },
+        "freeDays": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Int"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "minutesByDay": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/Int"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -459,6 +485,16 @@
         },
         "warmUpMinutes": {
           "$ref": "#/$defs/Int"
+        },
+        "weekday": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -763,6 +799,16 @@
           "items": {
             "$ref": "#/$defs/Evidence"
           }
+        },
+        "week": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WeekOption"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -840,6 +886,22 @@
           "required": [
             "kind",
             "date"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "replan"
+            },
+            "utcOffset": {
+              "$ref": "#/$defs/Int"
+            }
+          },
+          "required": [
+            "kind",
+            "utcOffset"
           ],
           "additionalProperties": false
         }
@@ -1296,7 +1358,7 @@
       "type": "object",
       "properties": {
         "schemaVersion": {
-          "const": 3
+          "const": 4
         },
         "athleteID": {
           "$ref": "#/$defs/UUID"
@@ -1721,6 +1783,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "autoReplan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Bool"
             },
             {
               "type": "null"
@@ -2211,6 +2283,91 @@
       ],
       "additionalProperties": false
     },
+    "WeekSession": {
+      "type": "object",
+      "properties": {
+        "weekday": {
+          "$ref": "#/$defs/Int"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "minutes": {
+          "$ref": "#/$defs/Number"
+        },
+        "exercises": {
+          "$ref": "#/$defs/Int"
+        },
+        "sets": {
+          "$ref": "#/$defs/Int"
+        }
+      },
+      "required": [
+        "weekday",
+        "name",
+        "minutes",
+        "exercises",
+        "sets"
+      ],
+      "additionalProperties": false
+    },
+    "WeekOption": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/String"
+        },
+        "split": {
+          "$ref": "#/$defs/String"
+        },
+        "name": {
+          "$ref": "#/$defs/String"
+        },
+        "days": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Int"
+          }
+        },
+        "sessions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WeekSession"
+          }
+        },
+        "sessionsPerWeek": {
+          "$ref": "#/$defs/Int"
+        },
+        "weeklyMinutes": {
+          "$ref": "#/$defs/Number"
+        },
+        "volume": {
+          "$ref": "#/$defs/String"
+        },
+        "score": {
+          "$ref": "#/$defs/Number"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "split",
+        "name",
+        "days",
+        "sessions",
+        "sessionsPerWeek",
+        "weeklyMinutes",
+        "volume",
+        "score",
+        "reasons"
+      ],
+      "additionalProperties": false
+    },
     "SpokenSet": {
       "type": "object",
       "properties": {
@@ -2395,6 +2552,16 @@
             "$ref": "#/$defs/UUID"
           },
           "minItems": 6
+        },
+        "optionID": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -2402,6 +2569,22 @@
         "permitsFixtures",
         "now",
         "ids"
+      ],
+      "additionalProperties": false
+    },
+    "weekOptionsPayload": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/$defs/Profile"
+        },
+        "permitsFixtures": {
+          "$ref": "#/$defs/Bool"
+        }
+      },
+      "required": [
+        "profile",
+        "permitsFixtures"
       ],
       "additionalProperties": false
     },
@@ -2476,6 +2659,16 @@
           "anyOf": [
             {
               "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "utcOffset": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
             },
             {
               "type": "null"
@@ -2593,6 +2786,16 @@
       "properties": {
         "profile": {
           "$ref": "#/$defs/Profile"
+        },
+        "optionID": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -4016,6 +4219,12 @@
             },
             {
               "$ref": "#/$defs/Program"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/WeekOption"
+              }
             },
             {
               "$ref": "#/$defs/Library"

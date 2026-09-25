@@ -15,8 +15,10 @@ from typing import Any
 from ..athlete_state import has_active_session, next_plan
 from ..errors import DomainError
 from ..events import store_plan
+from ..rules.adaptation import replan_program
 from ..rules.eligibility import decide
 from .context import CommandContext
+from .plan import WEEKLY_ID_COUNT
 
 JSON = dict[str, Any]
 
@@ -84,11 +86,37 @@ def accept(context: CommandContext) -> None:
     if not still_valid or plan is None:
         raise DomainError("staleProposal")
     reevaluated = decide(state, recommendation["request"], library, context.now)
+    if recommendation["request"]["kind"] == "replan":
+        _apply_replan(context, recommendation, reevaluated)
+        return
     if reevaluated != recommendation["decision"] or reevaluated.get("after") is None:
         raise DomainError("staleProposal")
     applied_plan = deepcopy(reevaluated["after"])
     applied_plan["revision"] = plan["revision"] + 1
     store_plan(applied_plan, state)
+    context.record("recommendation_accepted", reevaluated["reason"])
+    context.expire_proposals()
+    recommendation["status"] = "applied"
+    context.record("recommendation_applied", reevaluated["reason"])
+
+
+def _apply_replan(context: CommandContext, recommendation: JSON, reevaluated: JSON) -> None:
+    """ADR-018: replace the program with the proposed week, rebuilt now from the same attendance.
+
+    The decision holds the week, not its ids, so re-evaluating yields an identical decision when
+    nothing has changed; the program's ids are taken lazily from this command.
+    """
+    week = reevaluated.get("week")
+    if reevaluated != recommendation["decision"] or week is None:
+        raise DomainError("staleProposal")
+    state = context.state
+    ids = (context.next_id() for _ in range(WEEKLY_ID_COUNT))
+    utc_offset = recommendation["request"].get("utcOffset")
+    program = replan_program(state, context.library, context.now, ids, week["id"], utc_offset)
+    state["previousPrograms"].append(state["program"])
+    state["program"] = program
+    state.pop("nextPlanOverride", None)
+    context.mark_context_changed()
     context.record("recommendation_accepted", reevaluated["reason"])
     context.expire_proposals()
     recommendation["status"] = "applied"

@@ -70,7 +70,9 @@ struct TodayView: View {
 
     private func nextSessionHero(_ plan: SessionPlan) -> some View {
         let confirmed = plan.slots.filter { $0.load != nil }.count
-        let when = plan.scheduledDate.map { "Next session · \($0.formatted(date: .abbreviated, time: .shortened))." } ?? "Next session · today."
+        let when = plan.scheduledDate.map { "Next session · \($0.formatted(date: .abbreviated, time: .shortened))." }
+            ?? plan.weekday.map { "Next session · \(Weekday.name($0)) · \(plan.name)." }
+            ?? "Next session · today."
         let detail = plan.modified
             ? "Temporary session adjustment · for today only. Revision \(plan.revision)."
             : "\(when) Loads confirmed: \(confirmed) of \(plan.slots.count). Revision \(plan.revision)."
@@ -114,7 +116,7 @@ struct TodayView: View {
     }
 
     private var heroProposals: [ProposalCard] {
-        store.today.proposals.filter { $0.kind == "shorten" || $0.kind == "reschedule" }
+        store.today.proposals.filter { $0.kind == "shorten" || $0.kind == "reschedule" || $0.kind == "replan" }
     }
 
     private func planTitle(_ plan: SessionPlan) -> String {
@@ -166,7 +168,7 @@ struct SlotCard: View {
         }
     }
     private var headline: String {
-        let role = store.service?.library.exercise(slot.exerciseID)?.role ?? "exercise"
+        let role = store.service?.library.exercise(slot.exerciseID)?.roleLabel ?? "exercise"
         return String(format: "Slot %02d · %@", position, role) + (slot.optional ? " · optional" : "")
     }
 }
@@ -421,7 +423,7 @@ struct PainSheet: View {
                 Button {
                     store.perform({ try $0.reportPain(exerciseID: slot.exerciseID) }) { _ in dismiss() }
                 } label: {
-                    let role = store.service?.library.exercise(slot.exerciseID)?.role ?? "exercise"
+                    let role = store.service?.library.exercise(slot.exerciseID)?.roleLabel ?? "exercise"
                     StitchListRow(store.name(slot.exerciseID), subtitle: String(format: "Slot %02d · %@", index + 1, role), symbol: "bandage")
                 }
                 .buttonStyle(.plain)

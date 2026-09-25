@@ -221,3 +221,101 @@ Consequences:
   one-line diet summary that opens it. HealthKit read access now includes body mass; nothing is
   written to Health.
 Status: accepted.
+
+## ADR-017 · 2026-09-24 · Weekly plans for 1–7 free days: research sets the bounds, the AI chooses
+Why: owner decisions on 2026-09-24. Plans must work for anyone free 1 to 7 days a week. There must
+be no fixed "N days → split" table: "the AI should suggest different combinations based on all
+other information about the user". The owner chose "AI chooses, research bounds" over "AI decides
+freely". The research is in `docs/research/training-frequency-evidence.md` (37 sources, four
+retracted papers excluded). A second agent re-checked all 46 cited sources against the papers on
+2026-09-24: 22 confirmed, 23 corrected, 1 only partly checkable (ACSM09's body text is paywalled).
+Its log is at the end of that file. The tested consecutive-day dose was about 2–3 direct sets per
+muscle (one verified Monday–Friday trial), so the consecutive-day cap starts at 3, not 4.
+Consequences:
+- `rules/week_plans.py` builds every week the guardrails allow on the athlete's free weekdays and
+  per-day minutes. The guardrails:
+  - weekly sets per major muscle between a floor and a ceiling, with a lower time-limited floor
+  - a per-session cap per muscle
+  - a lower cap on the later of two consecutive days that train the same muscle
+  - minimum and maximum sets per exercise
+  - minutes per set and warm-up
+  - a maximum number of sessions a week
+
+  Every value ships in the content bundle, cited or recorded as an owner decision with a cited
+  rationale, and none lives in code. Splits (full body, upper/lower, push/pull/legs and hybrids)
+  are cycles of session types; a candidate is any cycle placed on any subset of the free days.
+- `rules/plan_ranking.py` orders the valid weeks for one athlete using weekly volume against
+  their target, strength exposures, recovery spacing, variety, recent adherence and stated
+  likes or dislikes. The ranking weights are bundle owner decisions. Unknown history or
+  preferences are neutral, never assumed.
+- The on-device model (ADR-015) may pick among the top candidates using what the athlete said in
+  words, and explain the choice. It cannot create a week, a number or an exercise outside the
+  candidates, and Python re-validates its pick. Without the model, the ranking alone decides.
+  This relaxes "no LLM in the decision path" to "no LLM outside the evidence bounds".
+- The chosen week becomes a Program with one plan per session, and is still a proposal the
+  athlete accepts (rule 3). As adherence, progress and stated preferences change, the app
+  proposes a different week, never a silent change.
+- No qualifying trial tested conventional training on 7 days a week (§7 of the research), so the
+  bundle's session maximum starts at 6 as an owner decision: 7 free days are a valid input and
+  the plan uses up to 6 of them. Flipping it is a bundle edit with its own rationale.
+- Needs, after the evidence-bundle work (ADR-014/016) is on master:
+  - new governed roles and exercises (horizontal and vertical press and pull, hinge, single-leg,
+    elbow flexion and extension, knee flexion, calves), drawn from
+    `docs/research/exercise-evidence.json`
+  - Profile fields for free weekdays and per-day minutes, with a state migration where unknown
+    weekdays stay unknown
+  - an operation that returns distinct top options with reasons
+  - the onboarding weekday picker
+- Implemented on 2026-09-24 in `claude/frequency-1-7`:
+  - `evidence-2` supersedes `evidence-1`, which is now `disabled`. It adds a cited `planner` section
+    (weekly guardrails, targets, structures, ranking) and 29 exercises for eleven roles. Every
+    exercise citation was re-checked independently: 101 checked, 16 locators corrected, 5 removed.
+  - A role with no exercise for the athlete's equipment falls back to its sibling (vertical to
+    horizontal pull or press, single-leg to squat, knee flexion to hinge), per ACSM26.
+  - The ranking adds `spread` (even spacing of each muscle's sessions), so free days are not
+    bunched together.
+  - The profile gains `freeDays` and `minutesByDay` and each plan gains `weekday`, so the state
+    schema moves to 4 with no data filled in. Onboarding asks for free weekdays and minutes, then
+    shows up to three options with plain reasons.
+  - Not yet: re-planning from adherence history. The first plan uses no history, so preview and
+    accept stay identical. The on-device model choosing among options is also still to come.
+Status: accepted by the owner ("AI chooses, research bounds", 2026-09-24).
+
+## ADR-018 · 2026-09-24 · The week adapts to the sessions the athlete actually completes
+Why: owner request, 2026-09-24: "the plan doesn't change itself from your training history yet,
+for example if you keep skipping days. Do this."
+Consequences:
+- A new request kind, `replan` (`rules/adaptation.py`), compares completed sessions a week with the
+  week's planned sessions. Completed and ended-early sessions count; skipped sessions and days with
+  nothing logged do not. It reads only logged records: no sensor, calendar or HealthKit data
+  (rule 4).
+- When the athlete completes, on average, at least one session a week fewer than planned over the
+  window, and the week is old enough to judge, the same planner (ADR-017) proposes a week capped at
+  the sessions they have been completing (at least one). The ranking is told that history.
+- The thresholds are `evidence-2` `planner.adaptation` owner decisions with rationales: a 28-day
+  window, a 14-day minimum plan age, and 1 missed session a week (rule 1). The rationale rests on
+  ACSM26: at equal weekly volume, fewer sessions give similar hypertrophy.
+- It is a Recommendation (rule 3). Today offers it once through `autoReplan`, and a rejected
+  replan is not re-proposed for the same plan. The decision holds the proposed week without ids,
+  and acceptance rebuilds that week into a new program, keeping the old one in
+  `previousPrograms`. The attendance window is anchored to whole days, so a proposal stays
+  acceptable for the rest of the day.
+- Extended the same day (owner: "do it then"). The replan now also covers three more cases:
+  - *More sessions*: at least 1 extra completed session a week. It proposes a week with more
+    sessions, still within the free days, the days actually trained, and the session maximum.
+  - *Shorter sessions*: at least 2 sessions in the window ended early with the athlete's own "time"
+    reason. Session minutes are capped at the median length of those sessions, rounded down to
+    5 minutes and never below 15; the planner may spread the work over more days.
+  - *Training days*: a weekday the athlete trained on in at least half the window's weeks is a
+    habit day. Habit days are added to the free days for the replan and preferred by a new
+    `habit` ranking feature. When at least half of the completed sessions fell on weekdays the
+    plan does not use, the week moves onto the habit days.
+- Weekdays need the athlete's time zone, which the embedded core cannot look up. So the host
+  sends its UTC offset with the replan request (stored with it, so acceptance re-evaluates
+  identically) and with `views`. Without it, weekday habits stay unknown and are not used.
+- The new thresholds (`extraSessionsPerWeek` 1, `endedEarlyForTime` 2, `minimumSessionMinutes`
+  15, `habitShare` 0.5, `otherDaysShare` 0.5) and the `habit` weight are `evidence-2` owner
+  decisions with rationales.
+- Reasons: `ADHERENCE_REPLAN`, `SHORTER_SESSIONS_REPLAN`, `MORE_SESSIONS_REPLAN`,
+  `TRAINING_DAYS_REPLAN`. One proposal explains every drift it found.
+Status: accepted (owner requests, 2026-09-24).

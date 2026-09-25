@@ -10,7 +10,7 @@ from pathlib import Path
 
 from support import NOW, call, golden_request, result, uid
 
-from ai_trainer import content
+from ai_trainer import content, contracts
 
 
 def cited(value, source="paper", locator="Table 1", certainty="moderate"):
@@ -242,25 +242,38 @@ class BundleSelectionTests(unittest.TestCase):
         self.assertEqual((slot["lowerReps"], slot["upperReps"]), (8, 10))
 
     def test_shipped_evidence_bundle_runs_without_anyone_approving_it(self):
-        """ADR-014: the approved evidence bundle builds programs in release and honours the contract."""
-        manifest, body = content.read_bundle(self.original / "evidence-1")
+        """ADR-014/017: the approved evidence bundle builds weekly programs in release, within the contract."""
+        manifest, body = content.read_bundle(self.original / "evidence-2")
         self.assertEqual(manifest["review"], "approved")
         self.assertNotIn("approval", manifest)
         self.write(manifest, body)
 
         library = result("library", {"permitsFixtures": False})
-        self.assertEqual(library["policy"]["version"], "evidence-1")
+        self.assertEqual(library["policy"]["version"], "evidence-2")
         self.assertTrue(all("sources" not in exercise for exercise in library["exercises"]))
 
         profile = copy.deepcopy(golden_request()["payload"]["state"]["profile"])
-        payload = {"profile": profile, "permitsFixtures": False, "now": NOW, "ids": [uid(n) for n in range(10, 16)]}
+        payload = {"profile": profile, "permitsFixtures": False, "now": NOW, "ids": [uid(n) for n in range(10, 90)]}
         for goal, rest in (("Hypertrophy", 90), ("Strength", 120)):
             profile["goal"] = goal
-            plan = result("initialProgram", payload)["plans"][0]
-            self.assertEqual(len(plan["slots"]), 4, goal)  # three required roles and the accessory at 60 minutes
-            self.assertEqual({slot["restSeconds"] for slot in plan["slots"]}, {rest}, goal)
-        profile["daysPerWeek"] = 4
-        self.assertEqual(call("initialProgram", payload)["error"]["code"], "invalid")
+            program = result("initialProgram", payload)
+            self.assertTrue(1 <= len(program["plans"]) <= profile["daysPerWeek"], goal)
+            for plan in program["plans"]:
+                self.assertIn(plan["weekday"], range(7))
+                self.assertEqual({slot["restSeconds"] for slot in plan["slots"]}, {rest}, goal)
+                self.assertTrue(all("load" not in slot for slot in plan["slots"]))  # never estimated
+            contracts.validate(call("initialProgram", payload), contracts.RESPONSE, contracts.RESPONSE)
+        profile["daysPerWeek"] = 7
+        response = call("weekOptions", {"profile": profile, "permitsFixtures": False})
+        contracts.validate(response, contracts.RESPONSE, contracts.RESPONSE)  # what Swift decodes
+        options = response["result"]
+        self.assertTrue(options)
+        self.assertLessEqual(len(options), 3)
+        self.assertTrue(all(option["sessionsPerWeek"] <= 6 for option in options))  # no qualifying 7-day trial
+
+    def test_superseded_bundle_never_runs(self):
+        manifest, _ = content.read_bundle(self.original / "evidence-1")
+        self.assertEqual((manifest["review"], manifest.get("supersededBy")), ("disabled", "evidence-2"))
 
 
 if __name__ == "__main__":
