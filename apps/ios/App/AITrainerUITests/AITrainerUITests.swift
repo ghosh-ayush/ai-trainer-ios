@@ -77,8 +77,9 @@ final class AITrainerUITests: XCTestCase {
         tapWhenVisible(app.buttons["I'm sick or away"])
         XCTAssertTrue(app.staticTexts["You are marked injured. Tap I'm back to resume the app's suggestions."]
             .waitForExistence(timeout: 10))
-        let back = app.buttons.matching(identifier: "I'm back").allElementsBoundByIndex.last { $0.isHittable }
-        try XCTUnwrap(back, "Chat offers I'm back").tap()
+        // Today's banner behind the sheet also says "I'm back"; chat's own button has its identifier.
+        // Scroll to it, since the new reply may still be scrolling into view on a slower simulator.
+        tapWhenVisible(app.buttons["chat.endStatus"])
         XCTAssertTrue(app.staticTexts["Welcome back. The app's suggestions are on again."].waitForExistence(timeout: 10))
 
         app.buttons["Cancel"].firstMatch.tap()
