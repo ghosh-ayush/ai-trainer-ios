@@ -153,6 +153,15 @@ public final class TrainerService {
                                             dayStart: calendar.startOfDay(for: now),
                                             utcOffset: calendar.timeZone.secondsFromGMT(for: now)))
     }
+    /// Plates for each side of a barbell at `load`, from the athlete's own bar and plates (ADR-021).
+    public func plates(load: Double, bar: Double, plates: [Double]) throws -> PlateLoad {
+        struct Plates: Encodable {
+            let load: Double
+            let bar: Double
+            let plates: [Double]
+        }
+        return try core.call("plateLoad", Plates(load: load, bar: bar, plates: plates))
+    }
     /// Available loads around a confirmed working load, in the athlete's own equipment step.
     public func loadSteps(base: Double, step: Double) throws -> [Double] {
         struct Steps: Encodable { let base: Double; let step: Double }

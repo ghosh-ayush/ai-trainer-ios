@@ -18,7 +18,7 @@ from . import contracts
 from .commands import reduce_state
 from .content import load_library, public_library
 from .diet_view import diet_options, diet_preview, diet_view
-from .equipment import load_steps
+from .equipment import load_steps, plate_load
 from .errors import DomainError
 from .foods import search as search_foods
 from .migrations import migrate_state
@@ -109,6 +109,8 @@ def dispatch(envelope: JSON) -> Any:
         }
     if operation == "loadSteps":
         return load_steps(payload["base"], payload["step"])
+    if operation == "plateLoad":
+        return plate_load(payload["load"], payload["bar"], payload["plates"])
     if operation == "dietOptions":
         return diet_options()
     if operation == "dietPreview":

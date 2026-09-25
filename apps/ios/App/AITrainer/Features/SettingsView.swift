@@ -23,6 +23,7 @@ struct YouView: View {
                 StitchCard("\(profile.goal) · \(profile.experience) · \(profile.daysPerWeek) days/week",
                            body: "\(profile.minutes) min sessions · \(profile.preferredUnit.rawValue) · \(equipmentText(profile)). Editing arrives with program review (TB-10).")
             }
+            BarAndPlatesSection()
             StitchSectionLabel("Data & privacy")
             StitchCard {
                 Label("Stored on this device", systemImage: "lock.shield").stitch(.displayH3).foregroundStyle(Stitch.textPrimary)
@@ -208,5 +209,41 @@ private struct CatalogEvidenceCard: View {
         case "noDifference": return "No clear difference"
         default: return "Studied"
         }
+    }
+}
+
+
+/// ADR-021: the athlete's own bar and plates for the workout's plate line. Empty until entered:
+/// the app never assumes what equipment someone has.
+struct BarAndPlatesSection: View {
+    @AppStorage(PlateSettings.barKey) private var barText = ""
+    @AppStorage(PlateSettings.platesKey) private var platesText = ""
+    var body: some View {
+        StitchSectionLabel("Bar and plates", meta: "for the plate calculator")
+        field("Bar weight", text: $barText, prompt: "e.g. 20")
+        field("Plates you have (one of each size)", text: $platesText, prompt: "e.g. 25, 20, 15, 10, 5, 2.5, 1.25")
+        StitchFootnote("Same unit as your workouts. The workout shows plates per side for barbell lifts once both are filled in.")
+    }
+    private func field(_ label: String, text: Binding<String>, prompt: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label).stitch(.monoLabel).textCase(.uppercase).foregroundStyle(Stitch.textMuted)
+            TextField(prompt, text: text).keyboardType(.numbersAndPunctuation).stitch(.monoBody).foregroundStyle(Stitch.textPrimary)
+        }
+        .padding(.horizontal, 16).padding(.vertical, 14).glass(radius: 8)
+    }
+}
+
+/// The stored bar and plates, parsed; nil until the athlete has entered both.
+enum PlateSettings {
+    static let barKey = "plateCalculatorBar"
+    static let platesKey = "plateCalculatorPlates"
+    static var saved: (bar: Double, plates: [Double])? {
+        let defaults = UserDefaults.standard
+        guard let bar = Double(defaults.string(forKey: barKey)?.trimmingCharacters(in: .whitespaces) ?? "") else { return nil }
+        let plates = (defaults.string(forKey: platesKey) ?? "")
+            .split(whereSeparator: { $0 == "," || $0 == " " })
+            .compactMap { Double($0) }
+            .filter { $0 > 0 }
+        return plates.isEmpty ? nil : (bar, plates)
     }
 }

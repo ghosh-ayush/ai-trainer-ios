@@ -356,3 +356,20 @@ Consequences:
   for the wrong week.
 - Today shows a 3 × 2 grid of rings. They are display only and never change the plan.
 Status: accepted (owner, 2026-09-24).
+
+## ADR-021 · 2026-09-24 · Faster logging: same as last, last time, plates per side
+Why: the owner's third pick, borrowed from Bevel's Strength Builder.
+Consequences:
+- **Same as last.** The next open working set can repeat the previous set's reps and load in one
+  tap, shown only when that set differed from the plan. Effort is never copied, so RIR stays
+  unknown (rule 2), as with "Done as planned".
+- **Last time.** Each exercise in a workout shows the latest recorded summary from the core's
+  progress view: comparable sessions only, and never the one in progress.
+- **Plates per side.** A new `plateLoad` operation takes the load, the athlete's own bar and their
+  plate sizes, and returns the plates per side, largest first, with an `exact` flag. When a load
+  can't be made it returns the nearest lower total, never a heavier bar. Bar and plates are empty
+  until entered in Settings; the app never assumes equipment. Shown only for barbell exercises
+  loaded as a total.
+- **Not yet:** "Done" buttons on a lock-screen Live Activity. They need a widget-extension
+  target, which Xcode must add (ADR-011); the code follows once the target exists.
+Status: accepted (owner, 2026-09-24).

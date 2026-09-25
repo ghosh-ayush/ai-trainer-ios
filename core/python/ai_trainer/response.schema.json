@@ -1362,6 +1362,29 @@
       ],
       "additionalProperties": false
     },
+    "PlateLoad": {
+      "type": "object",
+      "properties": {
+        "perSide": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Number"
+          }
+        },
+        "total": {
+          "$ref": "#/$defs/Number"
+        },
+        "exact": {
+          "$ref": "#/$defs/Bool"
+        }
+      },
+      "required": [
+        "perSide",
+        "total",
+        "exact"
+      ],
+      "additionalProperties": false
+    },
     "MuscleRing": {
       "type": "object",
       "properties": {
@@ -2814,6 +2837,29 @@
       "required": [
         "base",
         "step"
+      ],
+      "additionalProperties": false
+    },
+    "plateLoadPayload": {
+      "type": "object",
+      "properties": {
+        "load": {
+          "$ref": "#/$defs/Number"
+        },
+        "bar": {
+          "$ref": "#/$defs/Number"
+        },
+        "plates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Number"
+          }
+        }
+      },
+      "required": [
+        "load",
+        "bar",
+        "plates"
       ],
       "additionalProperties": false
     },
@@ -4467,6 +4513,9 @@
               "items": {
                 "$ref": "#/$defs/Number"
               }
+            },
+            {
+              "$ref": "#/$defs/PlateLoad"
             },
             {
               "$ref": "#/$defs/DietOptions"

@@ -122,6 +122,16 @@ final class AppFlowTests: XCTestCase {
         let service = try trainedService()
         XCTAssertNil(try service.views(now: now).rings)
     }
+    /// ADR-021: plates per side come from the core, largest first, and say when a load can't be made.
+    func testPlatesPerSideFromTheAthletesOwnPlates() throws {
+        let service = try trainedService()
+        let exact = try service.plates(load: 102.5, bar: 20, plates: [25, 20, 15, 10, 5, 2.5, 1.25])
+        XCTAssertEqual(exact.perSide, [25, 15, 1.25])
+        XCTAssertTrue(exact.exact)
+        let closest = try service.plates(load: 101, bar: 20, plates: [25, 20, 15, 10, 5, 2.5, 1.25])
+        XCTAssertEqual(closest.total, 100)
+        XCTAssertFalse(closest.exact)
+    }
     func testDomainErrorsArriveAsTypedSwiftErrors() throws {
         let service = try trainedService()
         XCTAssertThrowsError(try service.acceptRecommendation(id: UUID())) { XCTAssertEqual($0 as? TrainerError, .notFound) }

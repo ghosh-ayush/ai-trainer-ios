@@ -853,6 +853,23 @@ public struct DietDecision: Codable, Equatable, Identifiable {
     }
 }
 
+/// Plates for each side of a barbell from the athlete's own bar and plates (ADR-021).
+public struct PlateLoad: Codable, Equatable {
+    public var perSide: [Double]
+    public var total: Double
+    public var exact: Bool
+
+    public init(
+        perSide: [Double],
+        total: Double,
+        exact: Bool
+    ) {
+        self.perSide = perSide
+        self.total = total
+        self.exact = exact
+    }
+}
+
 /// One major muscle this week: sets logged, sets the accepted week prescribes, and the weekly target.
 public struct MuscleRing: Codable, Equatable {
     public var muscle: String
