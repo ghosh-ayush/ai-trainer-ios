@@ -179,7 +179,7 @@ struct SlotCard: View {
         }
     }
     private var headline: String {
-        let role = store.service?.library.exercise(slot.exerciseID)?.roleLabel ?? "exercise"
+        let role = store.service?.library.roleName(of: slot.exerciseID) ?? "exercise"
         return String(format: "Slot %02d · %@", position, role) + (slot.optional ? " · optional" : "")
     }
 }
@@ -438,7 +438,7 @@ struct PainSheet: View {
                 Button {
                     store.perform({ try $0.reportPain(exerciseID: slot.exerciseID) }) { _ in dismiss() }
                 } label: {
-                    let role = store.service?.library.exercise(slot.exerciseID)?.roleLabel ?? "exercise"
+                    let role = store.service?.library.roleName(of: slot.exerciseID) ?? "exercise"
                     StitchListRow(store.name(slot.exerciseID), subtitle: String(format: "Slot %02d · %@", index + 1, role), symbol: "bandage")
                 }
                 .buttonStyle(.plain)
