@@ -59,6 +59,37 @@ ENUMS: dict[str, list[str]] = {
     "TrainingLoad": ["light", "moderate", "high", "veryHigh"],
     "DietStatus": ["ready", "needsInput", "withheld"],
     "AdaptationPace": ["slower", "standard"],
+    "ChatTopic": [
+        "exerciseProgress",
+        "nextSession",
+        "week",
+        "lessTime",
+        "moveOrSkip",
+        "pain",
+        "away",
+        "changePlan",
+        "evidence",
+        "diet",
+        "other",
+    ],
+    "ChatActionKind": [
+        "ask",
+        "openToday",
+        "openDiet",
+        "openLoad",
+        "openSwap",
+        "openLessTime",
+        "openMoveDay",
+        "openPain",
+        "openStatus",
+        "confirmSkip",
+        "requestProgression",
+        "requestShorten",
+        "requestReplan",
+        "reportPain",
+        "setStatus",
+        "endStatus",
+    ],
 }
 
 # --------------------------------------------------------------------------- #
@@ -397,6 +428,32 @@ MODELS: list[ModelSpec] = [
         "A ``preview`` when the set is complete, otherwise a ``question``. ``ignored`` names draft "
         "fields dropped because the athlete never said them.",
     ),
+    _model(
+        "ChatDraft",
+        "topic:ChatTopic exercise?:String minutes?:Int days?:Int",
+        "What the on-device language model read from a chat message (ADR-023). Only a draft: ``chat`` "
+        "keeps a number or an exercise only if the athlete said it.",
+    ),
+    _model(
+        "ChatAction",
+        "kind:ChatActionKind title:String slotID?:UUID exerciseID?:String minutes?:Int status?:StatusKind "
+        "endsAt?:Date message?:String draft?:ChatDraft",
+        "A button under a chat answer. Nothing runs until the athlete taps it, and a plan change it "
+        "starts is still a proposal the athlete accepts. ``ask`` sends ``message`` with ``draft`` as a "
+        "new question.",
+    ),
+    _model(
+        "ChatSource",
+        "key:String citation:String doi?:String pmid?:String",
+        "A study or official report an answer rests on, from the active content bundle.",
+    ),
+    _model(
+        "ChatReply",
+        "topic:ChatTopic reading:String lines:[String] actions:[ChatAction] sources:[ChatSource] ignored:[String]",
+        "The core's answer to one chat message. ``reading`` says how the message was understood; "
+        "``lines`` come from the athlete's records and the cited content, never from the model; "
+        "``ignored`` names draft fields dropped because the athlete never said them.",
+    ),
 ]
 
 # Constraints the schema generator applies after building the models above.
@@ -446,6 +503,7 @@ OPERATIONS: list[tuple[str, str]] = [
     ("dietPreview", "state:State profile:DietProfile now:Date"),
     ("foods", "query:String pattern?:DietPattern limit:Int"),
     ("readSet", "state:State text:String draft:SpokenSet permitsFixtures:Bool"),
+    ("chat", "state:State text:String draft:ChatDraft permitsFixtures:Bool now:Date dayStart?:Date utcOffset?:Int"),
 ]
 
 # State commands: name -> arguments spec. Order matters for the generated union.
@@ -504,6 +562,7 @@ RESULT_TYPES: dict[str, str] = {
     "dietPreview": "DietView",
     "foods": "[FoodItem]",
     "readSet": "SetReading",
+    "chat": "ChatReply",
 }
 
 # --------------------------------------------------------------------------- #
@@ -546,6 +605,8 @@ SWIFT_ENUMS: dict[str, tuple[str, bool]] = {  # schema enum -> (Swift name, Case
     "TrainingLoad": ("TrainingLoad", True),
     "DietStatus": ("DietStatus", False),
     "AdaptationPace": ("AdaptationPace", True),
+    "ChatTopic": ("ChatTopic", True),
+    "ChatActionKind": ("ChatActionKind", False),
 }
 
 SWIFT_TYPE_NAMES: dict[str, str] = {
@@ -771,4 +832,19 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "SpokenSet": SwiftModel("SpokenSet", defaults={"exercise": "nil", "reps": "nil", "load": "nil", "rir": "nil"}),
     "SetPreview": SwiftModel("SetPreview", defaults={"load": "nil", "rir": "nil"}),
     "SetReading": SwiftModel("SetReading", defaults={"preview": "nil", "question": "nil", "ignored": "[]"}),
+    "ChatDraft": SwiftModel("ChatDraft", defaults={"exercise": "nil", "minutes": "nil", "days": "nil"}),
+    "ChatAction": SwiftModel(
+        "ChatAction",
+        defaults={
+            "slotID": "nil",
+            "exerciseID": "nil",
+            "minutes": "nil",
+            "status": "nil",
+            "endsAt": "nil",
+            "message": "nil",
+            "draft": "nil",
+        },
+    ),
+    "ChatSource": SwiftModel("ChatSource", defaults={"doi": "nil", "pmid": "nil"}),
+    "ChatReply": SwiftModel("ChatReply"),
 }

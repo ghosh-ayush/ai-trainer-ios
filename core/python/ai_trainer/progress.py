@@ -46,10 +46,10 @@ def progress_summary(state: JSON, library: JSON, now: float) -> list[JSON]:
 
 
 def _entry(session: JSON, slot: JSON) -> JSON:
-    return {"sessionID": session["id"], "date": session["startedAt"], "summary": _summary(session, slot)}
+    return {"sessionID": session["id"], "date": session["startedAt"], "summary": session_summary(session, slot)}
 
 
-def _summary(session: JSON, slot: JSON) -> str:
+def session_summary(session: JSON, slot: JSON) -> str:
     """ "20 kg × 8 / 8 / 8 · RIR 2", "load unknown × 8 / 8", "… · ended early"."""
     logs = working_logs(session, slot)
     unit = slot["equipment"]["unit"]

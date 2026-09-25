@@ -21,7 +21,7 @@
   ],
   "REQUIRED_WORK_DOES_NOT_FIT": [
     "needsInput",
-    "Required work does not fit this fixture. Reschedule; rest and warm-up are not compressed."
+    "Required work does not fit in that time. Reschedule; rest and warm-up are not compressed."
   ],
   "ALREADY_FITS": [
     "keepPlan",

@@ -163,6 +163,43 @@
         "standard"
       ]
     },
+    "ChatTopic": {
+      "type": "string",
+      "enum": [
+        "exerciseProgress",
+        "nextSession",
+        "week",
+        "lessTime",
+        "moveOrSkip",
+        "pain",
+        "away",
+        "changePlan",
+        "evidence",
+        "diet",
+        "other"
+      ]
+    },
+    "ChatActionKind": {
+      "type": "string",
+      "enum": [
+        "ask",
+        "openToday",
+        "openDiet",
+        "openLoad",
+        "openSwap",
+        "openLessTime",
+        "openMoveDay",
+        "openPain",
+        "openStatus",
+        "confirmSkip",
+        "requestProgression",
+        "requestShorten",
+        "requestReplan",
+        "reportPain",
+        "setStatus",
+        "endStatus"
+      ]
+    },
     "Profile": {
       "type": "object",
       "properties": {
@@ -2688,6 +2725,214 @@
       ],
       "additionalProperties": false
     },
+    "ChatDraft": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "$ref": "#/$defs/ChatTopic"
+        },
+        "exercise": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "minutes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "days": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "topic"
+      ],
+      "additionalProperties": false
+    },
+    "ChatAction": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/ChatActionKind"
+        },
+        "title": {
+          "$ref": "#/$defs/String"
+        },
+        "slotID": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exerciseID": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "minutes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StatusKind"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "endsAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "message": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "draft": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ChatDraft"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "title"
+      ],
+      "additionalProperties": false
+    },
+    "ChatSource": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/String"
+        },
+        "citation": {
+          "$ref": "#/$defs/String"
+        },
+        "doi": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pmid": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "key",
+        "citation"
+      ],
+      "additionalProperties": false
+    },
+    "ChatReply": {
+      "type": "object",
+      "properties": {
+        "topic": {
+          "$ref": "#/$defs/ChatTopic"
+        },
+        "reading": {
+          "$ref": "#/$defs/String"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChatAction"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChatSource"
+          }
+        },
+        "ignored": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        }
+      },
+      "required": [
+        "topic",
+        "reading",
+        "lines",
+        "actions",
+        "sources",
+        "ignored"
+      ],
+      "additionalProperties": false
+    },
     "decidePayload": {
       "type": "object",
       "properties": {
@@ -2999,6 +3244,54 @@
         "text",
         "draft",
         "permitsFixtures"
+      ],
+      "additionalProperties": false
+    },
+    "chatPayload": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "text": {
+          "$ref": "#/$defs/String"
+        },
+        "draft": {
+          "$ref": "#/$defs/ChatDraft"
+        },
+        "permitsFixtures": {
+          "$ref": "#/$defs/Bool"
+        },
+        "now": {
+          "$ref": "#/$defs/Date"
+        },
+        "dayStart": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "utcOffset": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Int"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "state",
+        "text",
+        "draft",
+        "permitsFixtures",
+        "now"
       ],
       "additionalProperties": false
     },
@@ -4818,6 +5111,26 @@
         },
         "payload": {
           "$ref": "#/$defs/readSetPayload"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "operation": {
+          "const": "chat"
+        },
+        "payload": {
+          "$ref": "#/$defs/chatPayload"
         }
       },
       "required": [

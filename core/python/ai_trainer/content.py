@@ -75,7 +75,7 @@ _IDENTIFIERS = frozenset({"id", "name", "version", "review", "exerciseID", "equi
 def load_library(permits_fixtures: bool) -> JSON:
     """The library the rules run against: exercises, policy, template, the weekly planner
     (when the bundle has one, ADR-017) and the fixture flag."""
-    bundle = _active_bundle()
+    _, _, bundle = _active_bundle()
     library = {
         "exercises": bundle["exercises"],
         "policy": bundle["policy"],
@@ -251,33 +251,48 @@ def all_bundles() -> dict[str, tuple[JSON, JSON]]:
     return bundles
 
 
+def active_bundle_raw() -> tuple[JSON, JSON]:
+    """The ``(manifest, content)`` of the bundle the rules run on, citations included.
+
+    The rules see only plain values (:func:`load_library`); chat (ADR-023) reads this to say
+    where a number comes from.
+    """
+    manifest, body, _ = _active_bundle()
+    return manifest, body
+
+
 @lru_cache(maxsize=1)
-def _active_bundle() -> JSON:
-    """The approved bundle if one passes the gate, otherwise the fixture. Never a draft.
+def _active_bundle() -> tuple[JSON, JSON, JSON]:
+    """``(manifest, raw content, plain-valued content)`` of the bundle the rules run on.
 
     Read once per process: the embedded interpreter lives as long as the app.
     """
+    manifest, body = _choose_bundle()
+    return manifest, body, _resolved(body)
+
+
+def _choose_bundle() -> tuple[JSON, JSON]:
+    """The approved bundle if one passes the gate, otherwise the fixture. Never a draft."""
     bundles = all_bundles()
     pinned = os.environ.get(PINNED_BUNDLE_ENV)
     if pinned:
-        return _resolved(_pinned_bundle(bundles, pinned))
+        return _pinned_bundle(bundles, pinned)
     approved = [
         (manifest, content)
         for manifest, content in bundles.values()
         if manifest.get("review") == "approved" and not bundle_problems(manifest, content)
     ]
-    _, body = approved[-1] if approved else bundles[FIXTURE_BUNDLE_ID]
-    return _resolved(body)
+    return approved[-1] if approved else bundles[FIXTURE_BUNDLE_ID]
 
 
-def _pinned_bundle(bundles: dict[str, tuple[JSON, JSON]], bundle_id: str) -> JSON:
-    """The content of the bundle named by ``PINNED_BUNDLE_ENV``; refuses anything the gate would not run."""
+def _pinned_bundle(bundles: dict[str, tuple[JSON, JSON]], bundle_id: str) -> tuple[JSON, JSON]:
+    """The bundle named by ``PINNED_BUNDLE_ENV``; refuses anything the gate would not run."""
     if bundle_id not in bundles:
         raise ValueError(f"{PINNED_BUNDLE_ENV} names no bundle: {bundle_id!r}")
     manifest, body = bundles[bundle_id]
     if manifest.get("review") not in ("fixture", "approved") or bundle_problems(manifest, body):
         raise ValueError(f"{PINNED_BUNDLE_ENV} may name only the fixture or an approved bundle that passes the gate")
-    return body
+    return manifest, body
 
 
 def _resolved(body: JSON) -> JSON:

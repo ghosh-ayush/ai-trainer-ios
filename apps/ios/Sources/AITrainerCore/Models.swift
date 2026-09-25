@@ -73,6 +73,14 @@ public enum AdaptationPace: String, Codable, CaseIterable {
     case slower, standard
 }
 
+public enum ChatTopic: String, Codable, CaseIterable {
+    case exerciseProgress, nextSession, week, lessTime, moveOrSkip, pain, away, changePlan, evidence, diet, other
+}
+
+public enum ChatActionKind: String, Codable {
+    case ask, openToday, openDiet, openLoad, openSwap, openLessTime, openMoveDay, openPain, openStatus, confirmSkip, requestProgression, requestShorten, requestReplan, reportPain, setStatus, endStatus
+}
+
 // MARK: - Records
 
 /// What the athlete told us at onboarding. No body metrics, no estimated strength. ``freeDays`` are weekdays 0-6 (Monday = 0) and ``minutesByDay`` maps a weekday to that day's minutes; both stay absent until the athlete gives them (ADR-017).
@@ -1619,6 +1627,107 @@ public struct SetReading: Codable, Equatable {
     ) {
         self.preview = preview
         self.question = question
+        self.ignored = ignored
+    }
+}
+
+/// What the on-device language model read from a chat message (ADR-023). Only a draft: ``chat`` keeps a number or an exercise only if the athlete said it.
+public struct ChatDraft: Codable, Equatable {
+    public var topic: ChatTopic
+    public var exercise: String?
+    public var minutes: Int?
+    public var days: Int?
+
+    public init(
+        topic: ChatTopic,
+        exercise: String? = nil,
+        minutes: Int? = nil,
+        days: Int? = nil
+    ) {
+        self.topic = topic
+        self.exercise = exercise
+        self.minutes = minutes
+        self.days = days
+    }
+}
+
+/// A button under a chat answer. Nothing runs until the athlete taps it, and a plan change it starts is still a proposal the athlete accepts. ``ask`` sends ``message`` with ``draft`` as a new question.
+public struct ChatAction: Codable, Equatable {
+    public var kind: ChatActionKind
+    public var title: String
+    public var slotID: UUID?
+    public var exerciseID: String?
+    public var minutes: Int?
+    public var status: StatusKind?
+    public var endsAt: Date?
+    public var message: String?
+    public var draft: ChatDraft?
+
+    public init(
+        kind: ChatActionKind,
+        title: String,
+        slotID: UUID? = nil,
+        exerciseID: String? = nil,
+        minutes: Int? = nil,
+        status: StatusKind? = nil,
+        endsAt: Date? = nil,
+        message: String? = nil,
+        draft: ChatDraft? = nil
+    ) {
+        self.kind = kind
+        self.title = title
+        self.slotID = slotID
+        self.exerciseID = exerciseID
+        self.minutes = minutes
+        self.status = status
+        self.endsAt = endsAt
+        self.message = message
+        self.draft = draft
+    }
+}
+
+/// A study or official report an answer rests on, from the active content bundle.
+public struct ChatSource: Codable, Equatable {
+    public var key: String
+    public var citation: String
+    public var doi: String?
+    public var pmid: String?
+
+    public init(
+        key: String,
+        citation: String,
+        doi: String? = nil,
+        pmid: String? = nil
+    ) {
+        self.key = key
+        self.citation = citation
+        self.doi = doi
+        self.pmid = pmid
+    }
+}
+
+/// The core's answer to one chat message. ``reading`` says how the message was understood; ``lines`` come from the athlete's records and the cited content, never from the model; ``ignored`` names draft fields dropped because the athlete never said them.
+public struct ChatReply: Codable, Equatable {
+    public var topic: ChatTopic
+    public var reading: String
+    public var lines: [String]
+    public var actions: [ChatAction]
+    public var sources: [ChatSource]
+    public var ignored: [String]
+
+    public init(
+        topic: ChatTopic,
+        reading: String,
+        lines: [String],
+        actions: [ChatAction],
+        sources: [ChatSource],
+        ignored: [String]
+    ) {
+        self.topic = topic
+        self.reading = reading
+        self.lines = lines
+        self.actions = actions
+        self.sources = sources
         self.ignored = ignored
     }
 }

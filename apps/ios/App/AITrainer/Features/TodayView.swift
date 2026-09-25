@@ -362,7 +362,7 @@ struct LessTimeSheet: View {
             StitchField("Available minutes", value: "\(minutes)") {
                 StitchStepperButtons(decrement: { minutes = max(5, minutes - 5) }, increment: { minutes = min(120, minutes + 5) })
             }
-            Text("Optional slots can be removed. The fixture will not compress required work, warm-up, or rest.")
+            Text("Optional exercises can be removed for this session. Required work, warm-up and rest are never compressed.")
                 .stitch(.body15).foregroundStyle(Stitch.textSecondary)
             Button("Preview shorter session") { store.request(.shorten(minutes)); dismiss() }.buttonStyle(.stitch())
         }
