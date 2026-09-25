@@ -295,9 +295,10 @@ class _Context:
         if node.get("certainty"):
             sentence += f" ({node['certainty']} certainty)"
         sentence += "."
-        if node.get("note"):
-            sentence += f" {node['note']}"
-        return sentence, [node["source"]]
+        note = str(node.get("note", ""))
+        if note:
+            sentence += f" {note}"
+        return sentence, [node["source"], *(key for key in self.keys_in(note) if key != node["source"])]
 
     def brief_basis(self, node: JSON | None) -> tuple[str, list[str]]:
         """``basis`` in a few words: the source and certainty, or "the app's own rule"."""
@@ -386,16 +387,23 @@ def _training_overview(context: _Context, ambiguous: list[str]) -> Answer:
     if ambiguous:
         actions = [_ask_exercise(context.names[key]) for key in ambiguous[:MAX_EXERCISE_BUTTONS]]
         return "Which exercise?", ["Which exercise do you mean?"], actions, []
-    lines: list[str] = []
+    rows: list[tuple[str, str, str]] = []  # name, last time, the app's decision
     for slot in context.plan_slots():
         name = context.name(slot["exerciseID"])
-        line = _last_time(context, slot, name)
+        explanation = ""
         if context.session is None:
             decision = decide(
                 context.state, {"kind": "progression", "slotID": slot["id"]}, context.library, context.now
             )
-            line += f" {decision['explanation']}"
-        lines.append(f"{name} — {line}")
+            explanation = decision["explanation"]
+        rows.append((name, _last_time(context, slot, name, brief=True), explanation))
+    shared = {explanation for _, _, explanation in rows}
+    if len(rows) > 1 and len(shared) == 1:
+        lines = [f"{name} — {last}" for name, last, _ in rows]
+        if rows[0][2]:
+            lines.append(f"For every exercise: {rows[0][2]}")
+    else:
+        lines = [f"{name} — {last} {explanation}".rstrip() for name, last, explanation in rows]
     actions = [_ask_exercise(context.name(slot["exerciseID"])) for slot in context.plan_slots()[:MAX_EXERCISE_BUTTONS]]
     return "How your training is going", lines, actions, []
 
@@ -522,13 +530,14 @@ def _pain(context: _Context, exercise_id: str | None) -> Answer:
 def _away(context: _Context, days: int | None) -> Answer:
     """Marking a break, illness or injury, or ending one."""
     status = active_status(context.state, context.now)
-    kind = next((kind for kind, words in STATUS_WORDS.items() if context.words & words), None)
+    heard_kinds = [kind for kind, words in STATUS_WORDS.items() if context.words & words]
+    kind = heard_kinds[0] if len(heard_kinds) == 1 else None  # "sick or away" names no one kind
     back = bool(context.words & BACK_WORDS)
     if status is not None and (back or kind is None):
         label = STATUS_LABELS[status["kind"]]
         until = f" until {context.day(status['endsAt'])}" if status.get("endsAt") else ""
         lines = [f"You are marked {label}{until}. Tap I'm back to resume the app's suggestions."]
-        return "Back from a break", lines, [_action("endStatus", "I'm back")], []
+        return "Your current status", lines, [_action("endStatus", "I'm back")], []
     if back:
         return "Back from a break", ["You are not marked away, so nothing is paused."], [], []
     explanation = (
@@ -544,8 +553,9 @@ def _away(context: _Context, days: int | None) -> Answer:
         return "Away or unwell", ["Are you on a break, sick or injured?", explanation], actions, []
     label = STATUS_LABELS[kind]
     ends_at = context.now + days * DAY if days is not None else None
-    length = f" for {days} day{'s' if days != 1 else ''}" if days is not None else " until you're back"
-    title = f"Mark me {label}{length}"
+    length = f" for {days} day{'s' if days != 1 else ''}" if days is not None else ""
+    until = length or " until I'm back"
+    title = f"Mark me {label}{until}"
     actions = [_action("setStatus", title, status=kind, endsAt=ends_at), _action("openStatus", "Choose other dates")]
     return f"{label.capitalize()}{length}", [explanation], actions, []
 
@@ -624,13 +634,19 @@ def _other() -> Answer:
 # --- pieces ---------------------------------------------------------------------------------
 
 
-def _last_time(context: _Context, slot: JSON, name: str) -> str:
-    """ "Last time: Mon 21 Sep, 20 kg × 10 / 10 / 9 · RIR 2; …" from the latest comparable sessions."""
+def _last_time(context: _Context, slot: JSON, name: str, brief: bool = False) -> str:
+    """ "Last time: Mon 21 Sep, 20 kg × 10 / 10 / 9 · RIR 2; …" from the latest comparable sessions.
+
+    ``brief`` is for a list that already names the exercise: "nothing logged yet." or
+    "last Mon 21 Sep, 20 kg × 10 / 10 / 9 · RIR 2."
+    """
     history = [
         session for session in comparable_sessions(context.state, slot, context.now) if working_logs(session, slot)
     ]
     if not history:
-        return f"No {name} sets are logged yet."
+        return "nothing logged yet." if brief else f"No {name} sets are logged yet."
+    if brief:
+        return f"last {context.day(history[0]['startedAt'])}, {session_summary(history[0], slot)}."
     recent = [
         f"{context.day(session['startedAt'])}, {session_summary(session, slot)}"
         for session in history[:RECENT_SESSIONS]

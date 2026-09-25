@@ -207,6 +207,23 @@ class StatusTests(unittest.TestCase):
         statuses = [item.get("status") for item in reply["actions"] if item["kind"] == "setStatus"]
         self.assertEqual(statuses, ["onBreak", "sick", "injured"])
 
+    def test_naming_two_kinds_is_not_a_choice(self):
+        reply = ask(Athlete.qualified(), "I'm sick or away", topic="away")
+        statuses = [item.get("status") for item in reply["actions"] if item["kind"] == "setStatus"]
+        self.assertEqual(statuses, ["onBreak", "sick", "injured"])
+
+    def test_while_marked_away_the_answer_is_the_current_status(self):
+        athlete = Athlete.qualified()
+        athlete.run("setStatus", status="injured")
+        reply = ask(athlete, "I'm sick or away", topic="away")
+        self.assertEqual(reply["lines"], ["You are marked injured. Tap I'm back to resume the app's suggestions."])
+        self.assertEqual(kinds(reply), ["endStatus"])
+
+    def test_no_length_means_until_back(self):
+        reply = ask(Athlete.qualified(), "I have the flu", topic="away")
+        self.assertEqual(action(reply, "setStatus")["title"], "Mark me sick until I'm back")
+        self.assertNotIn("endsAt", action(reply, "setStatus"))
+
     def test_back_ends_the_current_status(self):
         athlete = Athlete.qualified()
         athlete.run("setStatus", status="sick", endsAt=NOW + 3 * DAY)
@@ -228,7 +245,9 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(len(reply["lines"]), 1)
         self.assertTrue(reply["lines"][0].startswith(f"Rest, {cited['value']} seconds between sets: From "))
         self.assertIn(cited["note"], reply["lines"][0])
-        self.assertEqual([source["key"] for source in reply["sources"]], [cited["source"]])
+        keys = [source["key"] for source in reply["sources"]]
+        self.assertEqual(keys[0], cited["source"])  # the value's own source first
+        self.assertIn("ACSM09", keys)  # then every source its note names ("ACSM09: 1-2 minutes")
         self.assertEqual(reply["sources"][0]["doi"], manifest["sources"][cited["source"]]["doi"])
 
     def test_the_apps_own_rules_say_so_and_cite_what_they_are_built_from(self):

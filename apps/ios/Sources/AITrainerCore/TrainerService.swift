@@ -188,6 +188,38 @@ public final class TrainerService {
         return try core.call("readSet", Reading(state: repository.snapshot, text: text, draft: draft,
                                                 permitsFixtures: library.permitsFixtures))
     }
+    /// Answers one chat message (ADR-023). `draft` is what the on-device model read from `text`; the
+    /// core keeps only what the athlete said and writes the whole answer from their records and the
+    /// cited content. Read-only: every action in the reply needs its own tap.
+    public func chat(text: String, draft: ChatDraft, now: Date = Date(), calendar: Calendar = .current) throws -> ChatReply {
+        struct Message: Encodable {
+            let state: AthleteState
+            let text: String
+            let draft: ChatDraft
+            let permitsFixtures: Bool
+            let now: Date
+            let dayStart: Date
+            let utcOffset: Int
+        }
+        let message = Message(state: repository.snapshot, text: text, draft: draft, permitsFixtures: library.permitsFixtures,
+                              now: now, dayStart: calendar.startOfDay(for: now),
+                              utcOffset: calendar.timeZone.secondsFromGMT(for: now))
+        return try core.call("chat", message)
+    }
+    /// The exercises chat may name: the session in progress or the next one first, then the rest of
+    /// the program, each once. The on-device model picks only from these (ADR-023).
+    public var chatExerciseNames: [String] {
+        let snapshot = repository.snapshot
+        let plans = [snapshot.activeSession?.plan ?? snapshot.nextPlan].compactMap { $0 } + (snapshot.program?.plans ?? [])
+        var names: [String] = []
+        for slot in plans.flatMap(\.slots) {
+            let name = library.exercise(slot.exerciseID)?.name ?? slot.exerciseID
+            if !names.contains(name) {
+                names.append(name)
+            }
+        }
+        return names
+    }
 
     // MARK: Nutrition
     public func saveMeal(_ meal: Meal, asRecipe: Bool = false) throws {
