@@ -24,6 +24,7 @@ from .foods import search as search_foods
 from .migrations import migrate_state
 from .nutrition import scale_nutrients
 from .progress import progress_summary
+from .rings import muscle_rings
 from .rules.eligibility import decide
 from .rules.program import initial_program
 from .rules.week_program import option_summaries, week_options
@@ -104,6 +105,7 @@ def dispatch(envelope: JSON) -> Any:
             "today": today_status(state, library, now, payload.get("utcOffset")),
             "progress": progress_summary(state, library, now),
             "diet": diet_view(state, now, payload.get("dayStart")),
+            **_rings(state, library, now, payload),
         }
     if operation == "loadSteps":
         return load_steps(payload["base"], payload["step"])
@@ -117,6 +119,12 @@ def dispatch(envelope: JSON) -> Any:
         library = load_library(payload["permitsFixtures"])
         return read_set(payload["state"], payload["text"], payload["draft"], library)
     raise DomainError("unsupported", "Unknown operation.")
+
+
+def _rings(state: JSON, library: JSON, now: float, payload: JSON) -> JSON:
+    """``{"rings": ...}`` when this week's muscle rings can be counted (ADR-020), else nothing."""
+    rings = muscle_rings(state, library, now, payload.get("dayStart"), payload.get("utcOffset"))
+    return {} if rings is None else {"rings": rings}
 
 
 def _assess_recovery(observations: list[JSON]) -> JSON:

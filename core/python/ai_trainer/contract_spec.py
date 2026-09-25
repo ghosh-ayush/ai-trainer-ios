@@ -244,6 +244,16 @@ MODELS: list[ModelSpec] = [
         "An accepted or rejected diet suggestion, kept as history.",
     ),
     _model(
+        "MuscleRing",
+        "muscle:String done:Number planned:Number target:Number",
+        "One major muscle this week: sets logged, sets the accepted week prescribes, and the weekly target.",
+    ),
+    _model(
+        "WeekRings",
+        "weekStart:Date muscles:[MuscleRing]",
+        "This week's muscle rings from the athlete's local Monday (ADR-020). Counted from logged sets only.",
+    ),
+    _model(
         "StatusPeriod",
         "id:UUID kind:StatusKind startedAt:Date endsAt?:Date endedAt?:Date",
         "A period the athlete marked as on a break, sick or injured. While active, automatic proposals and "
@@ -325,7 +335,7 @@ MODELS: list[ModelSpec] = [
     ),
     _model(
         "Views",
-        "today:TodayStatus progress:[ExerciseProgress] diet:DietView",
+        "today:TodayStatus progress:[ExerciseProgress] diet:DietView rings?:WeekRings",
         "Everything the tab screens derive from state, computed in one pass after each change.",
     ),
     _model(
@@ -735,9 +745,13 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
     "ProgressEntry": SwiftModel("ProgressEntry"),
     "ExerciseProgress": SwiftModel("ExerciseProgress", defaults={"load": "nil"}),
     "StatusPeriod": SwiftModel("StatusPeriod", defaults={"endsAt": "nil", "endedAt": "nil"}, identifiable=True),
+    "MuscleRing": SwiftModel("MuscleRing"),
+    "WeekRings": SwiftModel("WeekRings"),
     "WeekSession": SwiftModel("WeekSession"),
     "WeekOption": SwiftModel("WeekOption", identifiable=True),
-    "Views": SwiftModel("CoreViews", defaults={"today": "TodayStatus()", "progress": "[]", "diet": "DietView()"}),
+    "Views": SwiftModel(
+        "CoreViews", defaults={"today": "TodayStatus()", "progress": "[]", "diet": "DietView()", "rings": "nil"}
+    ),
     "SpokenSet": SwiftModel("SpokenSet", defaults={"exercise": "nil", "reps": "nil", "load": "nil", "rir": "nil"}),
     "SetPreview": SwiftModel("SetPreview", defaults={"load": "nil", "rir": "nil"}),
     "SetReading": SwiftModel("SetReading", defaults={"preview": "nil", "question": "nil", "ignored": "[]"}),

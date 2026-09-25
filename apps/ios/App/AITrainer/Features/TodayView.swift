@@ -41,6 +41,7 @@ struct TodayView: View {
                         }
                     }
                 }
+                MuscleRingsCard()
                 DietSummaryCard()
                 WhatCouldChangeSection()
             }
@@ -497,4 +498,46 @@ struct StatusSheet: View {
         }
         .stitchSheet("Taking a break") { dismiss() }
     }
+}
+
+
+/// ADR-020: this week's logged sets per major muscle against the weekly target, as rings that
+/// fill as sets are logged. Counted from logged sets only; helper muscles count half.
+struct MuscleRingsCard: View {
+    @EnvironmentObject private var store: AppStore
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 3)
+    var body: some View {
+        if let rings = store.rings {
+            StitchSectionLabel("This week", meta: "sets per muscle")
+            StitchCard {
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(rings.muscles, id: \.muscle) { MuscleRingView(ring: $0) }
+                }
+                Text("Counted from the sets you log from Monday. The target is the research floor for your goal; a helper muscle counts half a set.")
+                    .stitch(.body13).foregroundStyle(Stitch.textSecondary)
+            }
+        }
+    }
+}
+
+struct MuscleRingView: View {
+    let ring: MuscleRing
+    private var fraction: Double { ring.target > 0 ? min(ring.done / ring.target, 1) : 0 }
+    var body: some View {
+        VStack(spacing: 6) {
+            ZStack {
+                Circle().stroke(Stitch.textMuted.opacity(0.25), lineWidth: 7)
+                Circle().trim(from: 0, to: fraction)
+                    .stroke(Stitch.accentPrimary, style: StrokeStyle(lineWidth: 7, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                Text(Self.count(ring.done)).stitch(.bodyMedium13).foregroundStyle(Stitch.textPrimary)
+            }
+            .frame(width: 58, height: 58)
+            Text(ring.muscle.capitalized).stitch(.bodyMedium13).foregroundStyle(Stitch.textPrimary)
+            Text("of \(Self.count(ring.target))").stitch(.body13).foregroundStyle(Stitch.textSecondary)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(ring.muscle.capitalized): \(Self.count(ring.done)) of \(Self.count(ring.target)) sets this week")
+    }
+    static func count(_ value: Double) -> String { value.formatted(.number.precision(.fractionLength(0...1))) }
 }

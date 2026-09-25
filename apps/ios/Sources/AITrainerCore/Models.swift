@@ -853,6 +853,40 @@ public struct DietDecision: Codable, Equatable, Identifiable {
     }
 }
 
+/// One major muscle this week: sets logged, sets the accepted week prescribes, and the weekly target.
+public struct MuscleRing: Codable, Equatable {
+    public var muscle: String
+    public var done: Double
+    public var planned: Double
+    public var target: Double
+
+    public init(
+        muscle: String,
+        done: Double,
+        planned: Double,
+        target: Double
+    ) {
+        self.muscle = muscle
+        self.done = done
+        self.planned = planned
+        self.target = target
+    }
+}
+
+/// This week's muscle rings from the athlete's local Monday (ADR-020). Counted from logged sets only.
+public struct WeekRings: Codable, Equatable {
+    public var weekStart: Date
+    public var muscles: [MuscleRing]
+
+    public init(
+        weekStart: Date,
+        muscles: [MuscleRing]
+    ) {
+        self.weekStart = weekStart
+        self.muscles = muscles
+    }
+}
+
 /// A period the athlete marked as on a break, sick or injured. While active, automatic proposals and plan adaptation pause, and its days do not count as missed (ADR-019).
 public struct StatusPeriod: Codable, Equatable, Identifiable {
     public var id: UUID
@@ -1311,15 +1345,18 @@ public struct CoreViews: Codable, Equatable {
     public var today: TodayStatus
     public var progress: [ExerciseProgress]
     public var diet: DietView
+    public var rings: WeekRings?
 
     public init(
         today: TodayStatus = TodayStatus(),
         progress: [ExerciseProgress] = [],
-        diet: DietView = DietView()
+        diet: DietView = DietView(),
+        rings: WeekRings? = nil
     ) {
         self.today = today
         self.progress = progress
         self.diet = diet
+        self.rings = rings
     }
 }
 

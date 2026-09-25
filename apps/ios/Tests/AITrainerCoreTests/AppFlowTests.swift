@@ -116,6 +116,12 @@ final class AppFlowTests: XCTestCase {
         try service.endStatus(now: now.addingTimeInterval(120))
         XCTAssertNil(try service.views(now: now.addingTimeInterval(180)).today.status)
     }
+    /// ADR-020: the pinned fixture has no weekly planner, so there are no rings rather than wrong ones,
+    /// even though the host sends its UTC offset.
+    func testRingsNeedAWeeklyPlanner() throws {
+        let service = try trainedService()
+        XCTAssertNil(try service.views(now: now).rings)
+    }
     func testDomainErrorsArriveAsTypedSwiftErrors() throws {
         let service = try trainedService()
         XCTAssertThrowsError(try service.acceptRecommendation(id: UUID())) { XCTAssertEqual($0 as? TrainerError, .notFound) }

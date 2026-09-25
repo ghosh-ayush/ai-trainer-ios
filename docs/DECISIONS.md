@@ -339,3 +339,20 @@ Consequences:
 - A status never changes the plan and never diagnoses. Pain still goes through the existing
   concern flow.
 Status: accepted (owner, 2026-09-24).
+
+## ADR-020 · 2026-09-24 · Muscle rings: this week's logged sets per muscle against the target
+Why: the owner's second pick, borrowed from Apple's Activity rings and Bevel's muscle
+distribution, but counted from logged sets instead of estimated.
+Consequences:
+- `views.rings` (`rings.py`) lists each major muscle with:
+  - `done`: working and extra sets with at least one rep, logged since the athlete's local
+    Monday. They count fully for the exercise's primary muscles and at the synergist credit
+    for the others, exactly as the planner counts (ADR-017).
+  - `planned`: what the accepted week prescribes.
+  - `target`: the bundle's cited weekly target.
+  Warm-ups and zero-rep attempts don't count.
+- The local week needs the host's UTC offset (it already sends `dayStart` and `utcOffset`
+  with `views`). Without it, or without a weekly planner, there are no rings rather than rings
+  for the wrong week.
+- Today shows a 3 × 2 grid of rings. They are display only and never change the plan.
+Status: accepted (owner, 2026-09-24).

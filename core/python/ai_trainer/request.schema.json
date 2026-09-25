@@ -1362,6 +1362,49 @@
       ],
       "additionalProperties": false
     },
+    "MuscleRing": {
+      "type": "object",
+      "properties": {
+        "muscle": {
+          "$ref": "#/$defs/String"
+        },
+        "done": {
+          "$ref": "#/$defs/Number"
+        },
+        "planned": {
+          "$ref": "#/$defs/Number"
+        },
+        "target": {
+          "$ref": "#/$defs/Number"
+        }
+      },
+      "required": [
+        "muscle",
+        "done",
+        "planned",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "WeekRings": {
+      "type": "object",
+      "properties": {
+        "weekStart": {
+          "$ref": "#/$defs/Date"
+        },
+        "muscles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MuscleRing"
+          }
+        }
+      },
+      "required": [
+        "weekStart",
+        "muscles"
+      ],
+      "additionalProperties": false
+    },
     "StatusPeriod": {
       "type": "object",
       "properties": {
@@ -2159,6 +2202,16 @@
         },
         "diet": {
           "$ref": "#/$defs/DietView"
+        },
+        "rings": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WeekRings"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
