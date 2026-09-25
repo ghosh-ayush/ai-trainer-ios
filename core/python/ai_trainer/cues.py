@@ -94,7 +94,8 @@ def _last_time(state: JSON, slot: JSON, now: float) -> str | None:
 
 
 def _name(slot: JSON, names: dict[str, str]) -> str:
-    return names.get(slot["exerciseID"], slot["exerciseID"])
+    exercise_id: str = slot["exerciseID"]
+    return names.get(exercise_id, exercise_id)
 
 
 def _load(slot: JSON) -> str:
