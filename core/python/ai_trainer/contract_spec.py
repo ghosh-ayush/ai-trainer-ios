@@ -83,6 +83,7 @@ ENUMS: dict[str, list[str]] = {
         "openPain",
         "openStatus",
         "openChangeDays",
+        "openSwapSession",
         "confirmSkip",
         "requestProgression",
         "requestShorten",
@@ -474,6 +475,7 @@ REQUEST_KINDS: dict[str, list[tuple[str, str]]] = {
     "reschedule": [("date", "Date")],
     "replan": [("utcOffset", "Int")],
     "changeDays": [("freeDays", "[Int]"), ("minutes?", "Int"), ("optionID?", "String")],
+    "swapSession": [("planID", "UUID"), ("utcOffset?", "Int")],
 }
 
 
@@ -660,6 +662,7 @@ SWIFT_MODELS: dict[str, SwiftModel] = {
             "utcOffset": "nil",
             "freeDays": "nil",
             "optionID": "nil",
+            "planID": "nil",
         },
     ),
     "Slot": SwiftModel("Prescription", defaults={"id": "UUID()", "load": "nil"}, identifiable=True),

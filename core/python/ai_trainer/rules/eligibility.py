@@ -21,6 +21,7 @@ from .adaptation import propose_replan
 from .adjustments import build_substitution, propose_reschedule, propose_shorter_session, propose_substitution
 from .free_days import propose_new_days
 from .progression import propose_progression
+from .session_swap import propose_session_swap
 
 JSON = dict[str, Any]
 
@@ -75,6 +76,9 @@ def decide(state: JSON, request: JSON, library: JSON, now: float) -> Decision:
 
     if kind == "changeDays":
         return propose_new_days(state, library, request)  # ADR-025: the athlete's own request
+
+    if kind == "swapSession":
+        return propose_session_swap(state, library, request, now)  # ADR-026: the athlete's own request
 
     raise DomainError("unsupported")
 

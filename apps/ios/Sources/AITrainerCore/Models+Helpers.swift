@@ -27,6 +27,10 @@ extension TrainingRequest {
     /// ADR-018: a week fitted to the sessions the athlete has actually been completing. `utcOffset`
     /// (seconds from UTC) lets the core read which weekdays they train on in their own time zone.
     public static func replan(utcOffset: Int) -> TrainingRequest { .init(kind: "replan", utcOffset: utcOffset) }
+    /// ADR-026: do the plan `planID` today instead of the next session; the two swap days on Accept.
+    public static func swapSession(_ planID: UUID, utcOffset: Int) -> TrainingRequest {
+        .init(kind: "swapSession", utcOffset: utcOffset, planID: planID)
+    }
     /// ADR-025: new free days (and minutes), proposed as the chosen week; `optionID` from `weekOptions`.
     public static func changeDays(_ freeDays: [Int], minutes: Int?, optionID: String?) -> TrainingRequest {
         .init(kind: "changeDays", minutes: minutes, freeDays: freeDays, optionID: optionID)

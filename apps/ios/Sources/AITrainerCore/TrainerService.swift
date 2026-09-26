@@ -121,6 +121,17 @@ public final class TrainerService {
 
     // MARK: Recommendations
     /// Asks the Training Brain; a `proposeChange` answer is stored as a pending recommendation.
+    /// What `request` would decide right now, without saving a proposal (the core's read-only `decide`).
+    public func preview(_ request: TrainingRequest, now: Date = Date()) throws -> Decision {
+        struct Preview: Encodable {
+            let state: AthleteState
+            let request: TrainingRequest
+            let permitsFixtures: Bool
+            let now: Date
+        }
+        return try core.call("decide", Preview(state: repository.snapshot, request: request,
+                                               permitsFixtures: library.permitsFixtures, now: now))
+    }
     @discardableResult public func request(_ request: TrainingRequest, now: Date = Date()) throws -> Decision {
         guard let decision = try command("requestChange", Arguments(request: request), now: now).decision else {
             throw TrainerError.invalid("Missing decision.")

@@ -192,6 +192,7 @@
         "openPain",
         "openStatus",
         "openChangeDays",
+        "openSwapSession",
         "confirmSkip",
         "requestProgression",
         "requestShorten",
@@ -980,6 +981,25 @@
           "required": [
             "kind",
             "freeDays"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "swapSession"
+            },
+            "planID": {
+              "$ref": "#/$defs/UUID"
+            },
+            "utcOffset": {
+              "$ref": "#/$defs/Int"
+            }
+          },
+          "required": [
+            "kind",
+            "planID"
           ],
           "additionalProperties": false
         }

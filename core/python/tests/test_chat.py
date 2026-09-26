@@ -151,6 +151,13 @@ class SafetyTests(unittest.TestCase):
         reply = ask(Athlete.qualified(), "I want to train on weekends instead", topic="changePlan")
         self.assertIn("openChangeDays", kinds(reply))
 
+    def test_a_week_with_several_sessions_offers_a_different_one_today(self):
+        state, library, bundle = evidence_athlete()
+        reply = ask_real(state, library, bundle, "I want to do legs today instead", topic="changePlan")
+        self.assertIn("openSwapSession", kinds(reply))
+        single = ask(Athlete.qualified(), "can I do something else today", topic="changePlan")
+        self.assertNotIn("openSwapSession", kinds(single), "one session has nothing to swap with")
+
     def test_a_lighter_week_is_not_invented(self):
         reply = ask(Athlete.qualified(), "my knee hurts, lighter legs this week", topic="pain")
         self.assertTrue(any("no cited rule for a lighter week" in line for line in reply["lines"]))

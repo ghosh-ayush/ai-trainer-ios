@@ -1048,6 +1048,11 @@
         "locator": "Results 'Strength'; Table 6 (strength column)",
         "certainty": "moderate",
         "note": "Two or more training days a week enhanced strength. Read per muscle as the owner's interpretation."
+      },
+      "recoveryNoticeHours": {
+        "value": 72,
+        "source": "owner",
+        "rationale": "Information only; it never blocks a session. No qualifying study sets a rest interval between sessions for the same muscle: tested designs used 48 h or more (PEDERSEN22; LASEVICIUS19; SCHOENFELD19V), muscle protein synthesis stays raised about 48 h (IUSCA21, p. 9), and failure slowed recovery for up to 24-48 h (MORANNAVARRO17). The owner chose 72 h, longer than every tested interval, as a conservative notice when choosing a different session; the cited limit for consecutive days is consecutiveDayCap."
       }
     },
     "targets": {

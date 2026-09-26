@@ -105,6 +105,21 @@ final class AITrainerUITests: XCTestCase {
         XCTAssertTrue(profile.waitForExistence(timeout: 10), "You shows the new free days")
     }
 
+    /// ADR-026: another session of the week for today, proposed and swapped on Accept.
+    @MainActor
+    func testDoingADifferentSessionTodaySwapsItIn() throws {
+        onboard()
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Full body A")).firstMatch
+            .waitForExistence(timeout: 10))
+        tapWhenVisible(app.buttons["Do a different session today"])
+        let chosen = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Full body B · ")).firstMatch
+        XCTAssertTrue(chosen.waitForExistence(timeout: 10), "The sheet lists the week's other sessions")
+        tapWhenVisible(app.buttons["Do this today"])
+        tapWhenVisible(app.buttons["Accept"])
+        let today = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Full body B · ")).firstMatch
+        XCTAssertTrue(today.waitForExistence(timeout: 10), "Today's session is now the chosen one")
+    }
+
     // MARK: Steps
 
     /// Consent, Monday / Wednesday / Friday, the suggested week, Accept.

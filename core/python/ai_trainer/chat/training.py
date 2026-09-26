@@ -186,6 +186,8 @@ def change_plan(context: ChatContext, exercise_id: str | None) -> Answer:
             "and loads you confirmed carry over. Changing equipment isn't in the app yet."
         )
         actions.append(action("openChangeDays", "Change my free days"))
+    if context.session is None and len(program_plans(context)) > 1:
+        actions.append(action("openSwapSession", "Do a different session today"))
     actions.append(action("openLessTime", "Shorter session today"))
     if "planner" in context.library and any(plan.get("weekday") is not None for plan in program_plans(context)):
         actions.append(action("requestReplan", "See if another week fits better"))

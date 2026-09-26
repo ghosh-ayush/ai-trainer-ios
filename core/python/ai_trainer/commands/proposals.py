@@ -18,6 +18,7 @@ from ..events import store_plan
 from ..rules.adaptation import replan_program
 from ..rules.eligibility import decide
 from ..rules.free_days import carry_confirmed_loads, new_days_profile, new_days_program
+from ..rules.session_swap import swapped_program
 from .context import CommandContext
 from .plan import WEEKLY_ID_COUNT
 
@@ -93,6 +94,9 @@ def accept(context: CommandContext) -> None:
     if recommendation["request"]["kind"] == "changeDays":
         _apply_new_days(context, recommendation, reevaluated)
         return
+    if recommendation["request"]["kind"] == "swapSession":
+        _apply_session_swap(context, recommendation, reevaluated, plan)
+        return
     if reevaluated != recommendation["decision"] or reevaluated.get("after") is None:
         raise DomainError("staleProposal")
     applied_plan = deepcopy(reevaluated["after"])
@@ -144,6 +148,20 @@ def _apply_new_days(context: CommandContext, recommendation: JSON, reevaluated: 
     state["program"] = program
     state["profile"] = new_days_profile(state["profile"], request)
     state.pop("nextPlanOverride", None)
+    context.mark_context_changed()
+    context.record("recommendation_accepted", reevaluated["reason"])
+    context.expire_proposals()
+    recommendation["status"] = "applied"
+    context.record("recommendation_applied", reevaluated["reason"])
+
+
+def _apply_session_swap(context: CommandContext, recommendation: JSON, reevaluated: JSON, plan: JSON) -> None:
+    """ADR-026: the chosen session becomes today's; the one it replaces takes the chosen one's day."""
+    chosen = reevaluated.get("after")
+    if reevaluated != recommendation["decision"] or chosen is None:
+        raise DomainError("staleProposal")
+    state = context.state
+    state["program"] = swapped_program(state["program"], plan["id"], chosen["id"])
     context.mark_context_changed()
     context.record("recommendation_accepted", reevaluated["reason"])
     context.expire_proposals()

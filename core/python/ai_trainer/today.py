@@ -243,6 +243,8 @@ def _proposal(recommendation: JSON, plan: JSON, exercises: dict[str, JSON]) -> J
         title = f"Proposed · {len(after['slots'])} exercises · ~{_minutes(after)} min"
     elif request["kind"] == "reschedule":
         title = "Proposed · move this session"
+    elif request["kind"] == "swapSession" and after:
+        title = f"Proposed · {after['name']} today"
     elif request["kind"] in ("replan", "changeDays") and decision.get("week"):
         week = decision["week"]
         days = week["sessionsPerWeek"]
