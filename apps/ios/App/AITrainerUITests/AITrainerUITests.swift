@@ -77,13 +77,32 @@ final class AITrainerUITests: XCTestCase {
         tapWhenVisible(app.buttons["I'm sick or away"])
         XCTAssertTrue(app.staticTexts["You are marked injured. Tap I'm back to resume the app's suggestions."]
             .waitForExistence(timeout: 10))
-        let back = app.buttons.matching(identifier: "I'm back").allElementsBoundByIndex.last { $0.isHittable }
-        try XCTUnwrap(back, "Chat offers I'm back").tap()
+        // Today's banner behind the sheet also says "I'm back"; chat's own button has its identifier.
+        // Scroll to it, since the new reply may still be scrolling into view on a slower simulator.
+        tapWhenVisible(app.buttons["chat.endStatus"])
         XCTAssertTrue(app.staticTexts["Welcome back. The app's suggestions are on again."].waitForExistence(timeout: 10))
 
         app.buttons["Cancel"].firstMatch.tap()
         XCTAssertTrue(app.buttons["Taking a break, sick or injured?"].waitForExistence(timeout: 10),
                       "Today no longer shows the injury")
+    }
+
+    /// ADR-025: new free days get a proposed week; Accept on Today applies it, and You shows the days.
+    @MainActor
+    func testChangingFreeDaysProposesAWeekToAccept() throws {
+        onboard()
+        app.tabBars.buttons["YOU"].tap()
+        tapWhenVisible(app.buttons["Change free days and minutes"])
+        tapWhenVisible(app.buttons["Tuesday not free"])
+        XCTAssertTrue(app.buttons["Tuesday free"].waitForExistence(timeout: 5))
+        tapWhenVisible(app.buttons["See weeks for these days"])
+        tapWhenVisible(app.buttons["Propose the suggested week"])
+        let accept = app.buttons["Accept"]
+        XCTAssertTrue(accept.waitForExistence(timeout: 10), "The new week waits on Today for Accept")
+        tapWhenVisible(accept)
+        app.tabBars.buttons["YOU"].tap()
+        let profile = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Mon, Tue, Wed, Fri")).firstMatch
+        XCTAssertTrue(profile.waitForExistence(timeout: 10), "You shows the new free days")
     }
 
     // MARK: Steps

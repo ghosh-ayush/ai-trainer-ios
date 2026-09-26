@@ -147,6 +147,10 @@ class SafetyTests(unittest.TestCase):
         pause = action(reply, "reportPain")
         self.assertEqual(pause["exerciseID"], Athlete.qualified().slot["exerciseID"])
 
+    def test_talk_of_days_offers_to_change_the_free_days(self):
+        reply = ask(Athlete.qualified(), "I want to train on weekends instead", topic="changePlan")
+        self.assertIn("openChangeDays", kinds(reply))
+
     def test_a_lighter_week_is_not_invented(self):
         reply = ask(Athlete.qualified(), "my knee hurts, lighter legs this week", topic="pain")
         self.assertTrue(any("no cited rule for a lighter week" in line for line in reply["lines"]))

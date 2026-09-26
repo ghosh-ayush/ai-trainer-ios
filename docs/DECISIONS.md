@@ -448,3 +448,30 @@ Decision: an `AITrainerUITests` XCUITest target, created in Xcode (ADR-011), in 
   (with screenshots) when a test fails.
 Consequences: the simulator job takes about two minutes longer; its time limit is 40 minutes.
 Status: accepted (owner, 2026-09-25).
+
+## ADR-025 · 2026-09-25 · Free days can change at any time; a new week is a proposal
+Why: the owner's point that the days chosen at onboarding are only a starting point. Plans change
+("something came up"), and sometimes a day becomes free.
+Decision:
+- **A new request, `changeDays`** (`freeDays`, optional `minutes` and `optionID`), is the athlete's
+  own request, so a break or illness does not pause it (ADR-019). `rules/free_days.py` builds the
+  weeks for the new days with the same planner and research bounds as onboarding (ADR-017) and
+  proposes the chosen one.
+  - Accepting re-evaluates the request to an identical decision (rule 3), replaces the program,
+    keeps the old one in `previousPrograms`, and stores the new free days and minutes.
+  - No days gives `DAYS_REQUIRED`, and unchanged days and minutes give `SAME_DAYS`. Days with no
+    fitting week give `NO_WEEK_FOR_DAYS`, and an option no longer offered gives
+    `WEEK_OPTION_MISSING`.
+- **Confirmed loads carry over** to the same exercise on the same equipment (the same comparison
+  identity), for this and for an accepted replan (ADR-018). They are the athlete's own values, so
+  nothing is estimated, and a load never confirmed stays unknown. Before this, a rebuilt program
+  started every load unknown again.
+- **One-off changes keep using** Move day and Skip. On a day the week does not plan, Today says the
+  session can still be started; the weekly review (ADR-018) proposes a week on the days the athlete
+  actually trains.
+- **Where it appears:** You ("Change free days and minutes"), Today ("Free days changed? Update
+  them") and chat, which now offers the sheet instead of saying the change is not available.
+Consequences: the contract adds the `changeDays` request and the `openChangeDays` chat action.
+Request variants can now mark a field optional (`minutes?`) and use list types. The version stays
+1.0 and the stored state is unchanged.
+Status: accepted (owner, 2026-09-25).

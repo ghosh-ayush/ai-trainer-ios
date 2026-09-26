@@ -27,6 +27,10 @@ extension TrainingRequest {
     /// ADR-018: a week fitted to the sessions the athlete has actually been completing. `utcOffset`
     /// (seconds from UTC) lets the core read which weekdays they train on in their own time zone.
     public static func replan(utcOffset: Int) -> TrainingRequest { .init(kind: "replan", utcOffset: utcOffset) }
+    /// ADR-025: new free days (and minutes), proposed as the chosen week; `optionID` from `weekOptions`.
+    public static func changeDays(_ freeDays: [Int], minutes: Int?, optionID: String?) -> TrainingRequest {
+        .init(kind: "changeDays", minutes: minutes, freeDays: freeDays, optionID: optionID)
+    }
 }
 
 extension ContentLibrary {
@@ -107,6 +111,10 @@ public enum Weekday {
     public static let shortNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     public static let names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
+    /// Today's weekday in the core's numbering (Monday = 0), in `calendar`'s time zone.
+    public static func today(_ calendar: Calendar = .current, now: Date = Date()) -> Int {
+        (calendar.component(.weekday, from: now) + 5) % 7  // Calendar: Sunday = 1 … Saturday = 7
+    }
     public static func initial(_ day: Int) -> String {
         initials.indices.contains(day) ? initials[day] : "\(day + 1)"
     }

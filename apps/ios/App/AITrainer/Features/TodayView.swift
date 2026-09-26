@@ -14,6 +14,7 @@ struct TodayView: View {
     @State private var openWorkout = false
     @State private var showStatus = false
     @State private var showChat = false
+    @State private var showChangeDays = false
     /// The conversation with the app, kept while the app runs so reopening chat continues it (ADR-023).
     @State private var chatEntries: [ChatEntry] = []
     var body: some View {
@@ -61,6 +62,9 @@ struct TodayView: View {
         .sheet(isPresented: $showMoveDay) { MoveDaySheet() }
         .sheet(isPresented: $showPain) { PainSheet() }
         .sheet(isPresented: $showStatus) { StatusSheet() }
+        .sheet(isPresented: $showChangeDays) {
+            if let profile = store.state.profile { ChangeDaysSheet(profile: profile) }
+        }
         .confirmationDialog("Skip this session? Work will not be added to the next session.", isPresented: $confirmSkip, titleVisibility: .visible) {
             Button("Skip session", role: .destructive) { store.perform { try $0.skip() } }
         }
@@ -89,6 +93,9 @@ struct TodayView: View {
             : "\(when) Loads confirmed: \(confirmed) of \(plan.slots.count). Revision \(plan.revision)."
         return Group {
             StitchCard("\(planTitle(plan)) · \(plan.slots.count) exercises · ~\(plan.estimatedMinutes) min", body: detail, tone: .accent)
+            if let planned = plan.weekday, planned != Weekday.today(), !plan.modified {
+                StitchFootnote("Today isn't one of your planned days, but you can still start this session now. If you often train on other days, the app proposes a week on them.")
+            }
             Button(store.justFinishedSessionID == nil ? "Start" : "Start next session") {
                 store.perform({ try $0.start() }) { _ in store.justFinishedSessionID = nil; openWorkout = true }
             }
@@ -101,6 +108,7 @@ struct TodayView: View {
                 Button("Skip") { confirmSkip = true }.buttonStyle(.stitch(.secondary, compact: true))
                 Button("I'm in pain") { showPain = true }.buttonStyle(.stitch(.destructive, compact: true))
             }
+            Button("Free days changed? Update them") { showChangeDays = true }.buttonStyle(.stitch(.link))
         }
     }
 
@@ -126,8 +134,10 @@ struct TodayView: View {
         return StitchCard("Adjusted for today", body: "\(removed.joined(separator: ", ")) \(removed.count == 1 ? "is" : "are") omitted for this session only. The original plan returns next time.")
     }
 
+    /// Proposals about the whole session or week (shorter session, move, a new week, new free days):
+    /// every one not tied to a slot, so a new kind can't go missing from Today.
     private var heroProposals: [ProposalCard] {
-        store.today.proposals.filter { $0.kind == "shorten" || $0.kind == "reschedule" || $0.kind == "replan" }
+        store.today.proposals.filter { $0.slotID == nil }
     }
 
     private func planTitle(_ plan: SessionPlan) -> String {

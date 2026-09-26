@@ -16,12 +16,15 @@ struct YouView: View {
     @State private var exportDocument = StateExport(data: Data())
     @State private var showExport = false
     @State private var confirmDelete = false
+    @State private var changeDays = false
     var body: some View {
         TabRoot("You") {
             if let profile = store.state.profile {
-                StitchSectionLabel("Profile", meta: "Read-only until TB-10")
+                StitchSectionLabel("Profile")
                 StitchCard("\(profile.goal) · \(profile.experience) · \(profile.daysPerWeek) days/week",
-                           body: "\(profile.minutes) min sessions · \(profile.preferredUnit.rawValue) · \(equipmentText(profile)). Editing arrives with program review (TB-10).")
+                           body: "\(freeDaysText(profile)) · \(profile.minutes) min sessions · \(profile.preferredUnit.rawValue) · \(equipmentText(profile)).")
+                Button("Change free days and minutes") { changeDays = true }.buttonStyle(.stitch(.secondary))
+                StitchFootnote("Your first choice is only a starting point. Goal, experience and equipment can't be changed yet.")
             }
             SpokenCoachSection()
             BarAndPlatesSection()
@@ -84,6 +87,9 @@ struct YouView: View {
             }
             Button("Delete all local data", role: .destructive) { confirmDelete = true }.buttonStyle(.stitch(.destructive))
         }
+        .sheet(isPresented: $changeDays) {
+            if let profile = store.state.profile { ChangeDaysSheet(profile: profile) }
+        }
         .fileExporter(isPresented: $showExport, document: exportDocument, contentType: .json, defaultFilename: "AITrainer-private-export") { result in
             if case .failure(let error) = result { store.errorMessage = error.localizedDescription }
         }
@@ -93,6 +99,10 @@ struct YouView: View {
                 store.experimentalToolsEnabled = false
             }
         }
+    }
+    private func freeDaysText(_ profile: Profile) -> String {
+        guard let days = profile.freeDays, !days.isEmpty else { return "No free days chosen" }
+        return days.map(Weekday.short).joined(separator: ", ")
     }
     private func equipmentText(_ profile: Profile) -> String {
         let names = ["dumbbell": "Dumbbells", "barbell": "Barbell", "machine": "Machines"]
@@ -261,5 +271,69 @@ struct SpokenCoachSection: View {
         StitchSectionLabel("Spoken coach", meta: "during workouts")
         StitchToggleField("Read out sets and rest", isOn: $spokenCoach, on: "On", off: "Off")
         StitchFootnote("Says what you just did, the rest, and the next set, using your plan and the sets you log. It never makes up a number. Works while the app is open; music dips while it speaks.")
+    }
+}
+
+/// ADR-025: new free days and minutes, answered with the weeks that fit. Choosing one proposes it;
+/// nothing changes until Accept on Today, and confirmed loads carry over.
+struct ChangeDaysSheet: View {
+    @EnvironmentObject private var store: AppStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var freeDays: [Int]
+    @State private var minutes: Int
+    @State private var options: [WeekOption]?
+
+    init(profile: Profile) {
+        _freeDays = State(initialValue: profile.freeDays ?? [])
+        _minutes = State(initialValue: profile.minutes)
+    }
+
+    var body: some View {
+        Group {
+            if let options {
+                StitchSectionLabel("Weeks for these days", meta: "\(options.count) option\(options.count == 1 ? "" : "s")")
+                if options.isEmpty {
+                    StitchNotice("No week fits", body: "Add a day or more minutes.", tone: .warn)
+                }
+                ForEach(Array(options.enumerated()), id: \.element.id) { index, option in
+                    StitchCard(tone: index == 0 ? .accent : .default) {
+                        Text("\(option.name) · \(option.sessionsPerWeek) day\(option.sessionsPerWeek == 1 ? "" : "s")")
+                            .stitch(.displayH3).foregroundStyle(Stitch.textPrimary)
+                        Text(WeekOptionText.schedule(option)).stitch(.body13).foregroundStyle(Stitch.textSecondary)
+                        ForEach(option.reasons, id: \.self) { reason in
+                            Text("• " + WeekOptionText.explanation(reason)).stitch(.body13).foregroundStyle(Stitch.textSecondary)
+                        }
+                        Button(index == 0 ? "Propose the suggested week" : "Propose this week") { propose(option) }
+                            .buttonStyle(.stitch(index == 0 ? .primary : .secondary))
+                    }
+                }
+                Button("Change the days again") { self.options = nil }.buttonStyle(.stitch(.link))
+            } else {
+                StitchSectionLabel("Free days", meta: "\(freeDays.count) day\(freeDays.count == 1 ? "" : "s") a week")
+                WeekdayPicker(freeDays: $freeDays)
+                StitchField("Minutes per session", value: "\(minutes) min") {
+                    StitchStepperButtons(decrement: { minutes = max(15, minutes - 5) }, increment: { minutes = min(120, minutes + 5) })
+                }
+                StitchFootnote("The app offers weeks for these days within the same research limits. Loads you confirmed carry over, and nothing changes until you accept the week on Today.")
+                Button("See weeks for these days") { loadOptions() }
+                    .buttonStyle(.stitch())
+                    .disabled(freeDays.isEmpty)
+            }
+        }
+        .stitchSheet("Your free days") { dismiss() }
+    }
+
+    private func loadOptions() {
+        guard var profile = store.state.profile else { return }
+        profile.freeDays = freeDays
+        profile.daysPerWeek = max(1, freeDays.count)
+        profile.minutes = minutes
+        store.read({ try $0.weekOptions(profile: profile) }) { options = $0 }
+    }
+
+    private func propose(_ option: WeekOption) {
+        store.request(.changeDays(freeDays, minutes: minutes, optionID: option.id))
+        store.tab = .today
+        dismiss()
     }
 }

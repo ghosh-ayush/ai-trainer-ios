@@ -78,7 +78,7 @@ public enum ChatTopic: String, Codable, CaseIterable {
 }
 
 public enum ChatActionKind: String, Codable {
-    case ask, openToday, openDiet, openLoad, openSwap, openLessTime, openMoveDay, openPain, openStatus, confirmSkip, requestProgression, requestShorten, requestReplan, reportPain, setStatus, endStatus
+    case ask, openToday, openDiet, openLoad, openSwap, openLessTime, openMoveDay, openPain, openStatus, openChangeDays, confirmSkip, requestProgression, requestShorten, requestReplan, reportPain, setStatus, endStatus
 }
 
 // MARK: - Records
@@ -516,6 +516,8 @@ public struct TrainingRequest: Codable, Equatable {
     public var alternativeID: String?
     public var date: Date?
     public var utcOffset: Int?
+    public var freeDays: [Int]?
+    public var optionID: String?
 
     public init(
         kind: String,
@@ -523,7 +525,9 @@ public struct TrainingRequest: Codable, Equatable {
         minutes: Int? = nil,
         alternativeID: String? = nil,
         date: Date? = nil,
-        utcOffset: Int? = nil
+        utcOffset: Int? = nil,
+        freeDays: [Int]? = nil,
+        optionID: String? = nil
     ) {
         self.kind = kind
         self.slotID = slotID
@@ -531,6 +535,8 @@ public struct TrainingRequest: Codable, Equatable {
         self.alternativeID = alternativeID
         self.date = date
         self.utcOffset = utcOffset
+        self.freeDays = freeDays
+        self.optionID = optionID
     }
 }
 

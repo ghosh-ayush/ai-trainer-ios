@@ -47,6 +47,7 @@ enum ChatRoute: Identifiable {
     case moveDay
     case pain
     case status
+    case changeDays
 
     var id: String {
         switch self {
@@ -56,6 +57,7 @@ enum ChatRoute: Identifiable {
         case .moveDay: return "moveDay"
         case .pain: return "pain"
         case .status: return "status"
+        case .changeDays: return "changeDays"
         }
     }
 }
@@ -187,6 +189,8 @@ struct CoachChatSheet: View {
         case .moveDay: MoveDaySheet()
         case .pain: PainSheet()
         case .status: StatusSheet()
+        case .changeDays:
+            if let profile = store.state.profile { ChangeDaysSheet(profile: profile) }
         }
     }
 
@@ -274,6 +278,8 @@ struct CoachChatSheet: View {
             route = .pain
         case .openStatus:
             route = .status
+        case .openChangeDays:
+            route = .changeDays
         case .confirmSkip:
             confirmSkip = true
         case .requestProgression:
@@ -336,6 +342,7 @@ struct ChatReplyView: View {
             ForEach(Array(reply.actions.enumerated()), id: \.offset) { _, action in
                 Button(action.title) { onAction(action) }
                     .buttonStyle(.stitch(action.kind == .reportPain ? .destructive : .secondary, compact: true))
+                    .accessibilityIdentifier("chat.\(action.kind.rawValue)")  // for UI tests; VoiceOver reads the title
             }
             if !reply.sources.isEmpty {
                 Button(showSources ? "Hide sources" : "Sources (\(reply.sources.count))") { showSources.toggle() }
