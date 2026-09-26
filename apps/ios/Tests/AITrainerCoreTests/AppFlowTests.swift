@@ -118,7 +118,8 @@ final class AppFlowTests: XCTestCase {
         let reply = try service.chat(text: "why is my bench not going up?", draft: draft, now: now)
         XCTAssertEqual(reply.ignored, ["minutes"])
         XCTAssertEqual(reply.reading, "How Barbell bench press is going")
-        XCTAssertTrue(reply.lines.first?.hasPrefix("Last time: ") ?? false)
+        XCTAssertEqual(reply.lines.first, "Good news: Barbell bench press is ready to move up.")
+        XCTAssertTrue(reply.lines.dropFirst().first?.hasPrefix("Last time: ") ?? false)
         let slot = try XCTUnwrap(before.nextPlan?.slots.first)
         XCTAssertEqual(reply.actions.first { $0.kind == .requestProgression }?.slotID, slot.id)
         XCTAssertEqual(service.repository.snapshot, before)
@@ -147,6 +148,24 @@ final class AppFlowTests: XCTestCase {
         XCTAssertEqual(library.roleNames, [:])
         XCTAssertEqual(library.roleName(of: exercise.id), exercise.role)
         XCTAssertNil(library.roleName(of: "no-such-exercise"))
+    }
+    /// ADR-027: the real on-device writer rewords a real answer, and the core decides whether it may be
+    /// shown. Skipped where Apple's model cannot run (CI). Pain answers are never reworded.
+    func testOnDeviceWordingIsShownOnlyWhenTheCoreAcceptsIt() async throws {
+        try XCTSkipUnless(OnDeviceChatReader.isAvailable, "Apple's on-device model is not available here.")
+        let service = try trainedService()
+        let message = "why is my bench not going up?"
+        let reply = try service.chat(text: message, draft: ChatDraft(topic: .exerciseProgress, exercise: "Barbell bench press"), now: now)
+        let wording = try await OnDeviceChatWriter.reply(to: message, facts: reply)
+        let checked = try service.checkChatWording(reply: reply, wording: wording, message: message)
+        if checked.accepted {
+            XCTAssertEqual(checked.text, wording.trimmingCharacters(in: .whitespacesAndNewlines))
+        } else {
+            XCTAssertFalse(checked.dropped.isEmpty, "a refusal says what was not grounded")
+        }
+        var pain = reply
+        pain.topic = .pain
+        XCTAssertFalse(try service.checkChatWording(reply: pain, wording: wording, message: message).accepted)
     }
     /// ADR-019: a break pauses automatic proposals; "I'm back" resumes them.
     func testABreakPausesAutomaticProposalsUntilImBack() throws {

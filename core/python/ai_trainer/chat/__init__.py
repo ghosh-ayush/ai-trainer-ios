@@ -40,15 +40,17 @@ def chat_reply(
     now: float,
     day_start: float | None = None,
     utc_offset: int | None = None,
+    earlier: str | None = None,
 ) -> JSON:
     """Answer one chat message from the athlete's records and the cited content. Read-only.
 
     ``draft`` is what the on-device model read from ``text``; ``bundle`` is the active content
-    bundle's raw ``(manifest, content)``, citations included. Returns a ``ChatReply``.
+    bundle's raw ``(manifest, content)``, citations included; ``earlier`` is the athlete's previous
+    message, so a follow-up keeps its exercise. Returns a ``ChatReply``.
     """
     words = text.strip()
     require(0 < len(words) <= MAX_TEXT_LENGTH, "invalid", "Ask in up to 500 characters.")
-    context = ChatContext(state, words, library, bundle, now, day_start, utc_offset)
+    context = ChatContext(state, words, library, bundle, now, day_start, utc_offset, earlier)
     ignored: list[str] = []
     exercise_id, ambiguous = context.grounded_exercise(draft.get("exercise"), ignored)
     minutes = context.grounded_number(draft.get("minutes"), context.minute_values(), MINUTES_RANGE, "minutes", ignored)

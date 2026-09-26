@@ -202,7 +202,8 @@ public final class TrainerService {
     /// Answers one chat message (ADR-023). `draft` is what the on-device model read from `text`; the
     /// core keeps only what the athlete said and writes the whole answer from their records and the
     /// cited content. Read-only: every action in the reply needs its own tap.
-    public func chat(text: String, draft: ChatDraft, now: Date = Date(), calendar: Calendar = .current) throws -> ChatReply {
+    public func chat(text: String, draft: ChatDraft, earlier: String? = nil, now: Date = Date(),
+                     calendar: Calendar = .current) throws -> ChatReply {
         struct Message: Encodable {
             let state: AthleteState
             let text: String
@@ -211,11 +212,25 @@ public final class TrainerService {
             let now: Date
             let dayStart: Date
             let utcOffset: Int
+            let earlier: String?
         }
         let message = Message(state: repository.snapshot, text: text, draft: draft, permitsFixtures: library.permitsFixtures,
                               now: now, dayStart: calendar.startOfDay(for: now),
-                              utcOffset: calendar.timeZone.secondsFromGMT(for: now))
+                              utcOffset: calendar.timeZone.secondsFromGMT(for: now), earlier: earlier)
         return try core.call("chat", message)
+    }
+    /// ADR-027: whether the model's rewording of `reply` may be shown. The core accepts it only when
+    /// every number and exercise in it is in the facts or the athlete's own words.
+    public func checkChatWording(reply: ChatReply, wording: String, message: String, earlier: String? = nil) throws -> ChatWording {
+        struct Check: Encodable {
+            let reply: ChatReply
+            let wording: String
+            let message: String
+            let permitsFixtures: Bool
+            let earlier: String?
+        }
+        return try core.call("checkChatWording", Check(reply: reply, wording: wording, message: message,
+                                                        permitsFixtures: library.permitsFixtures, earlier: earlier))
     }
     /// The exercises chat may name: the session in progress or the next one first, then the rest of
     /// the program, each once. The on-device model picks only from these (ADR-023).

@@ -1718,6 +1718,23 @@ public struct ChatSource: Codable, Equatable {
     }
 }
 
+/// Whether the model's rewording of a chat answer may be shown (ADR-027). ``text`` is the wording when every number and exercise in it is grounded in the facts or the athlete's words; otherwise ``accepted`` is false and ``dropped`` names what failed.
+public struct ChatWording: Codable, Equatable {
+    public var text: String
+    public var accepted: Bool
+    public var dropped: [String]
+
+    public init(
+        text: String,
+        accepted: Bool,
+        dropped: [String]
+    ) {
+        self.text = text
+        self.accepted = accepted
+        self.dropped = dropped
+    }
+}
+
 /// The core's answer to one chat message. ``reading`` says how the message was understood; ``lines`` come from the athlete's records and the cited content, never from the model; ``ignored`` names draft fields dropped because the athlete never said them.
 public struct ChatReply: Codable, Equatable {
     public var topic: ChatTopic

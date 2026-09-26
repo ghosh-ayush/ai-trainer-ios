@@ -127,10 +127,12 @@ xcodebuild test -project apps/ios/App/AITrainer.xcodeproj -scheme AITrainer -sdk
   never assumed. "4+" RIR is recorded as 4.
 - "Log a set in words" appears only where Apple's on-device model runs. `readSet` drops any
   number the athlete did not say, even one the model returned, and nothing saves until Save (ADR-015).
-- Chat (ADR-023) uses the on-device model only to sort a message into a topic. `chat` keeps a number
-  or an exercise only if the athlete said it, answers pain words as pain whatever the model chose,
-  and writes every line itself from records and cited content. Replies change nothing until an
-  action is tapped, and "lighter week" gets no invented rule.
+- Chat (ADR-023, ADR-027): the on-device model sorts a message into a topic and then rewords the
+  core's answer. `chat` keeps a number or an exercise only if the athlete said it, answers pain words
+  as pain whatever the model chose, and computes every fact from records and cited content.
+  `checkChatWording` refuses any rewording with a number or exercise not in the facts, and pain
+  answers are never reworded. The facts stay one tap away; replies change nothing until an action is
+  tapped, and "lighter week" gets no invented rule.
 - Weekly plans (ADR-017) never guess weekdays: onboarding starts with no free day selected, and a
   migrated profile keeps `freeDays` absent. Seven free days give at most six sessions (no qualifying
   7-day trial); the cap is a cited owner decision in the bundle, not code.

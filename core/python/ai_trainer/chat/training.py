@@ -17,6 +17,15 @@ from .context import JSON, Answer, ChatContext
 from .vocabulary import DAY_WORDS, HARDER_WORDS, LIGHTER_WORDS, STATUS_LABELS
 
 RECENT_SESSIONS = 2
+
+# The direct answer that leads an exercise's reply, by the outcome of the app's decision.
+HEADLINES = {
+    "proposeChange": "Good news: {name} is ready to move up.",
+    "needsInput": "{name} is waiting on you before it can move up.",
+    "keepPlan": "Not yet: {name} stays as it is for now.",
+    "withholdGuidance": "{name} is paused, so it won't move up for now.",
+    "unassessed": "The app can't judge how {name} is going yet.",
+}
 MAX_EXERCISE_BUTTONS = 6
 
 SETUP_REASONS = frozenset({"BASELINE_REQUIRED", "EQUIPMENT_STEP_UNKNOWN", "HISTORY_STALE", "LOAD_CONTEXT_CHANGED"})
@@ -35,6 +44,7 @@ def exercise_progress(context: ChatContext, exercise_id: str | None, ambiguous: 
     actions: list[JSON] = []
     if plan is context.plan and context.session is None:
         decision = decide(context.state, {"kind": "progression", "slotID": slot["id"]}, context.library, context.now)
+        lines.insert(0, HEADLINES[decision["outcome"]].format(name=name))
         lines.append(decision["explanation"])
         if decision["reason"] == "EFFORT_UNKNOWN":
             lines.append("Log reps in reserve with each set, so the app knows how hard it was.")

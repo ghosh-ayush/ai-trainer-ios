@@ -2942,6 +2942,29 @@
       ],
       "additionalProperties": false
     },
+    "ChatWording": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "$ref": "#/$defs/String"
+        },
+        "accepted": {
+          "$ref": "#/$defs/Bool"
+        },
+        "dropped": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/String"
+          }
+        }
+      },
+      "required": [
+        "text",
+        "accepted",
+        "dropped"
+      ],
+      "additionalProperties": false
+    },
     "ChatReply": {
       "type": "object",
       "properties": {
@@ -3337,6 +3360,16 @@
               "type": "null"
             }
           ]
+        },
+        "earlier": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -3345,6 +3378,40 @@
         "draft",
         "permitsFixtures",
         "now"
+      ],
+      "additionalProperties": false
+    },
+    "checkChatWordingPayload": {
+      "type": "object",
+      "properties": {
+        "reply": {
+          "$ref": "#/$defs/ChatReply"
+        },
+        "wording": {
+          "$ref": "#/$defs/String"
+        },
+        "message": {
+          "$ref": "#/$defs/String"
+        },
+        "permitsFixtures": {
+          "$ref": "#/$defs/Bool"
+        },
+        "earlier": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/String"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "reply",
+        "wording",
+        "message",
+        "permitsFixtures"
       ],
       "additionalProperties": false
     },
@@ -5184,6 +5251,26 @@
         },
         "payload": {
           "$ref": "#/$defs/chatPayload"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "operation",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "operation": {
+          "const": "checkChatWording"
+        },
+        "payload": {
+          "$ref": "#/$defs/checkChatWordingPayload"
         }
       },
       "required": [

@@ -504,3 +504,43 @@ Consequences: the contract adds the `swapSession` request and the `openSwapSessi
 evidence-2 gains `planner.weekly.recoveryNoticeHours`, and its review sheet is regenerated. The
 version stays 1.0 and the stored state is unchanged.
 Status: accepted (owner, 2026-09-25).
+
+## ADR-027 · 2026-09-25 · Chat replies in the model's words, checked against the app's facts
+Why: the owner wants chat to feel like talking to an AI, not choosing fixed prompts. ADR-023 kept
+Apple's on-device model to reading only; every reply was the core's template text.
+Evidence, from 7 real answers rewritten by the Mac's model on 2026-09-25:
+- Free wording was natural but invented claims and once said the opposite of the facts: it called
+  the bench "stuck at the same weight" when both qualifying sessions had met their targets.
+- Strict rules with deterministic sampling kept every number grounded and contradicted no fact.
+The owner chose the strict rewrite.
+Decision:
+- **The core still answers.** `chat` computes the reply as facts from logged sets, the decision a
+  proposal would use, and the cited content (ADR-023).
+  - An exercise's answer now starts with a direct headline from that decision ("Good news: … is
+    ready to move up.", "Not yet: …"), so neither the athlete nor the model starts from a wrong
+    premise.
+  - The athlete's previous message (`earlier`) lets a follow-up keep the exercise named just
+    before.
+- **The model rewords.** `OnDeviceChatWriter` asks Apple's on-device model, greedy and with strict
+  rules, to say what the numbered facts say in 2 or 3 sentences: nothing added, nothing
+  contradicted, numbers unchanged. The reader also sees the previous message for follow-ups.
+- **The core decides what is shown** (`checkChatWording`, `chat/voice.py`). The wording is refused
+  when it has:
+  - a number that isn't in the facts or the athlete's words;
+  - an exercise name that isn't in them;
+  - a link, or empty or overlong text;
+  - a pain topic. Pain answers keep the app's exact safety wording (the owner's decision).
+
+  A refused wording is dropped, never edited, and the facts are shown as written.
+- **The facts stay one tap away** ("The app's exact answer"). Buttons and sources still come only
+  from the core, and nothing changes until a button is tapped.
+- **The text field is always shown.** Where the model can't run, it is disabled and says why
+  (Apple Intelligence off, model downloading, device not eligible).
+Consequences:
+- **The "no LLM in the decision path" rule still holds.** The model decides nothing and only
+  phrases facts the core computed. But the athlete now reads model-written sentences, so a subtle
+  paraphrase slip remains possible (for example, accepting a question's premise). The headline, the
+  checks and the one-tap facts are the mitigations.
+- **The contract** adds `ChatWording` and `checkChatWording`, and `earlier` on `chat`. The version
+  stays 1.0.
+Status: accepted (owner, 2026-09-25).
